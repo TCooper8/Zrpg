@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "World0", "World0\World0.fsproj", "{FF2E47D3-BC25-45D9-935B-F027CE6194C6}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GameServer", "..\GameServer\GameServer\GameServer.fsproj", "{4541DBAF-AE56-444D-AD86-D8EBA10E0DC4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FF2E47D3-BC25-45D9-935B-F027CE6194C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF2E47D3-BC25-45D9-935B-F027CE6194C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF2E47D3-BC25-45D9-935B-F027CE6194C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF2E47D3-BC25-45D9-935B-F027CE6194C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4541DBAF-AE56-444D-AD86-D8EBA10E0DC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4541DBAF-AE56-444D-AD86-D8EBA10E0DC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4541DBAF-AE56-444D-AD86-D8EBA10E0DC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4541DBAF-AE56-444D-AD86-D8EBA10E0DC4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
