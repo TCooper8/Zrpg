@@ -80,6 +80,11 @@
       <Project>{7827978d-378c-447a-915d-e72f6ad88d28}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\..\Logging\Logging\Logging.csproj">
+      <Name>Logging</Name>
+      <Project>{7d7e432c-99f2-4d65-98ae-fb4e00889062}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\..\WebServer\WebServer\WebServer.fsproj">
       <Name>WebServer</Name>
       <Project>{c27ef1ab-768d-4a08-b6d5-719ff54777cd}</Project>

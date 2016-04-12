@@ -2,6 +2,7 @@
 
 open System
 open System.IO
+open System.Text
 open Newtonsoft.Json
 open System.Diagnostics
 
@@ -30,39 +31,88 @@ module GameServer =
     | EventBranch of EventBranch
 
   type Msg =
-    | AddCharacterMsg of AddCharacter * AsyncReplyChannel<exn option>
+    | AddCharacter of AddCharacter
+    | AddRegion of Region
+    | AddZone of string * Zone
+    | SetStartingZone of Race * string
+
+  type Reply =
+    | EmptyReply
+    | MsgReply of string
+    | ExnReply of string
+
+  type Cmd = Msg * AsyncReplyChannel<Choice<Reply, exn>>
 
   type GameServer () =
+    let log = Logging.FileLogger("GameServer", Logging.LogLevel.Debug, "out.log")
     let gameState = GameState()
     let game = GameRunner.Game(gameState)
     let webServer = Pario.WebServer.Server()
 
-    let agent = MailboxProcessor.Start(fun inbox ->
+    do
+      for i in 0 .. 100 do
+        log.Info <| sprintf "%i" i
+
+    let agent = MailboxProcessor<Cmd>.Start(fun inbox ->
+      log.Info <| "Starting server..."
+
       let rec loop () = async {
-        let! msg = inbox.Receive()
+        let! cmd = inbox.Receive()
+        let (msg, reply) = cmd
+
+        log.Info <| sprintf "Received %A" msg
+
         match msg with
-        | AddCharacterMsg(cmd, reply) ->
+        | AddCharacter char ->
           let res =
             try
               gameState.AddCharacter
-              <| cmd.clientId
-              <| cmd.name
-              <| cmd.race
-              <| cmd.gender
-              <| cmd.classType
-              None
-            with e -> Some e
+              <| char.clientId
+              <| char.name
+              <| char.race
+              <| char.gender
+              <| char.classType
+              MsgReply "Added character" |> Choice1Of2
+            with e -> Choice2Of2 e
           reply.Reply(res)
+
+        | AddRegion region ->
+          let res =
+            try
+              gameState.AddRegion region
+              MsgReply "Added region" |> Choice1Of2
+            with e -> Choice2Of2 e
+          reply.Reply(res)
+
+        | AddZone(regionId, zone) ->
+          let res =
+            try
+              gameState.AddZone regionId zone
+              MsgReply "Added zone" |> Choice1Of2
+            with e -> Choice2Of2 e
+          reply.Reply(res)
+
+        | SetStartingZone(race, zoneId) ->
+          let res =
+            try
+              gameState.SetStartingZone race zoneId
+              MsgReply "Set starting zone" |> Choice1Of2
+            with e -> Choice2Of2 e
+          reply.Reply(res)
+
+        return! loop ()
       }
       loop()
     )
+
+    let enc = Encoding.UTF8
 
     do webServer.handle {
       priority = 100
       handler = fun req resp -> async {
         let path = req.Url.AbsolutePath
 
-        if path <> "/addCharacter" then
+        if path <> "/api" then
           return false
         else
         try
@@ -71,23 +121,22 @@ module GameServer =
           use reader = new StreamReader(input)
 
           let! json = reader.ReadToEndAsync() |> Async.AwaitTask
-          let cmd = JsonConvert.DeserializeObject<AddCharacter>(json)
+
+          log.Info <| sprintf "Got json %s" json
+
+          let msg = JsonConvert.DeserializeObject<Msg>(json)
 
           // Now, issue the command to the server.
-          let! res = agent.PostAndAsyncReply(fun reply -> AddCharacterMsg(cmd, reply))
-          match res with
-          | Some e ->
-            Debug.WriteLine(sprintf "%A" e)
-            resp.StatusCode <- 500
-            resp.StatusDescription <- e.Message
-            return true
-          | None ->
-            // The add was successful.
-            use resp = resp.OutputStream
-            let msg = "Character created!"B
-            do! resp.WriteAsync(msg, 0, msg.Length) |> Async.AwaitIAsyncResult |> Async.Ignore
+          let! res = agent.PostAndAsyncReply(fun reply -> (msg, reply))
+          let reply = match res with
+          | Choice2Of2 e -> ExnReply e.Message
+          | Choice1Of2 reply -> reply
 
-            return true
+          use resp = resp.OutputStream
+          let json = JsonConvert.SerializeObject(reply) |> enc.GetBytes
+          do! resp.WriteAsync(json, 0, json.Length) |> Async.AwaitIAsyncResult |> Async.Ignore
+
+          return true
 
         with e ->
           resp.StatusCode <- 400

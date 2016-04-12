@@ -12,32 +12,18 @@ open Zrpg.Game.GameServer
 
 [<TestClass>]
 type TestGameServer () =
+  let log = Logging.FileLogger("TestGameServer", Logging.LogLevel.Debug, "out.log")
+
   let server = new Zrpg.Game.GameServer.GameServer()
 
   let enc = Encoding.UTF8
 
-  [<TestInitialize>]
-  member this.init () =
-    async {
-      let! res = server.Listen "localhost" 8080 |> Async.Catch
-      match res with
-      | Choice2Of2 e ->
-        Debug.WriteLine(sprintf "%A" e)
-      | _ -> ()
-    } |> Async.Start
+  let msgServer (msg:Msg) =
+    log.Info <| sprintf "Requesting %A" msg
+    let data = JsonConvert.SerializeObject(msg) |> enc.GetBytes
 
-  [<TestMethod>]
-  member this.testAddCharacter () =
-    let cmd: AddCharacter = {
-      clientId = "testId"
-      name = "bob"
-      race = Race.Human
-      gender = Gender.Male
-      classType = ClassType.Warrior
-    }
-    let data = JsonConvert.SerializeObject(cmd) |> enc.GetBytes
-
-    let req = HttpWebRequest.Create "http://localhost:8080/addCharacter" :?> HttpWebRequest
+    let req = HttpWebRequest.Create "http://localhost:8080/api" :?> HttpWebRequest
+    req.Timeout <- 10000
 
     req.Method <- "POST"
     req.ContentType <- "application/json"
@@ -52,6 +38,9 @@ type TestGameServer () =
       try req.GetResponse() :?> HttpWebResponse
       with
         | :? WebException as e ->
+          if e.Response = null then
+            failwith <| sprintf "%A" e
+
           let resp = e.Response :?> HttpWebResponse
           failwith <| sprintf "%A : %A" resp.StatusCode resp.StatusDescription
         | e -> failwith <| e.Message
@@ -59,12 +48,60 @@ type TestGameServer () =
     use resp = resp.GetResponseStream()
     use resp = new StreamReader(resp, enc)
     let data = resp.ReadToEnd()
+    let reply = JsonConvert.DeserializeObject<Reply>(data)
 
-    let expectedData = "Character created!"
-    match data = expectedData with
-    | true -> ()
-    | _ ->
-      failwith
-      <| sprintf "Data %s does not match %s" data expectedData
+    log.Info <| sprintf "Received response %A" reply
+
+    reply
+
+  [<TestInitialize>]
+  member this.init () =
+    async {
+      let! res = server.Listen "localhost" 8080 |> Async.Catch
+      match res with
+      | Choice2Of2 e ->
+        Debug.WriteLine(sprintf "%A" e)
+      | _ -> ()
+    } |> Async.Start
+
+  [<TestMethod>]
+  member this.testAddCharacter () =
+    let msg = AddRegion {
+      id = "forest"
+      name = "Elwynn Forest"
+      zones = Seq.empty |> Set
+    }
+    let reply = msgServer msg
+    match reply with
+    | ExnReply e -> failwith e
+    | _ -> ()
+
+    let msg = AddZone("forest", {
+      id = "forest.northshire"
+      name = "Northshire"
+      npcs = Set.empty |> Set 
+    })
+    let reply = msgServer msg
+    match reply with
+    | ExnReply e -> failwith e
+    | _ -> ()
+
+    let msg = SetStartingZone(Race.Human, "forest.northshire")
+    let reply = msgServer msg
+    match reply with
+    | ExnReply e -> failwith e
+    | _ -> ()
+
+    let msg = AddCharacter {
+      clientId = "testId"
+      name = "bob"
+      race = Race.Human
+      gender = Gender.Male
+      classType = ClassType.Warrior
+    }
+    let reply = msgServer msg
+    match reply with
+    | ExnReply e -> failwith e
+    | _ -> ()
     ()
      

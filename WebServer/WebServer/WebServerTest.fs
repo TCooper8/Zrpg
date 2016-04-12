@@ -31,23 +31,10 @@ type Testrun () =
       fileData.Length
     )
 
-    server.handle {
-      priority = 100
-      handler = fun req resp -> async {
-        let path = req.Url.AbsolutePath
-        if path <> "/getChar" then
-          Debug.WriteLine("Request handled false!")
-          return false
-        else
-
-        return true
-      }
-    }
-
-    //WebServer.FileLoader.serveStatic
-    //<| staticDir 
-    //<| Some defaultFile
-    //|> server.get
+    WebServer.FileLoader.serveStatic
+    <| staticDir 
+    <| Some defaultFile
+    |> server.get
 
     server.listen "localhost" 8080 |> Async.Start |> ignore
 
