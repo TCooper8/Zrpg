@@ -1,4 +1,4 @@
-﻿namespace Commons
+﻿namespace Zrpg
 
 open StackExchange.Redis
 
@@ -8,7 +8,7 @@ module Discovery =
 
   type HostInfo = {
     ipAddress: string
-    port: int16
+    port: uint16
     hostType: string
     status: string
   } with
