@@ -21,15 +21,13 @@ namespace Logging
     private static Dictionary<string, CancellationTokenSource> tokens =
         new Dictionary<string, CancellationTokenSource>();
 
-    private static Dictionary<string, StreamWriter> streams =
-      new Dictionary<string, StreamWriter>();
-
     private static Object objLock =
       new object();
 
     static async Task BeginPolling(
         ConcurrentQueue<string> queue,
         CancellationToken token,
+        Stream dstStream,
         StreamWriter outStream
         )
     {
@@ -41,31 +39,32 @@ namespace Logging
       {
         if (queue.TryDequeue(out msg))
         {
-          //builder = new StringBuilder(msg);
-          //n = msg.Length;
-          //int msgs = 0;
+          //await outStream.WriteLineAsync(msg);
 
-          //while (queue.TryDequeue(out msg))
-          //{
-          //  builder.AppendLine(msg + "\n");
-          //  n += msg.Length;
-          //  msgs += 1;
+          builder = new StringBuilder(msg + "\n");
+          n = msg.Length;
+          int msgs = 1;
 
-          //  if (n > 1 << 20 || msgs > 128)
-          //  {
-          //    break;
-          //  }
-          //}
+          while (queue.TryDequeue(out msg))
+          {
+            builder.AppendLine(msg);
+            n += msg.Length;
+            msgs += 1;
 
-          //var finalMsg = builder.ToString() + "\n";
+            if (n > 1 << 20 || msgs > 1024)
+            {
+              break;
+            }
+          }
 
-          //Debug.WriteLine("Logging {0}", finalMsg);
-          //var result = Encoding.UTF8.GetBytes(finalMsg);
+          var finalMsg = builder.ToString();
 
-          //var result = Encoding.UTF8.GetBytes(msg + "\n");
-          //await outStream.WriteAsync(result, 0, result.Length);
-          await outStream.WriteLineAsync(msg);
-          await outStream.FlushAsync();
+          var buf = Encoding.UTF8.GetBytes(finalMsg);
+          //Console.WriteLine(finalMsg);
+#if DEBUG
+          Debug.Write(finalMsg);
+#endif
+          await dstStream.WriteAsync(buf, 0, buf.Length);
         }
         else
         {
@@ -74,7 +73,7 @@ namespace Logging
       }
     }
 
-    public static ConcurrentQueue<string> CreateFileLogger(string key, string filepath)
+    public static ConcurrentQueue<string> CreateStreamLogger(string key, Stream stream)
     {
       ConcurrentQueue<string> queue;
 
@@ -85,20 +84,8 @@ namespace Logging
           return queue;
         }
 
-        StreamWriter outStream;
-
-        if (!streams.TryGetValue(filepath, out outStream))
-        {
-          var stream = File.Open(
-            filepath,
-            FileMode.Append,
-            FileAccess.Write,
-            FileShare.Read
-            );
-
-          outStream = new StreamWriter(stream);
-          streams.Add(filepath, outStream);
-        }
+        StreamWriter outStream = new StreamWriter(stream);
+        outStream.AutoFlush = true;
 
         queue = new ConcurrentQueue<string>();
         var tokSource = new CancellationTokenSource();
@@ -107,7 +94,7 @@ namespace Logging
         {
           try
           {
-            await BeginPolling(queue, tok, outStream);
+            await BeginPolling(queue, tok, stream, outStream);
           }
           catch (Exception _)
           {
@@ -125,23 +112,25 @@ namespace Logging
   }
 
   public enum LogLevel {
-    Fatal,
-    Error,
-    Warn,
-    Info,
-    Debug,
+    Fatal = 10,
+    Error = 20,
+    Warn = 30,
+    Info = 40,
+    Debug = 50,
   }
 
   public abstract class Logger
   {
-    abstract protected LogLevel level { get; }
-    abstract protected string name { get; }
+    abstract public LogLevel Level { get; }
+    abstract public string Name { get; }
     
     abstract protected void Publish(string msg);
 
+    abstract public Logger Fork(string name, LogLevel level);
+
     public void Log(LogLevel level, string format, params object[] args)
     {
-      if (level <= this.level)
+      if (level <= this.Level)
       {
         string msg;
 
@@ -153,28 +142,69 @@ namespace Logging
         {
           msg = String.Format(format, args);
         }
-        var finalMsg = String.Format("{0} \t| {1} \t| {2} \t| {3}", DateTime.Now.ToString(), name, level, msg);
+
+        var finalMsg = String.Format(
+          "{0} \t| {1}:{2} \t| {3} \t| {4}", 
+          DateTime.Now.ToString(), 
+          Name, 
+          Thread.CurrentThread.ManagedThreadId,
+          level, 
+          msg
+        );
+
         this.Publish(finalMsg);
       }
+    }
+
+    public void Fatal(string format, params object[] args)
+    {
+      Log(LogLevel.Fatal, format, args);
+    }
+
+    public void Error(string format, params object[] args)
+    {
+      Log(LogLevel.Error, format, args);
+    }
+
+    public void Warn(string format, params object[] args)
+    {
+      Log(LogLevel.Warn, format, args);
     }
 
     public void Info(string format, params object[] args)
     {
       Log(LogLevel.Info, format, args);
     }
+
+    public void Debug(string format, params object[] args)
+    {
+      Log(LogLevel.Debug, format, args);
+    }
   }
 
-  public class FileLogger : Logger
+  public class StreamLogger : Logger
   {
     ConcurrentQueue<string> queue;
-    LogLevel _level;
-    string _name;
+    LogLevel level;
+    string name;
 
-    public FileLogger(string name, LogLevel level, string filepath)
+    public StreamLogger(string name, LogLevel level, Stream stream)
     {
-      this._name = name;
-      this._level = level;
-      this.queue = LogManager.CreateFileLogger(name, filepath);
+      this.name = name;
+      this.level = level;
+      this.queue = LogManager.CreateStreamLogger(name, stream);
+    }
+
+    private StreamLogger(string name, LogLevel level, ConcurrentQueue<string> queue)
+    {
+      this.name = name;
+      this.level = level;
+      this.queue = queue;
+    }
+
+    public override Logger Fork(string name, LogLevel level)
+    {
+      return new StreamLogger(name, level, this.queue);
     }
 
     protected override void Publish(string msg)
@@ -182,19 +212,19 @@ namespace Logging
       queue.Enqueue(msg);
     }
 
-    protected override LogLevel level
+    public override LogLevel Level
     {
       get
       {
-        return _level;
+        return level;
       }
     }
 
-    protected override string name
+    public override string Name
     {
       get
       {
-        return _name;
+        return name;
       }
     }
   }
