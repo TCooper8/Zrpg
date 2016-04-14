@@ -9,10 +9,19 @@ open System.Net
 open Newtonsoft.Json
 
 open Zrpg.Game.GameServer
+open Logging
 
 [<TestClass>]
 type TestGameServer () =
-  let log = Logging.FileLogger("TestGameServer", Logging.LogLevel.Debug, "out.log")
+  let log = Logging.StreamLogger(
+    "TestGameServer",
+    LogLevel.Debug,
+    Console.OpenStandardOutput()
+  )
+
+  do
+    for i in 0 .. 100 do
+      log.Debug <| sprintf "%i" i
 
   let server = new Zrpg.Game.GameServer.GameServer()
 
@@ -57,7 +66,7 @@ type TestGameServer () =
   [<TestInitialize>]
   member this.init () =
     async {
-      let! res = server.Listen "localhost" 8080 |> Async.Catch
+      let! res = server.Listen "localhost" 8080us |> Async.Catch
       match res with
       | Choice2Of2 e ->
         Debug.WriteLine(sprintf "%A" e)

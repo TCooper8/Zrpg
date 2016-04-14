@@ -3,8 +3,12 @@
 open System
 open System.IO
 open System.Text
+open System.Net.WebSockets
+open System.Threading
 open Newtonsoft.Json
 open System.Diagnostics
+
+open Logging
 
 module GameServer =
   type AddCharacter = {
@@ -44,23 +48,25 @@ module GameServer =
   type Cmd = Msg * AsyncReplyChannel<Choice<Reply, exn>>
 
   type GameServer () =
-    let log = Logging.FileLogger("GameServer", Logging.LogLevel.Debug, "out.log")
+    let log = StreamLogger(
+      "GameServer",
+      LogLevel.Debug,
+      Console.OpenStandardOutput()
+    )
+
     let gameState = GameState()
     let game = GameRunner.Game(gameState)
-    let webServer = Pario.WebServer.Server()
-
-    do
-      for i in 0 .. 100 do
-        log.Info <| sprintf "%i" i
+    let webServer = Pario.WebServer.Server(log)
+    let discovery = Zrpg.Discovery.createLocal() |> Async.RunSynchronously
 
     let agent = MailboxProcessor<Cmd>.Start(fun inbox ->
-      log.Info <| "Starting server..."
+      log.Debug <| "Starting server..."
 
       let rec loop () = async {
         let! cmd = inbox.Receive()
         let (msg, reply) = cmd
 
-        log.Info <| sprintf "Received %A" msg
+        log.Debug <| sprintf "Received \n\t%A" msg
 
         match msg with
         | AddCharacter char ->
@@ -122,7 +128,7 @@ module GameServer =
 
           let! json = reader.ReadToEndAsync() |> Async.AwaitTask
 
-          log.Info <| sprintf "Got json %s" json
+          log.Debug <| sprintf "Got json %s" json
 
           let msg = JsonConvert.DeserializeObject<Msg>(json)
 
@@ -145,5 +151,71 @@ module GameServer =
       }
     }
 
-    member this.Listen host port =
-      webServer.listen host port
+    let handleWs (ws:WebSocket) = async {
+      use ws = ws
+      use tokSource = new CancellationTokenSource()
+      let tok = tokSource.Token
+
+      use inStream = new MemoryStream(1024)
+
+      let rec receive () = async {
+        let inSegment = ArraySegment(Array.zeroCreate 1024)
+        let! n = ws.ReceiveAsync(inSegment, tok) |> Async.AwaitTask
+        do! inStream.AsyncWrite inSegment.Array
+        
+        if n.EndOfMessage then
+          let res = inStream.ToArray() |> enc.GetString
+          inStream.Position <- 0L
+
+
+
+          return res.Substring(0, res.Length - (1024 - n.Count))
+        else
+          return! receive()
+      }
+
+      let send msg = async {
+        let outBuffer = JsonConvert.SerializeObject(msg) |> enc.GetBytes
+        let outSegment = ArraySegment(outBuffer)
+        do! ws.SendAsync(outSegment, WebSocketMessageType.Text, true, tok) |> Async.AwaitIAsyncResult |> Async.Ignore
+      }
+
+      let rec loop () = async {
+        let! msg = receive()
+        log.Info <| sprintf ">>> %s END" msg
+
+        do! send "Hello"
+
+        return! loop()
+      }
+
+      do! loop()
+      
+      return ()
+    }
+
+    do webServer.handleSocket <| fun context -> async {
+      try
+        let! wsCtx = context.AcceptWebSocketAsync(null) |> Async.AwaitTask
+
+        let ws = wsCtx.WebSocket
+        handleWs ws |> Async.Start
+
+        return true
+      with e ->
+        log.Warn("Encountered a WebSocket error: {0}", e)
+        return false
+    }
+
+    member this.Listen host port = async {
+      let! res = discovery.addServiceHost "gameserver" {
+        ipAddress = host
+        port = port
+        hostType = "http"
+        status = "good"
+      }
+
+      Option.iter (fun e -> raise e) res
+
+      do! webServer.listen host port
+    }
