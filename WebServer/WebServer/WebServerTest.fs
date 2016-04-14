@@ -11,7 +11,8 @@ open System.Diagnostics
 
 [<TestClass>]
 type Testrun () =
-  let server = new WebServer.Server()
+  let log = Logging.StreamLogger("Test", Logging.LogLevel.Debug, Console.OpenStandardOutput())
+  let server = new WebServer.Server(log)
 
   let staticDir = Path.Combine(Directory.GetCurrentDirectory(), "static")
   let defaultFile = "index.html"
@@ -36,7 +37,7 @@ type Testrun () =
     <| Some defaultFile
     |> server.get
 
-    server.listen "localhost" 8080 |> Async.Start |> ignore
+    server.listen "localhost" 8080us |> Async.Start |> ignore
 
   [<TestCleanup>]
   member this.cleanup () =

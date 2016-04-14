@@ -6,6 +6,10 @@ open System.Net
 open System.Text
 open System.Text.RegularExpressions
 open System.Diagnostics
+open System.Security.Authentication
+
+open System.Diagnostics
+open Logging
 
 module WebServer =
   type Handler = HttpListenerRequest -> HttpListenerResponse -> Async<bool>
@@ -69,6 +73,7 @@ module WebServer =
   type private ServerState () =
     let mutable modules = List.empty<ServerModule>
     let mutable workers = List.empty<MailboxProcessor<Work>>
+    let mutable socketHandlers = List.empty<HttpListenerContext -> Async<bool>>
 
     member this.addModule serverModule =
       modules <- 
@@ -77,25 +82,44 @@ module WebServer =
         <| serverModule::modules
       modules
 
+    member this.addSocketHandler handler =
+      socketHandlers <- handler::socketHandlers
+
     member this.setWorkers newWorkers =
       workers <- newWorkers
 
     member this.getWorkers () =
       workers
 
+    member this.getSocketHandlers () =
+      socketHandlers
+
     member this.getModules () =
       modules
 
   type Msg =
     | AddModule of ServerModule
+    | AddSocketHandler of (HttpListenerContext -> bool Async)
     | SetWorkers of List<MailboxProcessor<Work>>
     | RouteWork of Work
+    | HandleSocket of HttpListenerContext
     | Kill
 
-  type Server () =
+  type Server (log:Logger) =
     let rand = new Random()
 
     let agent = MailboxProcessor.Start(fun inbox ->
+      let rec tryHandleSocketUpgrade (context:HttpListenerContext) handlers = async {
+        match handlers with
+        | [] -> return false
+        | handler::handlers ->
+          let! res = handler context
+          if res then
+            return true
+          else
+            return! tryHandleSocketUpgrade context handlers
+      }
+
       let rec loop (state:ServerState): Async<unit> = async {
         let! msg = inbox.Receive()
 
@@ -107,12 +131,25 @@ module WebServer =
           for worker in workers do
             worker.Post <| SetModules modules
 
+        | AddSocketHandler handler ->
+          state.addSocketHandler handler
+
         | RouteWork work ->
           let workers = state.getWorkers()
           if workers.IsEmpty |> not then
             let workers = workers |> List.sortBy (fun worker -> worker.CurrentQueueLength)
             let worker = workers.[0]
             worker.Post work
+
+        | HandleSocket(context) ->
+          let handlers = state.getSocketHandlers()
+          async {
+            let! handled = tryHandleSocketUpgrade context handlers
+            if not handled then
+              use resp = context.Response
+              resp.StatusCode <- 400
+          } |> Async.Start
+          ()
 
         | SetWorkers workers ->
           state.setWorkers workers
@@ -127,7 +164,7 @@ module WebServer =
     )
 
     do 
-      [ 0 .. 8 ]
+      [ 0 .. 2 ]
       |> List.map (fun i ->
         let worker = MailboxProcessor.Start(fun inbox ->
           let rec loop handlers = async {
@@ -172,7 +209,7 @@ module WebServer =
       |> SetWorkers
       |> agent.Post
 
-    member this.listen host port =
+    member this.listen host (port:uint16) =
       let listener = new HttpListener()
 
       listener.Prefixes.Add <| sprintf "http://%s:%i/" host port
@@ -185,8 +222,17 @@ module WebServer =
       async {
         while true do
           let! context = task
-          RouteWork <| Handle(context.Request, context.Response) |> agent.Post
+
+          log.Debug("Received headers {0}", context.Request.Headers)
+          if context.Request.Headers.["Upgrade"] = "websocket" then
+            log.Debug("Got websocket upgrade request!")
+            HandleSocket(context) |> agent.Post
+          else
+            RouteWork <| Handle(context.Request, context.Response) |> agent.Post
       }
+
+    member this.handleSocket handler =
+      agent.Post <| AddSocketHandler handler
 
     member this.handle serverModule =
       agent.Post <| AddModule serverModule

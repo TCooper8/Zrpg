@@ -100,6 +100,18 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Discovery\Discovery\Discovery.fsproj">
+      <Name>Discovery</Name>
+      <Project>{7827978d-378c-447a-915d-e72f6ad88d28}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Logging\Logging\Logging.csproj">
+      <Name>Logging</Name>
+      <Project>{7d7e432c-99f2-4d65-98ae-fb4e00889062}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
