@@ -8,7 +8,7 @@ open Logging
 
 [<TestClass>]
 type AuthTest () =
-  let log = StreamLogger("test", LogLevel.Debug, Console.OpenStandardOutput())
+  let log = new StreamLogger("test", LogLevel.Debug, Console.OpenStandardOutput())
 
   let auth =
     Auth.createLocal <| log.Fork("Auth", log.Level)
@@ -25,6 +25,8 @@ type AuthTest () =
     birthdate = DateTime.Now
     screenname = "testScreenname"
   }
+
+  do log.Debug <| "Running test!"
 
   [<TestMethod>]
   member this.register () =
@@ -54,3 +56,7 @@ type AuthTest () =
       match o with
       | None -> failwith "User credentials were verified after user was deregistered"
       | _ -> ()
+
+  interface IDisposable with
+    member this.Dispose () =
+      log.Dispose()
