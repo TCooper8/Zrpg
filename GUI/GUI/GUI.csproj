@@ -188,6 +188,10 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\GameClient\GameClient\GameClient.fsproj">
+      <Project>{0cf77619-8a7f-4059-89f1-cd6b24eac853}</Project>
+      <Name>GameClient</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\GameCommons\GameCommons.fsproj">
       <Project>{d3508c67-9ae7-4b7a-9814-035d20bb4199}</Project>
       <Name>GameCommons</Name>
