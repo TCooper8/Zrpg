@@ -101,8 +101,14 @@
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="MapZones\Northshire.xaml.cs">
-      <DependentUpon>Northshire.xaml</DependentUpon>
+    <Compile Include="Pages\AllianceGarrisonCreationPage.xaml.cs">
+      <DependentUpon>AllianceGarrisonCreationPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\ChooseFactionPage.xaml.cs">
+      <DependentUpon>ChooseFactionPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\GarrisonPage.xaml.cs">
+      <DependentUpon>GarrisonPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\HeroCreationPage.xaml.cs">
       <DependentUpon>HeroCreationPage.xaml</DependentUpon>
@@ -113,8 +119,11 @@
     <Compile Include="Pages\HeroSelectionPage.xaml.cs">
       <DependentUpon>HeroSelectionPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Pages\WorldMapPage.xaml.cs">
-      <DependentUpon>WorldMapPage.xaml</DependentUpon>
+    <Compile Include="Pages\HordeGarrisonCreationPage.xaml.cs">
+      <DependentUpon>HordeGarrisonCreationPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\RegisterPage.xaml.cs">
+      <DependentUpon>RegisterPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -126,7 +135,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\background3.jpg" />
-    <Content Include="Assets\background6.png" />
     <Content Include="Assets\genericBackground.jpg" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
@@ -146,7 +154,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="MapZones\Northshire.xaml">
+    <Page Include="Pages\AllianceGarrisonCreationPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\ChooseFactionPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\GarrisonPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -162,10 +178,20 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Pages\WorldMapPage.xaml">
+    <Page Include="Pages\HordeGarrisonCreationPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Pages\RegisterPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\GameCommons\GameCommons.fsproj">
+      <Project>{d3508c67-9ae7-4b7a-9814-035d20bb4199}</Project>
+      <Name>GameCommons</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

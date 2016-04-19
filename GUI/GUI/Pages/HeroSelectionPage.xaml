@@ -96,7 +96,8 @@
                     <SolidColorBrush Color="#33000000"/>
                 </Button.Background>
             </Button>
-            <TextBox x:Name="textBox" HorizontalAlignment="Center" Margin="0" Grid.Row="1" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Center" Width="600" Height="500"/>
+            <TextBox x:Name="textBox" HorizontalAlignment="Center" Margin="0" Grid.Row="1" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Center" Width="600" Height="500" BorderBrush="#FF7A7A7A"/>
+            <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="50,0,0,0" TextWrapping="Wrap" Text="Back" VerticalAlignment="Top" Height="40" FontSize="20" Foreground="White" Padding="0,5,0,0"/>
 
         </Grid>
     </ScrollViewer>

@@ -1,0 +1,43 @@
+﻿<Page
+    x:Class="GUI.Pages.ChooseFactionPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:GUI.Pages"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <ScrollViewer>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.Background>
+                <ImageBrush Stretch="Fill" ImageSource="ms-appx:///Assets/genericBackground.jpg"/>
+            </Grid.Background>
+            <Button x:Name="backButton" Content="&#xE72B;" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Top" Width="40" Height="40" FontSize="20" Foreground="Black" FontFamily="Segoe MDL2 Assets" Click="backButton_Click" BorderBrush="#FF7A7A7A" Padding="0">
+                <Button.Background>
+                    <SolidColorBrush Color="White" Opacity="0.4"/>
+                </Button.Background>
+            </Button>
+            <TextBlock x:Name="titleTextBlock" HorizontalAlignment="Center" Margin="0" TextWrapping="Wrap" Text="Choose Faction Page" VerticalAlignment="Center" FontSize="30" Foreground="White"/>
+            <TextBlock x:Name="allianceTextBlock" HorizontalAlignment="Left" Margin="350,100,0,0" Grid.Row="1" TextWrapping="Wrap" Text="Alliance" VerticalAlignment="Top" FontSize="30" Foreground="White"/>
+            <TextBlock x:Name="hordeTextBlock" HorizontalAlignment="Right" Margin="0,100,350,0" Grid.Row="1" TextWrapping="Wrap" Text="Horde" VerticalAlignment="Top" Foreground="White" FontSize="30"/>
+            <Frame x:Name="allianceInfoFrame" Content="Frame To Display Alliance Info" Margin="200,150,0,0" Grid.Row="1" VerticalAlignment="Top" Width="400" Height="400" BorderBrush="#FF7A7A7A" Background="#33000000" FontSize="20" HorizontalContentAlignment="Center" VerticalContentAlignment="Stretch" Foreground="White" HorizontalAlignment="Left"/>
+            <Frame x:Name="hordeInfoFrame" Content="Frame To Display Horde Info" Margin="0,150,200,0" Grid.Row="1" VerticalAlignment="Top" Height="400" Width="400" FontSize="20" Foreground="White" Background="#33000000" HorizontalContentAlignment="Center" HorizontalAlignment="Right"/>
+            <Button x:Name="choseAllianceButton" Content="Choose Alliance" HorizontalAlignment="Left" Margin="300,600,0,20" Grid.Row="1" VerticalAlignment="Top" Width="200" Height="40" Foreground="Black" BorderBrush="#FF7A7A7A" Padding="0" Click="choseAllianceButton_Click">
+                <Button.Background>
+                    <SolidColorBrush Color="White" Opacity="0.4"/>
+                </Button.Background>
+            </Button>
+            <Button x:Name="choseHordeButton" Content="Choose Horde" HorizontalAlignment="Right" Margin="0,600,300,20" Grid.Row="1" VerticalAlignment="Top" Width="200" Height="40" Foreground="Black" BorderBrush="#FF7A7A7A" Padding="0" Click="choseHordeButton_Click">
+                <Button.Background>
+                    <SolidColorBrush Color="White" Opacity="0.4"/>
+                </Button.Background>
+            </Button>
+            <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="50,0,0,0" TextWrapping="Wrap" Text="Back" VerticalAlignment="Top" Height="40" FontSize="20" Foreground="White" Padding="0,5,0,0"/>
+        </Grid>
+    </ScrollViewer>
+</Page>

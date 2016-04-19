@@ -20,25 +20,17 @@ namespace GUI.Pages
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class WorldMapPage : Page
+    public sealed partial class GarrisonPage : Page
     {
-        public WorldMapPage()
+        public GarrisonPage()
         {
             this.InitializeComponent();
         }
 
-        private void worldMapPageBackButton_Click(object sender, RoutedEventArgs e)
+        private void backButton_Click(object sender, RoutedEventArgs e)
         {
-            //TO DO: Save current hero data
-
-            //Navigate to hero selection page
-            this.Frame.Navigate(typeof(HeroScreenPage));
-        }
-
-        private void northshireZone_Click(object sender, RoutedEventArgs e)
-        {
-            //Navigate to northshire map
-            this.Frame.Navigate(typeof(MapZones.Northshire));
+            //Log user out
+            this.Frame.Navigate(typeof(MainPage));
         }
     }
 }

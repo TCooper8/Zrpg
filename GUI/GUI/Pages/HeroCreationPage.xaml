@@ -17,7 +17,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <Button x:Name="heroCreateBackButton" Content="&#xE72B;" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Top" Width="40" Height="40" Padding="0" FontSize="20" FontFamily="Segoe MDL2 Assets" Click="heroCreateBackButton_Click" BorderBrush="{x:Null}" Background="#33000000" Foreground="White"/>
+            <Button x:Name="backButton" Content="&#xE72B;" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Top" Width="40" Height="40" Padding="0" FontSize="20" FontFamily="Segoe MDL2 Assets" Click="backButton_Click" BorderBrush="{x:Null}" Background="#33000000" Foreground="White"/>
             <TextBlock x:Name="textBlock" Margin="0" TextWrapping="Wrap" Text="Hero Creation Page" HorizontalAlignment="Center" FontSize="30" Foreground="White"/>
             <ListView x:Name="allianceListView" HorizontalAlignment="Left" Margin="0,135,0,0" Grid.Row="1" Width="125" SelectionChanged="allianceListView_SelectionChanged">
                 <ListViewItem Content="Human" FontSize="20" Background="#33000000" Foreground="White"/>
@@ -41,6 +41,7 @@
             <TextBox x:Name="textBox" HorizontalAlignment="Center" Margin="0,500,0,40" Grid.Row="1" TextWrapping="Wrap" Text="" VerticalAlignment="Center" PlaceholderText="Character Name" Height="40" Width="300" Padding="0" FontSize="25"/>
             <AppBarToggleButton x:Name="maleToggleButton" HorizontalAlignment="Center" Icon="Accept" Label="Male" Margin="400,500,0,40" Grid.Row="1" VerticalAlignment="Center" Width="60" Height="60" Checked="maleToggleButton_Checked" Foreground="White"/>
             <AppBarToggleButton x:Name="femaleToggleButton" HorizontalAlignment="Center" Icon="Accept" Label="Female" Margin="550,500,0,40" Grid.Row="1" VerticalAlignment="Center" Width="60" Height="60" Checked="femaleToggleButton_Checked" Foreground="White"/>
+            <TextBlock x:Name="textBlock_Copy" HorizontalAlignment="Left" Margin="50,0,0,0" TextWrapping="Wrap" Text="Back" VerticalAlignment="Top" Height="40" FontSize="20" Foreground="White" Padding="0,5,0,0"/>
 
         </Grid>
     </ScrollViewer>

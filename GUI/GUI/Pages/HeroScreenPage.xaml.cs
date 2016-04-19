@@ -36,13 +36,13 @@ namespace GUI.Pages
         private void mapButton_Click(object sender, RoutedEventArgs e)
         {
             //Navigate to world map page
-            this.Frame.Navigate(typeof(WorldMapPage));
+            
         }
 
         //Dummy data to see layout being used
         private void mapPageItem_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            this.Frame.Navigate(typeof(WorldMapPage));
+            
         }
 
         private void logsItem_Tapped(object sender, TappedRoutedEventArgs e)

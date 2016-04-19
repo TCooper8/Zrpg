@@ -13,7 +13,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
-
+using Zrpg.Game;
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
 namespace GUI
@@ -35,8 +35,16 @@ namespace GUI
         {
             //TO DO: Authenticate credentials
 
-            //Go to hero selection page if credentials were good
-            this.Frame.Navigate(typeof(HeroSelectionPage));
+            //Navigate to new faction page if no previous garrison
+            this.Frame.Navigate(typeof(ChooseFactionPage));
+
+            //TO DO: Navigate to garrison page if user has previous garrison
+        }
+
+        private void registerButton_Click(object sender, RoutedEventArgs e)
+        {
+            //Navigate to register page
+            this.Frame.Navigate(typeof(RegisterPage));
         }
     }
 }

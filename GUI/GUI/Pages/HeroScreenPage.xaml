@@ -27,6 +27,7 @@
                 <ListViewItem x:Name="statsItem" Content="Stats" Tapped="statsItem_Tapped" Margin="0,10,0,0" Background="#33000000" Foreground="White"/>
                 <ListViewItem x:Name="questsItem" Content="Quests" Tapped="questsItem_Tapped" Margin="0,10,0,0" Background="#33000000" Foreground="White"/>
             </ListView>
+            <TextBlock x:Name="textBlock_Copy" HorizontalAlignment="Left" Margin="50,0,0,0" TextWrapping="Wrap" Text="Back" VerticalAlignment="Top" Height="40" FontSize="20" Foreground="White" Padding="0,5,0,0"/>
 
         </Grid>
     </ScrollViewer>

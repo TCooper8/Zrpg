@@ -27,7 +27,7 @@ namespace GUI.Pages
             this.InitializeComponent();
         }
 
-        private void heroCreateBackButton_Click(object sender, RoutedEventArgs e)
+        private void backButton_Click(object sender, RoutedEventArgs e)
         {
             //Navigate to hero selection page
             this.Frame.Navigate(typeof(HeroSelectionPage));
@@ -63,6 +63,6 @@ namespace GUI.Pages
 
             //Navigate back to hero selecion screen
             this.Frame.Navigate(typeof(HeroSelectionPage));
-        }
+        }  
     }
 }
