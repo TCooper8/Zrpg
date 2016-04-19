@@ -11,7 +11,7 @@ open System.Diagnostics
 
 [<TestClass>]
 type Testrun () =
-  let log = Logging.StreamLogger("Test", Logging.LogLevel.Debug, Console.OpenStandardOutput())
+  let log = new Logging.StreamLogger("Test", Logging.LogLevel.Debug, Console.OpenStandardOutput())
   let server = new WebServer.Server(log)
 
   let staticDir = Path.Combine(Directory.GetCurrentDirectory(), "static")
@@ -22,6 +22,7 @@ type Testrun () =
 
   [<TestInitialize>]
   member this.init () =
+    log.Debug <| "Initializing test..."
     // Create the directory.
     Directory.CreateDirectory staticDir |> ignore
     // Create the default file.
@@ -43,6 +44,7 @@ type Testrun () =
   member this.cleanup () =
     File.Delete <| Path.Combine(staticDir, defaultFile)
     Directory.Delete staticDir
+    log.Debug <| "Shutting down logger"
     ()
 
   [<TestMethod>]
@@ -60,4 +62,3 @@ type Testrun () =
       failwith
       <| sprintf "Data %s does not match %s" data fileData
     ()
-    

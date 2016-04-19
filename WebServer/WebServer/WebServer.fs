@@ -137,6 +137,7 @@ module WebServer =
         | RouteWork work ->
           let workers = state.getWorkers()
           if workers.IsEmpty |> not then
+            log.Debug <| sprintf "Routing http work to workers..."
             let workers = workers |> List.sortBy (fun worker -> worker.CurrentQueueLength)
             let worker = workers.[0]
             worker.Post work
