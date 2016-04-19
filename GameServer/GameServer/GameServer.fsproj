@@ -51,10 +51,8 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="Stats.fs" />
     <Compile Include="Monsters.fs" />
     <Compile Include="Events.fs" />
-    <Compile Include="Types.fs" />
     <Compile Include="GameState.fs" />
     <Compile Include="GameRunner.fs" />
     <Compile Include="GameServer.fs" />
@@ -78,6 +76,11 @@
     <ProjectReference Include="..\..\Discovery\Discovery\Discovery.fsproj">
       <Name>Discovery</Name>
       <Project>{7827978d-378c-447a-915d-e72f6ad88d28}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\GameCommons\GameCommons.fsproj">
+      <Name>GameCommons</Name>
+      <Project>{d3508c67-9ae7-4b7a-9814-035d20bb4199}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\Logging\Logging\Logging.csproj">

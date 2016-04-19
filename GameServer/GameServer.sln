@@ -11,6 +11,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "WebServer", "..\WebServer\W
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logging", "..\Logging\Logging\Logging.csproj", "{7D7E432C-99F2-4D65-98AE-FB4E00889062}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GameCommons", "..\GameCommons\GameCommons.fsproj", "{D3508C67-9AE7-4B7A-9814-035D20BB4199}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{7D7E432C-99F2-4D65-98AE-FB4E00889062}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7D7E432C-99F2-4D65-98AE-FB4E00889062}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7D7E432C-99F2-4D65-98AE-FB4E00889062}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3508C67-9AE7-4B7A-9814-035D20BB4199}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3508C67-9AE7-4B7A-9814-035D20BB4199}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3508C67-9AE7-4B7A-9814-035D20BB4199}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3508C67-9AE7-4B7A-9814-035D20BB4199}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

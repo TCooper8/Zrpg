@@ -74,43 +74,16 @@ type TestGameServer () =
     } |> Async.Start
 
   [<TestMethod>]
-  member this.testAddCharacter () =
-    let msg = AddRegion {
-      id = "forest"
-      name = "Elwynn Forest"
-      zones = Seq.empty |> Set
+  member this.testNewGarrison () =
+    // New player. Going to add a new garrison.
+    let msg = AddGarrison {
+      clientId = "testClientId"
+      name = "My garrison"
+      race = Human
+      faction = Alliance
     }
-    let reply = msgServer msg
-    match reply with
-    | ExnReply e -> failwith e
-    | _ -> ()
 
-    let msg = AddZone("forest", {
-      id = "forest.northshire"
-      name = "Northshire"
-      npcs = Set.empty |> Set 
-    })
     let reply = msgServer msg
     match reply with
-    | ExnReply e -> failwith e
+    | ExnReply e -> raise e
     | _ -> ()
-
-    let msg = SetStartingZone(Race.Human, "forest.northshire")
-    let reply = msgServer msg
-    match reply with
-    | ExnReply e -> failwith e
-    | _ -> ()
-
-    let msg = AddCharacter {
-      clientId = "testId"
-      name = "bob"
-      race = Race.Human
-      gender = Gender.Male
-      classType = ClassType.Warrior
-    }
-    let reply = msgServer msg
-    match reply with
-    | ExnReply e -> failwith e
-    | _ -> ()
-    ()
-     

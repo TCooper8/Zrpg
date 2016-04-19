@@ -11,41 +11,25 @@ open System.Diagnostics
 open Logging
 
 module GameServer =
-  type AddCharacter = {
-    clientId:  string
-    name:      string
-    race:      Race
-    gender:    Gender
-    classType: ClassType
-  }
+  let uuid () = Guid.NewGuid().ToString()
 
-  type ChainEvent = {
-    id: string
-    events: Event list
-  }
-  and EventNode = string
-  and EventBranch = {
-    id: string
-    activation: Stats option
-    events: Event list
-  }
-  and Event =
-    | ChainEvent of ChainEvent
-    | EventNode of EventNode
-    | EventBranch of EventBranch
+  type Token = string
 
   type Msg =
-    | AddCharacter of AddCharacter
-    | AddRegion of Region
-    | AddZone of string * Zone
-    | SetStartingZone of Race * string
+    | AddGarrison of AddGarrison
+  and AddGarrison = {
+    clientId: string
+    name: string
+    race: Race
+    faction: Faction
+  }
 
   type Reply =
     | EmptyReply
     | MsgReply of string
-    | ExnReply of string
+    | ExnReply of exn
 
-  type Cmd = Msg * AsyncReplyChannel<Choice<Reply, exn>>
+  type Cmd = Msg * AsyncReplyChannel<Reply>
 
   type GameServer () =
     let log = StreamLogger(
@@ -55,7 +39,7 @@ module GameServer =
     )
 
     let gameState = GameState()
-    let game = GameRunner.Game(gameState)
+    let game = GameRunner.Game(gameState, log)
     let webServer = Pario.WebServer.Server(log)
     let discovery = Zrpg.Discovery.createLocal() |> Async.RunSynchronously
 
@@ -64,46 +48,33 @@ module GameServer =
 
       let rec loop () = async {
         let! cmd = inbox.Receive()
-        let (msg, reply) = cmd
+        let msg, reply = cmd
 
-        log.Debug <| sprintf "Received \n\t%A" msg
+        log.Debug <| sprintf "Received \n\t%A" cmd
 
         match msg with
-        | AddCharacter char ->
-          let res =
-            try
-              gameState.AddCharacter
-              <| char.clientId
-              <| char.name
-              <| char.race
-              <| char.gender
-              <| char.classType
-              MsgReply "Added character" |> Choice1Of2
-            with e -> Choice2Of2 e
-          reply.Reply(res)
+        | AddGarrison msg ->
+          let stats = {
+            goldIncome = 10
+            heroes = []
+          }
 
-        | AddRegion region ->
-          let res =
-            try
-              gameState.AddRegion region
-              MsgReply "Added region" |> Choice1Of2
-            with e -> Choice2Of2 e
-          reply.Reply(res)
+          let garrison = {
+            id = uuid()
+            clientId = "tmpClientId"
+            name = msg.name
+            race = msg.race
+            faction = msg.faction
+            ownedRegions = Set []
+            ownedZones = Set []
+            vaultId = ""
+            stats = stats
+          }
 
-        | AddZone(regionId, zone) ->
-          let res =
-            try
-              gameState.AddZone regionId zone
-              MsgReply "Added zone" |> Choice1Of2
-            with e -> Choice2Of2 e
-          reply.Reply(res)
+          let res = match gameState.addGarrison garrison with
+          | Failure e -> ExnReply e
+          | Success () -> MsgReply "Garrison created!"
 
-        | SetStartingZone(race, zoneId) ->
-          let res =
-            try
-              gameState.SetStartingZone race zoneId
-              MsgReply "Set starting zone" |> Choice1Of2
-            with e -> Choice2Of2 e
           reply.Reply(res)
 
         return! loop ()
@@ -134,12 +105,9 @@ module GameServer =
 
           // Now, issue the command to the server.
           let! res = agent.PostAndAsyncReply(fun reply -> (msg, reply))
-          let reply = match res with
-          | Choice2Of2 e -> ExnReply e.Message
-          | Choice1Of2 reply -> reply
 
           use resp = resp.OutputStream
-          let json = JsonConvert.SerializeObject(reply) |> enc.GetBytes
+          let json = JsonConvert.SerializeObject(res) |> enc.GetBytes
           do! resp.WriteAsync(json, 0, json.Length) |> Async.AwaitIAsyncResult |> Async.Ignore
 
           return true
@@ -205,6 +173,9 @@ module GameServer =
       with e ->
         log.Warn("Encountered a WebSocket error: {0}", e)
         return false
+    }
+
+    let createServer (log:Logger) = async {
     }
 
     member this.Listen host port = async {
