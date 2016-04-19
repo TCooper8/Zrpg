@@ -15,20 +15,6 @@ module GameServer =
 
   type Token = string
 
-  type Msg =
-    | AddGarrison of AddGarrison
-  and AddGarrison = {
-    clientId: string
-    name: string
-    race: Race
-    faction: Faction
-  }
-
-  type Reply =
-    | EmptyReply
-    | MsgReply of string
-    | ExnReply of exn
-
   type Cmd = Msg * AsyncReplyChannel<Reply>
 
   [<Interface>]
@@ -54,6 +40,8 @@ module GameServer =
             log.Debug <| sprintf "Received \n\t%A" msg
             match msg with
             | AddGarrison msg ->
+              log.Debug <| sprintf "Adding garrison %s" msg.name
+
               let stats = {
                 goldIncome = 10
                 heroes = []
@@ -72,11 +60,12 @@ module GameServer =
               }
 
               match gameState.addGarrison garrison with
-              | Failure e -> ExnReply e
+              | Failure e -> ExnReply e.Message
               | Success () -> MsgReply "Garrison created!"
           with e ->
-            ExnReply e
+            ExnReply e.Message
 
+        log.Debug <| sprintf "Reply with %A" res
         reply.Reply(res)
 
         return! loop ()

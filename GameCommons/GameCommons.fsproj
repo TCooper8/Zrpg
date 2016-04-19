@@ -44,6 +44,7 @@
     <Compile Include="Try.fs" />
     <Compile Include="Stats.fs" />
     <Compile Include="Types.fs" />
+    <Compile Include="Messages.fs" />
     <None Include="Script.fsx" />
   </ItemGroup>
   <ItemGroup>

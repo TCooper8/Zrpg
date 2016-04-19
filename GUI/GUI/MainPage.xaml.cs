@@ -1,6 +1,7 @@
 ﻿using GUI.Pages;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -38,17 +39,23 @@ namespace GUI
             //TO DO: Authenticate credentials
 
             var reply = await client.AddGarrison("test client", "My garrison", Race.Human, Faction.Alliance);
+
             if (reply.IsEmptyReply)
             {
                 throw new Exception("Got empty reply from server");
             }
             else if (reply.IsExnReply)
             {
-                throw ((Reply.ExnReply)reply).Item;
+                var exnReply = (Reply.ExnReply)reply;
+                var exn = exnReply.Item;
+                Debug.WriteLine("Error: {0}", exn);
             }
-
-            var message = ((Reply.MsgReply)reply).Item;
-            // Yay! Got the message.
+            else
+            {
+                var message = ((Reply.MsgReply)reply).Item;
+                Debug.WriteLine("Response: {0}", message);
+                // Yay! Got the message.
+            }
 
             //Navigate to new faction page if no previous garrison
             this.Frame.Navigate(typeof(ChooseFactionPage));

@@ -10,20 +10,6 @@ open Newtonsoft.Json
 
 type ClientId = string
 
-type Msg =
-  | AddGarrison of AddGarrison
-and AddGarrison = {
-  clientId: string
-  name: string
-  race: Race
-  faction: Faction
-}
-
-type Reply =
-  | EmptyReply
-  | MsgReply of string
-  | ExnReply of exn
-
 [<Interface>]
 type IGameClient =
   abstract member AddGarrison :
