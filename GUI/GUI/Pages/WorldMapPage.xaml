@@ -1,0 +1,28 @@
+﻿<Page
+    x:Class="GUI.Pages.WorldMapPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:GUI.Pages"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <ScrollViewer>
+
+        <Grid Background="{ThemeResource AppBarItemPressedForegroundThemeBrush}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <TextBlock x:Name="textBlock" HorizontalAlignment="Center" Margin="0" TextWrapping="Wrap" Text="World Map Page" FontSize="30"/>
+            <Button x:Name="worldMapPageBackButton" Content="&#xE72B;" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Stretch" Width="40" Padding="0" FontSize="20" FontFamily="Segoe MDL2 Assets" BorderBrush="{x:Null}" Click="worldMapPageBackButton_Click">
+                <Button.Background>
+                    <SolidColorBrush Color="#33000000"/>
+                </Button.Background>
+            </Button>
+            <Button x:Name="northshireZone" Content="Northshire" HorizontalAlignment="Center" Margin="0,0,200,500" Grid.Row="1" VerticalAlignment="Center" Click="northshireZone_Click"/>
+            <Button x:Name="lakeshireZone" Content="Lakeshire" HorizontalAlignment="Center" Margin="340,0,0,0" Grid.Row="1" VerticalAlignment="Center"/>
+            <Button x:Name="banditcampZone" Content="Bandit Camp" HorizontalAlignment="Center" Margin="0,0,400,150" Grid.Row="1" VerticalAlignment="Center"/>
+        </Grid>
+    </ScrollViewer>
+</Page>

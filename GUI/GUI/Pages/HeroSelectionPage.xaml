@@ -1,0 +1,103 @@
+﻿<Page
+    x:Class="GUI.Pages.HeroSelectionPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:GUI.Pages"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <ScrollViewer>
+
+        <Grid SizeChanged="Grid_SizeChanged">
+            <Grid.Background>
+                <ImageBrush Stretch="Fill" ImageSource="ms-appx:///Assets/genericBackground.jpg"/>
+            </Grid.Background>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+            <Button x:Name="heroSelectBackButton" Content="&#xE72B;" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Top" Width="40" Height="40" FontFamily="Segoe MDL2 Assets" FontSize="20" Padding="0" ToolTipService.ToolTip="Log out and return to login page" Click="heroSelectBackButton_Click" Foreground="White" BorderBrush="{x:Null}">
+                <Button.Background>
+                    <SolidColorBrush Color="#33000000"/>
+                </Button.Background>
+            </Button>
+
+            <ListView x:Name="characterSelectListViewRow1" HorizontalAlignment="Left" Margin="0,135,0,0" Grid.Column="0" Grid.Row="1" Width="250" FontSize="20" Padding="0" MinWidth="100" MaxHeight="700">
+                <ListView.Background>
+                    <SolidColorBrush Color="#33000000"/>
+                </ListView.Background>
+                <ListViewItem Content="Sample Hero Bob" HorizontalContentAlignment="Left" FontSize="20" ToolTipService.ToolTip="Level 21 Rogue" Foreground="White" Height="88" VerticalContentAlignment="Top">
+                    <ListViewItem.Background>
+                        <SolidColorBrush Color="White" Opacity="0.15"/>
+                    </ListViewItem.Background>
+                </ListViewItem>
+                <ListViewItem Content="Sample Hero Jim" FontSize="20" HorizontalContentAlignment="Left" ToolTipService.ToolTip="Level 5 Warrior" Foreground="White" Height="88" VerticalContentAlignment="Top">
+                    <ListViewItem.Background>
+                        <SolidColorBrush Color="White" Opacity="0.15"/>
+                    </ListViewItem.Background>
+                </ListViewItem>
+                <ListViewItem Content="Sample Hero Jon" FontSize="20" HorizontalContentAlignment="Left" ToolTipService.ToolTip="Level 15 Mage" Foreground="White" Height="88" VerticalContentAlignment="Top">
+                    <ListViewItem.Background>
+                        <SolidColorBrush Color="White" Opacity="0.15"/>
+                    </ListViewItem.Background>
+                </ListViewItem>
+            </ListView>
+
+            <ListView x:Name="characterSelectListViewRow2" HorizontalAlignment="Left" Margin="0,135,0,0" Grid.Column="0" Grid.Row="2" Width="250" FontSize="20" Padding="0" MinWidth="100" MaxHeight="700">
+                <ListViewItem Content="Level 21 Rogue" HorizontalContentAlignment="Left" FontSize="15" Foreground="White" Height="88">
+                    <ListViewItem.Background>
+                        <SolidColorBrush Color="White" Opacity="0"/>
+                    </ListViewItem.Background>
+                </ListViewItem>
+                <ListViewItem Content="Level 5 Warrior" FontSize="15" HorizontalContentAlignment="Left" Foreground="White" Height="88">
+                    <ListViewItem.Background>
+                        <SolidColorBrush Color="White" Opacity="0"/>
+                    </ListViewItem.Background>
+                </ListViewItem>
+                <ListViewItem Content="Level 15 Mage" FontSize="15" HorizontalContentAlignment="Left" Foreground="White" Height="88">
+                    <ListViewItem.Background>
+                        <SolidColorBrush Color="White" Opacity="0"/>
+                    </ListViewItem.Background>
+                </ListViewItem>
+            </ListView>
+
+            <ListView x:Name="socialListViewRow1" HorizontalAlignment="Right" Margin="0,135,0,0" Grid.Column="0" Grid.Row="1" Width="250" FontSize="20" MaxHeight="700" MinWidth="100" Background="#33000000">
+                <ListViewItem Content="Sample Friend One" ToolTipService.ToolTip="World: Stormscale" FontSize="20" Foreground="White" Height="88" VerticalContentAlignment="Top">
+                    <ListViewItem.Background>
+                        <SolidColorBrush Color="White" Opacity="0.15"/>
+                    </ListViewItem.Background>
+                </ListViewItem>
+            </ListView>
+
+            <ListView x:Name="socialListViewRow2" HorizontalAlignment="Right" Margin="0,135,0,0" Grid.Column="0" Grid.Row="2" Width="250" FontSize="20" SelectionMode="None" MaxHeight="700" MinWidth="100">
+                <ListViewItem Content="Online - World: Stormscale" FontSize="15" Foreground="White" Height="88">
+                    <ListViewItem.Background>
+                        <SolidColorBrush Color="White" Opacity="0"/>
+                    </ListViewItem.Background>
+                </ListViewItem>
+            </ListView>
+
+            <TextBlock x:Name="characterSelectTextBlock" HorizontalAlignment="Left" Margin="0,40,0,0" Grid.Row="1" TextWrapping="Wrap" Text="Character Select" VerticalAlignment="Top" TextAlignment="Center" FontSize="25" Width="250" Height="35" Foreground="White"/>
+            <Button x:Name="heroCreateButton" Content="Create New Character" HorizontalAlignment="Left" Margin="25,90,0,0" Grid.Row="1" VerticalAlignment="Top" Padding="0" Height="35" Width="200" FontSize="15" Click="heroCreateButton_Click" Foreground="White" BorderBrush="{x:Null}">
+                <Button.Background>
+                    <SolidColorBrush Color="#33000000"/>
+                </Button.Background>
+            </Button>
+            <TextBlock x:Name="socialTextBlock" HorizontalAlignment="Right" Margin="0,40,0,0" Grid.Row="1" TextWrapping="Wrap" Text="Social" VerticalAlignment="Top" Height="35" Width="250" FontSize="25" TextAlignment="Center" Foreground="White"/>
+            <Button x:Name="addFriendButton" Content="Add Friend" HorizontalAlignment="Right" Margin="0,88,19,0" Grid.Row="1" VerticalAlignment="Top" Width="200" Height="35" Foreground="White" BorderBrush="{x:Null}">
+                <Button.Background>
+                    <SolidColorBrush Color="#33000000"/>
+                </Button.Background>
+            </Button>
+            <Button x:Name="selectHeroButton" Content="Select Hero" HorizontalAlignment="Stretch" Margin="0,600,0,20" Grid.Row="1" VerticalAlignment="Stretch" Height="35" Width="200" Padding="0" Foreground="White" BorderBrush="{x:Null}" Click="selectHeroButton_Click">
+                <Button.Background>
+                    <SolidColorBrush Color="#33000000"/>
+                </Button.Background>
+            </Button>
+            <TextBox x:Name="textBox" HorizontalAlignment="Center" Margin="0" Grid.Row="1" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Center" Width="600" Height="500"/>
+
+        </Grid>
+    </ScrollViewer>
+</Page>

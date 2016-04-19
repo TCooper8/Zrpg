@@ -1,0 +1,34 @@
+﻿<Page
+    x:Class="GUI.MapZones.Northshire"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:GUI.MapZones"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <ScrollViewer>
+
+        <Grid>
+            <Grid.Background>
+                <ImageBrush Stretch="Fill" ImageSource="ms-appx:///Assets/genericBackground.jpg"/>
+            </Grid.Background>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Button x:Name="northshireBackButton" Content="&#xE72B;" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Top" Width="40" Height="40" Padding="0" FontSize="20" FontFamily="Segoe MDL2 Assets" Click="northshireBackButton_Click">
+                <Button.Foreground>
+                    <SolidColorBrush Color="White"/>
+                </Button.Foreground>
+            </Button>
+            <TextBlock x:Name="textBlock" HorizontalAlignment="Center" Margin="0" TextWrapping="Wrap" Text="Northshire" VerticalAlignment="Center" FontSize="30" Foreground="White"/>
+            <ListView x:Name="northshireListView" HorizontalAlignment="Left" Margin="0,135,0,0" Grid.Row="1" Width="250">
+                <ListViewItem x:Name="vendorsItem" Content="Vendors" Tapped="vendorsItem_Tapped" Background="#33000000" HorizontalContentAlignment="Left" Foreground="White"/>
+                <ListViewItem x:Name="questsItem" Content="Quests" Tapped="questsItem_Tapped" Background="#33000000" Margin="0,10,0,0" HorizontalContentAlignment="Left" Foreground="White"/>
+                <ListViewItem x:Name="infoItem" Content="Info" Tapped="infoItem_Tapped" Background="#33000000" Margin="0,10,0,0" HorizontalContentAlignment="Left" Foreground="White"/>
+            </ListView>
+            <ListView x:Name="listViewDetailView" HorizontalAlignment="Left" Margin="250,130,0,0" Grid.Row="1" Width="250" SelectionMode="None"/>
+        </Grid>
+    </ScrollViewer>
+</Page>
