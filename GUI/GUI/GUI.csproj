@@ -113,8 +113,8 @@
     <Compile Include="Pages\HeroCreationPage.xaml.cs">
       <DependentUpon>HeroCreationPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Pages\HeroScreenPage.xaml.cs">
-      <DependentUpon>HeroScreenPage.xaml</DependentUpon>
+    <Compile Include="Pages\HeroesPage.xaml.cs">
+      <DependentUpon>HeroesPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\HeroSelectionPage.xaml.cs">
       <DependentUpon>HeroSelectionPage.xaml</DependentUpon>
@@ -170,7 +170,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Pages\HeroScreenPage.xaml">
+    <Page Include="Pages\HeroesPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

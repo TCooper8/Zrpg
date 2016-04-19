@@ -23,7 +23,7 @@
                 </Button.Background>
             </Button>
             <TextBlock x:Name="titleTextBlock" HorizontalAlignment="Center" Margin="0" TextWrapping="Wrap" Text="Alliance Garrison Creation Page" VerticalAlignment="Center" FontSize="30" Foreground="White"/>
-            <Frame x:Name="infoFrame" Content="Frame To Display Race Info" HorizontalAlignment="Right" Margin="0,100,100,0" Grid.Row="1" VerticalAlignment="Top" FontSize="20" Foreground="White" Width="600" Height="500" HorizontalContentAlignment="Left"/>
+            <Frame x:Name="infoFrame" Content="Frame To Display Race Info" HorizontalAlignment="Left" Margin="400,100,0,0" Grid.Row="1" VerticalAlignment="Top" FontSize="20" Foreground="White" Width="600" Height="500" HorizontalContentAlignment="Left"/>
             <Button x:Name="createButton" Content="Create Garrison" HorizontalAlignment="Left" Margin="25,550,0,0" Grid.Row="1" VerticalAlignment="Top" Height="40" Width="200" BorderBrush="#FF7A7A7A" Click="createButton_Click">
                 <Button.Background>
                     <SolidColorBrush Color="White" Opacity="0.4"/>
