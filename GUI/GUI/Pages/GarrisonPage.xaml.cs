@@ -25,12 +25,28 @@ namespace GUI.Pages
         public GarrisonPage()
         {
             this.InitializeComponent();
+
+            //Dummy data
+            infoFrame.Content = "Heroes: 5\n\n" +
+                                "Controlled Regions: 2\n\n" +
+                                "Vault Tabs: 3\n\n" +
+                                "Vendors Owned: 4\n\n" +
+                                "Artisans Owned: 2\n\n" +
+                                "Gold Income: 500 per day\n\n" +
+                                "Food Income: 200 per day\n\n" +
+                                "Research Points: 7";                               
         }
 
         private void backButton_Click(object sender, RoutedEventArgs e)
         {
             //Log user out
             this.Frame.Navigate(typeof(MainPage));
+        }
+
+        private void Heroes_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            //Navigate to hero page
+            this.Frame.Navigate(typeof(HeroesPage));
         }
     }
 }

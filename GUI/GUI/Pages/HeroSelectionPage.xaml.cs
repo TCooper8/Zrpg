@@ -82,7 +82,7 @@ namespace GUI.Pages
             //TO DO: Log hero into world and load data
 
             //Navigate to world map page
-            this.Frame.Navigate(typeof(HeroScreenPage));
+            this.Frame.Navigate(typeof(HeroesPage));
         }
     }
 }

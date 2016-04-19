@@ -34,7 +34,7 @@
                     <SolidColorBrush Color="White" Opacity="0.4"/>
                 </Button.Background>
             </Button>
-            <Frame x:Name="infoFrame" Content="Frame To Display Race Info" HorizontalAlignment="Right" Margin="0,100,100,0" Grid.Row="1" VerticalAlignment="Top" FontSize="20" Foreground="White" Width="600" Height="500" HorizontalContentAlignment="Left"/>
+            <Frame x:Name="infoFrame" Content="Frame To Display Race Info" HorizontalAlignment="Left" Margin="400,100,0,0" Grid.Row="1" VerticalAlignment="Top" FontSize="20" Foreground="White" Width="600" Height="500" HorizontalContentAlignment="Left"/>
             <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="50,0,0,0" TextWrapping="Wrap" Text="Back" VerticalAlignment="Top" Height="40" FontSize="20" Foreground="White" Padding="0,5,0,0"/>
         </Grid>
     </ScrollViewer>
