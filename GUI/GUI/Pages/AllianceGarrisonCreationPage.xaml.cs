@@ -63,9 +63,6 @@ namespace GUI.Pages
                 {
                     var message = ((Reply.MsgReply)reply).Item;
                     Debug.WriteLine("Response: {0}", message);
-
-                    //Navigate to garrison page
-                    this.Frame.Navigate(typeof(GarrisonPage));
                 }
             }
 
