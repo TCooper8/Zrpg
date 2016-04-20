@@ -49,7 +49,7 @@ module GameServer =
 
               let garrison = {
                 id = uuid()
-                clientId = "tmpClientId"
+                clientId = msg.clientId
                 name = msg.name
                 race = msg.race
                 faction = msg.faction

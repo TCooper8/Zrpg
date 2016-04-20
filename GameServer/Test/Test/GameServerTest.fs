@@ -56,6 +56,7 @@ type Test () =
   [<TestMethod>]
   member this.testClientFirstGarrison () =
     let clientId = uuid()
+
     Test.client.GetClientGarrison(clientId) |> sync
     |> fun m ->
       match m with
