@@ -12,6 +12,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Zrpg.Game;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -22,24 +23,33 @@ namespace GUI.Pages
     /// </summary>
     public sealed partial class GarrisonPage : Page
     {
+        IGameClient client;
+        //var reply = await client.AddGarrison("test client", "My garrison", Race.Human, Faction.Alliance);
         public GarrisonPage()
         {
             this.InitializeComponent();
+           
+            client = GameClient.RESTClient("http://localhost:8080");
+            GetGarrisonInfo();            
+        }
 
-            //Dummy data
-            infoFrame.Content = "Heroes: 5\n\n" +
-                                "Controlled Regions: 2\n\n" +
-                                "Vault Tabs: 3\n\n" +
-                                "Vendors Owned: 4\n\n" +
-                                "Artisans Owned: 2\n\n" +
-                                "Gold Income: 500 per day\n\n" +
-                                "Food Income: 200 per day\n\n" +
-                                "Research Points: 7";                               
+        private async void GetGarrisonInfo()
+        {
+            var reply = await client.GetClientGarrison("test client");
+
+            var id = (Reply.GetClientGarrisonReply)reply;
+
+            var name = id.Item;
+
+            //Garrison clientGarrison = client.GetGarrison(name);
+            
+            infoFrame.Content = name;
+            
         }
 
         private void backButton_Click(object sender, RoutedEventArgs e)
         {
-            //Log user out
+            //Log user out           
             this.Frame.Navigate(typeof(MainPage));
         }
 
