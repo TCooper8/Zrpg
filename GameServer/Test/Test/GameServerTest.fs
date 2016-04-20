@@ -82,3 +82,23 @@ type Test () =
         failwith <| sprintf "Expceted GetGarrisonReply but got %A" reply
     | reply ->
       failwith <| sprintf "Expceted GetClientGarrisonReply but got %A" reply
+
+  [<TestMethod>]
+  member this.testClientHasGarrison () =
+    let clientId = uuid()
+    match Test.client.AddGarrison(clientId, "My garrison", Human, Alliance) |> sync with
+    | AddGarrisonReply id -> ()
+    | msg -> failwith <| sprintf "Expected AddGarrisonReply with id, but got %A" msg
+
+    let garrisonId =
+      match Test.client.GetClientGarrison(clientId) |> sync with
+      | GetClientGarrisonReply id -> id
+      | msg -> failwith <| sprintf "Expected GetClientGarrisonReply with id, but got %A" msg
+
+    let garrison =
+      match Test.client.GetGarrison garrisonId |> sync with
+      | GetGarrisonReply garrison -> garrison
+      | msg -> failwith <| sprintf "Expected GetClientGarrisonReply with id, but got %A" msg
+
+    // Got the garrison
+    ()
