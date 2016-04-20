@@ -44,7 +44,7 @@ namespace GUI.Pages
 
         private void choseAllianceButton_Click(object sender, RoutedEventArgs e)
         {
-            //Navigate to horde garrison creation page
+            //Navigate to alliance garrison creation page
             this.Frame.Navigate(typeof(AllianceGarrisonCreationPage));
         }
 

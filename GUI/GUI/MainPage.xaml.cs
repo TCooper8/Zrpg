@@ -25,37 +25,16 @@ namespace GUI
     public sealed partial class MainPage : Page
     {
         public static MainPage Current;
-        IGameClient client;
 
         public MainPage()
         {
             this.InitializeComponent();
             Current = this;
-            client = GameClient.RESTClient("http://localhost:8080");
         }
 
-        private async void loginButton_Click(object sender, RoutedEventArgs e)
+        private void loginButton_Click(object sender, RoutedEventArgs e)
         {
             //TO DO: Authenticate credentials
-
-            var reply = await client.AddGarrison("test client", "My garrison", Race.Human, Faction.Alliance);
-
-            if (reply.IsEmptyReply)
-            {
-                throw new Exception("Got empty reply from server");
-            }
-            else if (reply.IsExnReply)
-            {
-                var exnReply = (Reply.ExnReply)reply;
-                var exn = exnReply.Item;
-                Debug.WriteLine("Error: {0}", exn);
-            }
-            else
-            {
-                var message = ((Reply.MsgReply)reply).Item;
-                Debug.WriteLine("Response: {0}", message);
-                // Yay! Got the message.
-            }
 
             //Navigate to new faction page if no previous garrison
             this.Frame.Navigate(typeof(ChooseFactionPage));
