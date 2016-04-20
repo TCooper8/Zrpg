@@ -9,25 +9,26 @@ type GameState () =
 
   member this.addGarrison (garrison:Garrison) =
     if clientGarrisons.ContainsKey garrison.clientId then
-      Try.failwith <| sprintf "Client %s already has a garrison" garrison.clientId
+      AddGarrisonReply ClientHasGarrison
     else
     garrisons <- garrisons.Add(garrison.id, garrison)
     clientGarrisons <- clientGarrisons.Add(garrison.clientId, garrison.id)
-    Success ()
+    AddGarrisonReply GarrisonAdded
 
   member this.getClientGarrison clientId =
     match clientGarrisons.TryFind clientId with
-    | None -> Try.failwith <| sprintf "Garrison for client %s does not exist" clientId
+    | None -> EmptyReply
     | Some id ->
-      this.getGarrison id
+      GetClientGarrisonReply id
 
   member this.getGarrison id =
     match garrisons.TryFind id with
-    | None -> Try.failwith <| sprintf "Garrison %s does not exist" id
-    | Some garrison -> Success garrison
+    | None -> EmptyReply
+    | Some garrison -> GetGarrisonReply garrison
 
   member this.remGarrison id =
     garrisons <- garrisons.Remove id
+    EmptyReply
 
   member this.tick () =
     gameTime <- gameTime + 1

@@ -19,6 +19,10 @@ type IGameClient =
     faction:Faction
       -> Reply Task
 
+  abstract member GetClientGarrison : clientId:string -> Reply Task
+  abstract member GetGarrison : garrisonId:string -> Reply Task
+  abstract member RemGarrison : garrisonId:string -> Reply Task
+
 type private RestGameClient (endPoint) =
   let enc = Encoding.UTF8
 
@@ -51,6 +55,10 @@ type private RestGameClient (endPoint) =
       race = race
       faction = faction
     }
+
+    member this.GetClientGarrison clientId = request <| GetClientGarrison clientId
+    member this.GetGarrison garrisonId = request <| GetGarrison garrisonId
+    member this.RemGarrison garrisonId = request <| RemGarrison garrisonId
 
 module GameClient =
   let RESTClient endPoint =

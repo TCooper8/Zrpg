@@ -13,69 +13,28 @@ open Zrpg.Game
 open Logging
 
 [<TestClass>]
-type TestGameServer () =
-  let log = Logging.StreamLogger(
-    "TestGameServer",
-    LogLevel.Debug,
-    Console.OpenStandardOutput()
-  )
+type Test () =
+  let sync = Async.AwaitTask >> Async.RunSynchronously
+  let uuid () = Guid.NewGuid().ToString()
 
-  do
-    for i in 0 .. 100 do
-      log.Debug <| sprintf "%i" i
+  static member log = new Logging.StreamLogger("Test", LogLevel.Debug, Console.OpenStandardOutput())
+  static member server = new Pario.WebServer.Server(Test.log)
+  static member client = GameClient.RESTClient "http://localhost:8080"
 
-  let server = new Pario.WebServer.Server(log)
-  let gameServer = GameServer.server log
-  let client = GameClient.RESTClient "http://localhost:8080"
-
-  do server.handle {
-    priority = 100
-    handler = gameServer.ApiHandler
-  }
-
-  do server.handleSocket gameServer.WebSocketHandler
-
-  let enc = Encoding.UTF8
-
-  let msgServer (msg:Msg) =
-    log.Info <| sprintf "Requesting %A" msg
-    let data = JsonConvert.SerializeObject(msg) |> enc.GetBytes
-
-    let req = HttpWebRequest.Create "http://localhost:8080/api" :?> HttpWebRequest
-    req.Timeout <- 10000
-
-    req.Method <- "POST"
-    req.ContentType <- "application/json"
-    req.ContentLength <- data.LongLength
-
-    use output = req.GetRequestStream()
-    output.Write(data, 0, data.Length)
-    output.Close()
-
-    // Now get the response.
-    use resp =
-      try req.GetResponse() :?> HttpWebResponse
-      with
-        | :? WebException as e ->
-          if e.Response = null then
-            failwith <| sprintf "%A" e
-
-          let resp = e.Response :?> HttpWebResponse
-          failwith <| sprintf "%A : %A" resp.StatusCode resp.StatusDescription
-        | e -> failwith <| e.Message
-
-    use resp = resp.GetResponseStream()
-    use resp = new StreamReader(resp, enc)
-    let data = resp.ReadToEnd()
-    let reply = JsonConvert.DeserializeObject<Reply>(data)
-
-    log.Info <| sprintf "Received response %A" reply
-
-    reply
-
-  [<TestInitialize>]
-  member this.init () =
+  [<ClassInitialize>]
+  static member init (ctx:TestContext) =
     async {
+      let server = Test.server
+      let log = Test.log
+      let gameServer = GameServer.server log
+
+      do server.handle {
+        priority = 100
+        handler = gameServer.ApiHandler
+      }
+
+      do server.handleSocket gameServer.WebSocketHandler
+
       let! res = server.listen "localhost" 8080us |> Async.Catch
       match res with
       | Choice2Of2 e ->
@@ -83,9 +42,42 @@ type TestGameServer () =
       | _ -> ()
     } |> Async.Start
 
+  [<ClassCleanup>]
+  static member cleanup () =
+    Test.server.stop()
+
   [<TestMethod>]
   member this.testNewGarrison () =
-    let reply = client.AddGarrison("testClientId", "My garrison", Human, Alliance) |> Async.AwaitTask |> Async.RunSynchronously
+    let reply = Test.client.AddGarrison(uuid(), "My garrison", Human, Alliance) |> sync
     match reply with
-    | ExnReply e -> raise e
+    | ExnReply e -> failwith e
     | _ -> ()
+
+  [<TestMethod>]
+  member this.testClientFirstGarrison () =
+    let clientId = uuid()
+    Test.client.GetClientGarrison(clientId) |> sync
+    |> fun m ->
+      match m with
+      | EmptyReply -> () // good.
+      | reply ->
+        failwith <| sprintf "Expected client not to have a garrison, but got %A" reply
+
+    // No garrison, let's create one.
+    Test.client.AddGarrison(clientId, "My garrison", Human, Alliance) |> sync
+    |> fun m ->
+      match m with
+      | AddGarrisonReply GarrisonAdded ->
+        () // good.
+      | reply ->
+        failwith <| sprintf "Expected AddGarrisonReply of GarrisonAdded but got %A" reply
+
+    match Test.client.GetClientGarrison(clientId) |> sync with
+    | GetClientGarrisonReply id ->
+      match Test.client.GetGarrison id |> sync with
+      | GetGarrisonReply garrison ->
+        () // Got the garrison, good.
+      | reply ->
+        failwith <| sprintf "Expceted GetGarrisonReply but got %A" reply
+    | reply ->
+      failwith <| sprintf "Expceted GetClientGarrisonReply but got %A" reply

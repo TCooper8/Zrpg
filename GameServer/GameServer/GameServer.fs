@@ -59,9 +59,16 @@ module GameServer =
                 stats = stats
               }
 
-              match gameState.addGarrison garrison with
-              | Failure e -> ExnReply e.Message
-              | Success () -> MsgReply "Garrison created!"
+              gameState.addGarrison garrison
+
+            | GetClientGarrison clientId ->
+              gameState.getClientGarrison clientId
+
+            | GetGarrison id ->
+              gameState.getGarrison id
+
+            | RemGarrison id ->
+              gameState.remGarrison id
           with e ->
             ExnReply e.Message
 
