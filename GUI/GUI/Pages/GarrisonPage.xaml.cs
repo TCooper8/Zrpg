@@ -35,15 +35,21 @@ namespace GUI.Pages
 
         private async void GetGarrisonInfo()
         {
-            var reply = await client.GetClientGarrison("test client");
+            try
+            {
+                var reply = await client.GetClientGarrison("test client");
 
-            var id = (Reply.GetClientGarrisonReply)reply;
+                var id = (Reply.GetClientGarrisonReply)reply;
 
-            var name = id.Item;
+                var name = id.Item;
 
-            //Garrison clientGarrison = client.GetGarrison(name);
-            
-            infoFrame.Content = name;
+                //Garrison clientGarrison = client.GetGarrison(name);
+
+                infoFrame.Content = name;
+            }
+            catch
+            {
+            }
             
         }
 
