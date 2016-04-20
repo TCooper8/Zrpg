@@ -7,6 +7,7 @@ open System.Text
 open System.Text.RegularExpressions
 open System.Diagnostics
 open System.Security.Authentication
+open System.Threading
 
 open System.Diagnostics
 open Logging
@@ -69,6 +70,7 @@ module WebServer =
   type Work =
     | Handle of HttpListenerRequest * HttpListenerResponse
     | SetModules of ServerModule list
+    | KillWork
 
   type private ServerState () =
     let mutable modules = List.empty<ServerModule>
@@ -107,6 +109,8 @@ module WebServer =
 
   type Server (log:Logger) =
     let rand = new Random()
+    let tokenSource = new CancellationTokenSource()
+    let token = tokenSource.Token
 
     let agent = MailboxProcessor.Start(fun inbox ->
       let rec tryHandleSocketUpgrade (context:HttpListenerContext) handlers = async {
@@ -156,6 +160,9 @@ module WebServer =
           state.setWorkers workers
 
         | Kill ->
+          let workers = state.getWorkers()
+          for worker in workers do
+            worker.Post KillWork
           return ()
 
         return! loop state
@@ -198,6 +205,8 @@ module WebServer =
               else () // The response was handled.
 
               // Will close the response.
+            | KillWork ->
+              return ()
 
             return! loop handlers
           }
@@ -210,7 +219,7 @@ module WebServer =
       |> SetWorkers
       |> agent.Post
 
-    member this.listen host (port:uint16) =
+    member this.listen host (port:uint16) = async {
       let listener = new HttpListener()
 
       listener.Prefixes.Add <| sprintf "http://%s:%i/" host port
@@ -220,8 +229,9 @@ module WebServer =
         listener.BeginGetContext,
         listener.EndGetContext
       )
-      async {
-        while true do
+
+      return! async {
+        while not <| token.IsCancellationRequested do
           let! context = task
 
           log.Debug("Received headers {0}", context.Request.Headers)
@@ -231,6 +241,11 @@ module WebServer =
           else
             RouteWork <| Handle(context.Request, context.Response) |> agent.Post
       }
+    }
+
+    member this.stop () =
+      tokenSource.Cancel()
+      agent.Post Kill
 
     member this.handleSocket handler =
       agent.Post <| AddSocketHandler handler
