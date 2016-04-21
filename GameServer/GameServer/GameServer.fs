@@ -60,15 +60,31 @@ module GameServer =
               }
 
               gameState.addGarrison garrison
+              |> AddGarrisonReply
 
             | GetClientGarrison clientId ->
               gameState.getClientGarrison clientId
+              |> GetClientGarrisonReply
 
-            | GetGarrison id ->
-              gameState.getGarrison id
+            | GetHero id ->
+              gameState.getHero id
+              |> GetHeroReply
+
+            | GetHeroArray heroIds ->
+              heroIds |> Array.collect (fun id ->
+                match gameState.getHero id with
+                | GetHeroReply.Empty -> Array.empty
+                | GetHeroReply.Success hero -> [| hero |]
+              )
+              |> fun heroes ->
+                if heroes.Length = 0 then GetHeroArrayReply.Empty
+                else GetHeroArrayReply.Success heroes
+              |> GetHeroArrayReply
 
             | RemGarrison id ->
               gameState.remGarrison id
+              |> RemGarrisonReply
+
           with e ->
             ExnReply e.Message
 
