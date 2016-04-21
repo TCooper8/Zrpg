@@ -17,11 +17,12 @@ type IGameClient =
     garrisonName:string *
     race:Race *
     faction:Faction
-      -> Reply Task
+      -> AddGarrisonReply Task
 
-  abstract member GetClientGarrison : clientId:string -> Reply Task
-  abstract member GetGarrison : garrisonId:string -> Reply Task
-  abstract member RemGarrison : garrisonId:string -> Reply Task
+  abstract member GetClientGarrison : clientId:string -> GetClientGarrisonReply Task
+  abstract member GetHero : heroId:string -> GetHeroReply Task
+  abstract member GetHeroArray : heroIds:string array -> GetHeroArrayReply Task
+  abstract member RemGarrison : garrisonId:string -> RemGarrisonReply Task
 
 type private RestGameClient (endPoint) =
   let enc = Encoding.UTF8
@@ -46,19 +47,69 @@ type private RestGameClient (endPoint) =
       let! data = reader.ReadToEndAsync() |> Async.AwaitTask
       let reply = JsonConvert.DeserializeObject<Reply>(data)
       return reply
-    } |> Async.StartAsTask
-
-  interface IGameClient with
-    member this.AddGarrison (clientId, garrisonName, race, faction) = request <| AddGarrison {
-      clientId = clientId
-      name = garrisonName
-      race = race
-      faction = faction
     }
 
-    member this.GetClientGarrison clientId = request <| GetClientGarrison clientId
-    member this.GetGarrison garrisonId = request <| GetGarrison garrisonId
-    member this.RemGarrison garrisonId = request <| RemGarrison garrisonId
+  interface IGameClient with
+    member this.AddGarrison (clientId, garrisonName, race, faction) =
+      async {
+        let! reply = request <| AddGarrison {
+          clientId = clientId
+          name = garrisonName
+          race = race
+          faction = faction
+        }
+
+        let reply = match reply with
+        | AddGarrisonReply reply -> reply
+        | ExnReply msg -> failwith msg
+        | msg -> failwith <| sprintf "Expected AddGarrisonReply but got %A" msg
+
+        return reply
+      } |> Async.StartAsTask
+
+    member this.GetClientGarrison clientId =
+      async {
+        let! reply = request <| GetClientGarrison clientId
+        let reply = match reply with
+        | GetClientGarrisonReply reply -> reply
+        | ExnReply msg -> failwith msg
+        | msg -> failwith <| sprintf "Expected AddGarrisonReply but got %A" msg
+
+        return reply
+      } |> Async.StartAsTask
+
+    member this.GetHero heroId =
+      async {
+        let! reply = request <| GetHero heroId
+        let reply = match reply with
+        | GetHeroReply reply -> reply
+        | ExnReply msg -> failwith msg
+        | msg -> failwith <| sprintf "Expected AddGarrisonReply but got %A" msg
+
+        return reply
+      } |> Async.StartAsTask
+
+    member this.GetHeroArray heroIds =
+      async {
+        let! reply = request <| GetHeroArray heroIds
+        let reply = match reply with
+        | GetHeroArrayReply reply -> reply
+        | ExnReply msg -> failwith msg
+        | msg -> failwith <| sprintf "Expected AddGarrisonReply but got %A" msg
+
+        return reply
+      } |> Async.StartAsTask
+
+    member this.RemGarrison heroIds =
+      async {
+        let! reply = request <| RemGarrison heroIds
+        let reply = match reply with
+        | RemGarrisonReply reply -> reply
+        | ExnReply msg -> failwith msg
+        | msg -> failwith <| sprintf "Expected AddGarrisonReply but got %A" msg
+
+        return reply
+      } |> Async.StartAsTask
 
 module GameClient =
   let RESTClient endPoint =
