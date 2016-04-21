@@ -25,6 +25,7 @@ namespace GUI
     public sealed partial class MainPage : Page
     {
         public static MainPage Current;
+        static ClientState client = ClientState.state;
 
         public MainPage()
         {
@@ -32,14 +33,29 @@ namespace GUI
             Current = this;
         }
 
-        private void loginButton_Click(object sender, RoutedEventArgs e)
+        private async void loginButton_Click(object sender, RoutedEventArgs e)
         {
             //TO DO: Authenticate credentials
 
-            //Navigate to new faction page if no previous garrison
-            this.Frame.Navigate(typeof(ChooseFactionPage));
+            // This should populate the clientId.
+            client.Authenticate(
+                this.usernameTextBox.Text,
+                this.passwordBox.Password
+            );
 
-            //TO DO: Navigate to garrison page if user has previous garrison
+            // After authenticating, check to see if the client has a garrison already.
+            var reply = await client.GetGarrison();
+            if (reply.IsEmpty)
+            {
+                // The client has no Garrison, take them to create a new one.
+                this.Frame.Navigate(typeof(ChooseFactionPage));
+                return;
+            }
+            else
+            {
+                // The client has a garrison, take them to the garrison page.
+                this.Frame.Navigate(typeof(GarrisonPage));
+            }
         }
 
         private void registerButton_Click(object sender, RoutedEventArgs e)

@@ -25,12 +25,11 @@ namespace GUI.Pages
     /// </summary>
     public sealed partial class AllianceGarrisonCreationPage : Page
     {
-        IGameClient client;
+        static ClientState client = ClientState.state;
 
         public AllianceGarrisonCreationPage()
         {
             this.InitializeComponent();
-            client = GameClient.RESTClient("http://localhost:8080");
         }
 
         private void backButton_Click(object sender, RoutedEventArgs e)
@@ -46,24 +45,28 @@ namespace GUI.Pages
             //Create alliance garrison
             try
             {
-                var reply = await client.AddGarrison("test client", "My garrison", Race.Human, Faction.Alliance);
+                var reply = await client.CreateGarrison(Race.Human, Faction.Alliance);
 
-                //Create message on the server
-                if (reply.IsEmptyReply)
+                if (reply.IsClientHasGarrison)
                 {
-                    throw new Exception("Got empty reply from server");
+                    // What? Get the garrison and navigate to the garrison page.
+                    var getReply = await client.GetGarrison();
+                    if (getReply.IsEmpty)
+                    {
+                        throw new Exception("Cannot create garrison and client has no garrison to get");
+                    }
+                    this.Frame.Navigate(typeof(GarrisonPage));
+                    return;
                 }
-                else if (reply.IsExnReply)
+                else if (!reply.IsSuccess)
                 {
-                    var exnReply = (Reply.ExnReply)reply;
-                    var exn = exnReply.Item;
-                    Debug.WriteLine("Error: {0}", exn);
+                    // Sanity check on the messages.
+                    throw new Exception("Unable to create garrison");
                 }
-                else
-                {
-                    var message = ((Reply.MsgReply)reply).Item;
-                    Debug.WriteLine("Response: {0}", message);
-                }
+
+                // Retrieve the client's garrison.
+                await client.GetGarrison();
+                this.Frame.Navigate(typeof(GarrisonPage));
             }
 
             catch

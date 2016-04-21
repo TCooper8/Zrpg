@@ -23,34 +23,19 @@ namespace GUI.Pages
     /// </summary>
     public sealed partial class GarrisonPage : Page
     {
-        IGameClient client;
+        ClientState state = ClientState.state;
         //var reply = await client.AddGarrison("test client", "My garrison", Race.Human, Faction.Alliance);
         public GarrisonPage()
         {
             this.InitializeComponent();
-           
-            client = GameClient.RESTClient("http://localhost:8080");
-            GetGarrisonInfo();            
+            GetGarrisonInfo();
         }
 
         private async void GetGarrisonInfo()
         {
-            try
-            {
-                var reply = await client.GetClientGarrison("test client");
 
-                var id = (Reply.GetClientGarrisonReply)reply;
-
-                var name = id.Item;
-
-                //Garrison clientGarrison = client.GetGarrison(name);
-
-                infoFrame.Content = name;
-            }
-            catch
-            {
-            }
-            
+            var garrison = state.Garrison;
+            infoFrame.Content = garrison.name;
         }
 
         private void backButton_Click(object sender, RoutedEventArgs e)
