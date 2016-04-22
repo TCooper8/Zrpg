@@ -44,7 +44,7 @@ type Hero = {
   stats: HeroStats
 } with
   override this.ToString() =
-    sprintf "%s\nLevel 4 %A" this.name this.heroClass
+    sprintf "%s\nLevel %i %A" this.name this.level this.heroClass
 
 type GarrisonStats = {
   goldIncome: int
