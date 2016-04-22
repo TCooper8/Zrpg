@@ -2,17 +2,35 @@
 
 type Race =
   | Human
+  with
+    override this.ToString() =
+      match this with
+      | Human -> "Human"
 
 type Gender =
   | Male
   | Female
+  with
+    override this.ToString() =
+      match this with
+      | Male -> "Male"
+      | Female -> "Female"
 
 type HeroClass =
   | Warrior
+  with
+    override this.ToString() =
+      match this with
+      | Warrior -> "Warrior"
 
 type Faction =
   | Alliance
   | Horde
+  with
+    override this.ToString() =
+      match this with
+      | Alliance -> "Alliance"
+      | Horde -> "Horde"
 
 type Hero = {
   id: string
