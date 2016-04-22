@@ -18,6 +18,7 @@ type Hero = {
   id: string
   name: string
   race: Race
+  faction: Faction
   gender: Gender
   heroClass: HeroClass
   stats: HeroStats
@@ -25,7 +26,7 @@ type Hero = {
 
 type GarrisonStats = {
   goldIncome: int
-  heroes: string list
+  heroes: string array
 }
 
 type Garrison = {
