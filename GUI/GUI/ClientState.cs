@@ -78,6 +78,13 @@ namespace GUI
             return reply;
         }
 
+        public async Task<GetHeroArrayReply> GetHeroes()
+        {          
+            var reply = await gameClient.GetHeroArray(garrison.stats.heroes);
+
+            return reply;
+        }
+
         public string ClientId { get { return EnsureDefined<string>(clientId, "clientId is not defined"); } }
         public string Username { get { return EnsureDefined<string>(username, "username is not defined"); } }
         public Garrison Garrison { get { return EnsureDefined<Garrison>(garrison, "garrison is not defined"); } }

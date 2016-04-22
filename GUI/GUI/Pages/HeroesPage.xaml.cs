@@ -12,6 +12,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Zrpg.Game;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -27,43 +28,38 @@ namespace GUI.Pages
         public HeroesPage()
         {
             this.InitializeComponent();
-            var garrison = state.Garrison;
-
-            listView.ItemsSource = garrison.stats.heroes;
-            string hero = GetHeroSelected(listView.SelectedIndex);
-            infoFrame.Content = hero + "'s Stats Info Here";
+            var garrison = state.Garrison;                   
+           
+            LoadHeroes();
+            GetHeroStats();
         }
 
-        private void backButton_Click(object sender, RoutedEventArgs e)
+        private async void LoadHeroes()
         {
-            //Navigate back to garrison page
-            this.Frame.Navigate(typeof(GarrisonPage));
-        }
-
-        //All data is static and manually entered until the heros are generated from the server
-        //This is just used as a preview for the data and code will be adjusted later
-        //However, logic and behavior will stay the same
-        private string GetHeroSelected(int index)
-        {
+            var reply = await state.GetHeroes();
             var garrison = state.Garrison;
-            string hero;
-            if(index == 0)
+
+            if (reply.IsSuccess)
             {
-                hero = garrison.stats.heroes[index];
+                var success = (GetHeroArrayReply.Success)reply;
+                listView.ItemsSource = success.Item;            
             }
-            else if(index == 1)
+            listView.SelectedIndex = 0;
+        }
+        
+        private async void GetHeroStats()
+        {
+            var reply = await state.GetHeroes();
+            var garrison = state.Garrison;
+            Hero hero; 
+
+            if (reply.IsSuccess)
             {
-                hero = garrison.stats.heroes[index];
+                var success = (GetHeroArrayReply.Success)reply;
+                hero = success.Item[listView.SelectedIndex];
+                infoFrame.Content = hero.faction;
             }
-            else if(index == 2)
-            {
-                hero = garrison.stats.heroes[index];
-            }
-            else
-            {
-                hero = "No Hero Selected";
-            }
-            return hero;
+           
         }
 
         private void statsButton_Click(object sender, RoutedEventArgs e)
@@ -73,9 +69,6 @@ namespace GUI.Pages
             gearButton.IsEnabled = true;
             inventoryButton.IsEnabled = true;
             mapButton.IsEnabled = true;
-
-            string hero = GetHeroSelected(listView.SelectedIndex);          
-            infoFrame.Content = hero + "'s Stats Info Here";
         }
 
         private void gearButton_Click(object sender, RoutedEventArgs e)
@@ -85,9 +78,6 @@ namespace GUI.Pages
             statsButton.IsEnabled = true;
             inventoryButton.IsEnabled = true;
             mapButton.IsEnabled = true;
-
-            string hero = GetHeroSelected(listView.SelectedIndex);
-            infoFrame.Content = hero + "'s Gear Info Here";
         }
 
         private void inventoryButton_Click(object sender, RoutedEventArgs e)
@@ -97,9 +87,6 @@ namespace GUI.Pages
             gearButton.IsEnabled = true;
             statsButton.IsEnabled = true;
             mapButton.IsEnabled = true;
-
-            string hero = GetHeroSelected(listView.SelectedIndex);
-            infoFrame.Content = hero + "'s Inventory Info Here";
         }
 
         private void mapButton_Click(object sender, RoutedEventArgs e)
@@ -109,13 +96,11 @@ namespace GUI.Pages
             gearButton.IsEnabled = true;
             inventoryButton.IsEnabled = true;
             statsButton.IsEnabled = true;
-
-            string hero = GetHeroSelected(listView.SelectedIndex);
-            infoFrame.Content = hero + "'s Map Info Here";
         }
 
         private void listView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            //Logic for the behavior of buttons
             try
             {
                 if (statsButton.IsEnabled == false)
@@ -147,6 +132,12 @@ namespace GUI.Pages
         private void createHeroButton_Click(object sender, RoutedEventArgs e)
         {
             this.Frame.Navigate(typeof(HeroCreationPage));
+        }
+
+        private void backButton_Click(object sender, RoutedEventArgs e)
+        {
+            //Navigate back to garrison page
+            this.Frame.Navigate(typeof(GarrisonPage));
         }
     }
 }

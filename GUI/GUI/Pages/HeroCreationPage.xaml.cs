@@ -12,6 +12,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Zrpg.Game;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -59,13 +60,14 @@ namespace GUI.Pages
             allianceListView.SelectedIndex = -1;
         }
 
-        private void doneButton_Click(object sender, RoutedEventArgs e)
+        private async void doneButton_Click(object sender, RoutedEventArgs e)
         {
             //TO DO: Create specified hero
             var garrison = state.Garrison;
+            var clientId = state.ClientId;
 
-            
-
+            await state.AddHero(clientId, "Hero1", Race.Human, Faction.Alliance, Gender.Male, HeroClass.Warrior);
+            await state.AddHero(clientId, "Hero2", Race.Human, Faction.Horde, Gender.Female, HeroClass.Warrior);
             //Navigate back to hero selecion screen
             this.Frame.Navigate(typeof(HeroesPage));
         }  
