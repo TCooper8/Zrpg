@@ -19,6 +19,7 @@ type IGameClient =
     faction:Faction
       -> AddGarrisonReply Task
 
+  abstract member AddHero : AddHero -> AddHeroReply Task
   abstract member GetClientGarrison : clientId:string -> GetClientGarrisonReply Task
   abstract member GetHero : heroId:string -> GetHeroReply Task
   abstract member GetHeroArray : heroIds:string array -> GetHeroArrayReply Task
@@ -63,6 +64,18 @@ type private RestGameClient (endPoint) =
         | AddGarrisonReply reply -> reply
         | ExnReply msg -> failwith msg
         | msg -> failwith <| sprintf "Expected AddGarrisonReply but got %A" msg
+
+        return reply
+      } |> Async.StartAsTask
+
+    member this.AddHero msg =
+      async {
+        let! reply = request <| AddHero msg
+
+        let reply = match reply with
+        | AddHeroReply reply -> reply
+        | ExnReply msg -> failwith msg
+        | msg -> failwith <| sprintf "Expected AddHeroReply but got %A" msg
 
         return reply
       } |> Async.StartAsTask
