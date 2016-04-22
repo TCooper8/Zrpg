@@ -86,6 +86,7 @@ module GameServer =
                 raceStatMod msg.race * stats
               |> fun stats ->
                 { id = uuid()
+                  clientId = msg.clientId
                   name = msg.name
                   race = msg.race
                   faction = msg.faction
