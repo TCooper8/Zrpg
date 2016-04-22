@@ -7,6 +7,7 @@ type GameState () =
   let mutable garrisons = Map.empty<string, Garrison>
   let mutable clientGarrisons = Map.empty<string, string>
   let mutable heroes = Map.empty<string, Hero>
+  let mutable heroNames = Set.empty<string>
 
   member this.addGarrison (garrison:Garrison) =
     if clientGarrisons.ContainsKey garrison.clientId then
@@ -15,6 +16,14 @@ type GameState () =
     garrisons <- garrisons.Add(garrison.id, garrison)
     clientGarrisons <- clientGarrisons.Add(garrison.clientId, garrison.id)
     Success
+
+  member this.addHero (hero:Hero): AddHeroReply =
+    if heroNames.Contains hero.name then
+      NameTaken
+    else
+    heroes <- heroes.Add(hero.id, hero)
+    heroNames <- heroNames.Add(hero.name)
+    AddHeroReply.Success hero.id
 
   member this.getClientGarrison clientId =
     match clientGarrisons.TryFind clientId with

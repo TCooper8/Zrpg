@@ -52,8 +52,8 @@ type Quest = {
   id: string
   title: string
   body: string
-  rewards: string list
-  objectives: string list
+  rewards: string array
+  objectives: string array
 }
 
 type QuestRecord = {

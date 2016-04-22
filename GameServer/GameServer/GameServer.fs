@@ -28,6 +28,22 @@ module GameServer =
     let webServer = Pario.WebServer.Server(log)
     let discovery = Zrpg.Discovery.createLocal() |> Async.RunSynchronously
 
+    let baseClassStats heroClass =
+      match heroClass with
+      | Warrior -> 
+        { strength = 10.0
+          stamina = 10.0
+          groundTravelSpeed = 100.0
+        }
+
+    let raceStatMod race =
+      match race with
+      | Human ->
+        { strength = 1.0
+          stamina = 1.1
+          groundTravelSpeed = 1.0
+        }
+
     let agent = MailboxProcessor<Cmd>.Start(fun inbox ->
       log.Debug <| "Starting server..."
 
@@ -44,7 +60,7 @@ module GameServer =
 
               let stats = {
                 goldIncome = 10
-                heroes = []
+                heroes = Array.empty
               }
 
               let garrison = {
@@ -61,6 +77,24 @@ module GameServer =
 
               gameState.addGarrison garrison
               |> AddGarrisonReply
+
+            | AddHero msg ->
+              log.Debug <| sprintf "Adding hero %A" msg
+
+              baseClassStats msg.heroClass
+              |> fun stats ->
+                raceStatMod msg.race * stats
+              |> fun stats ->
+                { id = uuid()
+                  name = msg.name
+                  race = msg.race
+                  faction = msg.faction
+                  gender = msg.gender
+                  heroClass = msg.heroClass
+                  stats = stats
+                }
+              |> gameState.addHero
+              |> AddHeroReply
 
             | GetClientGarrison clientId ->
               gameState.getClientGarrison clientId
