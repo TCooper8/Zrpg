@@ -23,7 +23,9 @@ type Hero = {
   gender: Gender
   heroClass: HeroClass
   stats: HeroStats
-}
+} with
+  override this.ToString() =
+    sprintf "%s\nLevel 4 %A" this.name this.heroClass
 
 type GarrisonStats = {
   goldIncome: int
