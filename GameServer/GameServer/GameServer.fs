@@ -92,6 +92,7 @@ module GameServer =
                   faction = msg.faction
                   gender = msg.gender
                   heroClass = msg.heroClass
+                  level = 1
                   stats = stats
                 }
               |> gameState.addHero

@@ -22,6 +22,7 @@ type Hero = {
   faction: Faction
   gender: Gender
   heroClass: HeroClass
+  level: int
   stats: HeroStats
 } with
   override this.ToString() =
