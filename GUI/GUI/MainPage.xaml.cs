@@ -36,7 +36,7 @@ namespace GUI
         private async void loginButton_Click(object sender, RoutedEventArgs e)
         {
             //TO DO: Authenticate credentials
-
+            
             // This should populate the clientId.
             client.Authenticate(
                 this.usernameTextBox.Text,

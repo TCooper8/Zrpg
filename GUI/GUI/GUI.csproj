@@ -117,9 +117,6 @@
     <Compile Include="Pages\HeroesPage.xaml.cs">
       <DependentUpon>HeroesPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Pages\HeroSelectionPage.xaml.cs">
-      <DependentUpon>HeroSelectionPage.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Pages\HordeGarrisonCreationPage.xaml.cs">
       <DependentUpon>HordeGarrisonCreationPage.xaml</DependentUpon>
     </Compile>
@@ -172,10 +169,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\HeroesPage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Pages\HeroSelectionPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

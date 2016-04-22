@@ -24,16 +24,15 @@ namespace GUI.Pages
     public sealed partial class GarrisonPage : Page
     {
         ClientState state = ClientState.state;
-        //var reply = await client.AddGarrison("test client", "My garrison", Race.Human, Faction.Alliance);
+
         public GarrisonPage()
         {
             this.InitializeComponent();
             GetGarrisonInfo();
         }
 
-        private async void GetGarrisonInfo()
+        private void GetGarrisonInfo()
         {
-
             var garrison = state.Garrison;
             infoFrame.Content = garrison.name;
         }

@@ -48,8 +48,7 @@ namespace GUI.Pages
                 var reply = await client.CreateGarrison(Race.Human, Faction.Alliance);
 
                 if (reply.IsClientHasGarrison)
-                {
-                    // What? Get the garrison and navigate to the garrison page.
+                {                    
                     var getReply = await client.GetGarrison();
                     if (getReply.IsEmpty)
                     {

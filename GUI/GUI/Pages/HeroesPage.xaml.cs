@@ -22,9 +22,14 @@ namespace GUI.Pages
     /// </summary>
     public sealed partial class HeroesPage : Page
     {
+        ClientState state = ClientState.state;
+        
         public HeroesPage()
         {
             this.InitializeComponent();
+            var garrison = state.Garrison;
+
+            listView.ItemsSource = garrison.stats.heroes;
             string hero = GetHeroSelected(listView.SelectedIndex);
             infoFrame.Content = hero + "'s Stats Info Here";
         }
@@ -40,18 +45,19 @@ namespace GUI.Pages
         //However, logic and behavior will stay the same
         private string GetHeroSelected(int index)
         {
+            var garrison = state.Garrison;
             string hero;
             if(index == 0)
             {
-                hero = hero1.Content.ToString();
+                hero = garrison.stats.heroes[index];
             }
             else if(index == 1)
             {
-                hero = hero2.Content.ToString();
+                hero = garrison.stats.heroes[index];
             }
             else if(index == 2)
             {
-                hero = hero3.Content.ToString();
+                hero = garrison.stats.heroes[index];
             }
             else
             {
@@ -136,6 +142,11 @@ namespace GUI.Pages
             catch
             {
             }
+        }
+
+        private void createHeroButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Frame.Navigate(typeof(HeroCreationPage));
         }
     }
 }
