@@ -25,12 +25,11 @@ namespace GUI.Pages
     /// </summary>
     public sealed partial class HordeGarrisonCreationPage : Page
     {
-        IGameClient client;
+        static ClientState client = ClientState.state;
 
         public HordeGarrisonCreationPage()
         {
             this.InitializeComponent();
-            client = GameClient.RESTClient("http://localhost:8080");
         }
 
         private void backButton_Click(object sender, RoutedEventArgs e)
@@ -46,24 +45,25 @@ namespace GUI.Pages
             //Create horde garrison
             try
             {
-                var reply = await client.AddGarrison("test client", "My garrison", Race.Human, Faction.Horde);
+                var reply = await client.CreateGarrison(Race.Human, Faction.Horde);
 
-                //Create message on the server
-                if (reply.IsEmptyReply)
+                if (reply.IsClientHasGarrison)
                 {
-                    throw new Exception("Got empty reply from server");
+                    var getReply = await client.GetGarrison();
+                    if (getReply.IsEmpty)
+                    {
+                        throw new Exception("Cannot create garrison and client has no garrison to get");
+                    }
+                    this.Frame.Navigate(typeof(GarrisonPage));
+                    return;
                 }
-                else if (reply.IsExnReply)
+                else if (!reply.IsSuccess)
                 {
-                    var exnReply = (Reply.ExnReply)reply;
-                    var exn = exnReply.Item;
-                    Debug.WriteLine("Error: {0}", exn);
+                    throw new Exception("Unable to create garrison");
                 }
-                else
-                {
-                    var message = ((Reply.MsgReply)reply).Item;
-                    Debug.WriteLine("Response: {0}", message);                   
-                }
+
+                await client.GetGarrison();
+                this.Frame.Navigate(typeof(GarrisonPage));
             }
 
             catch
