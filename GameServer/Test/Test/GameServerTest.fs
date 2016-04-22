@@ -50,7 +50,7 @@ type Test () =
   member this.testNewGarrison () =
     let reply = Test.client.AddGarrison(uuid(), "My garrison", Human, Alliance) |> sync
     match reply with
-    | ExnReply e -> failwith e
+    | Success -> failwith e
     | _ -> ()
 
   [<TestMethod>]

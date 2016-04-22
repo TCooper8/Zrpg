@@ -21,6 +21,24 @@ type GameState () =
     if heroNames.Contains hero.name then
       NameTaken
     else
+
+    // Lookup the client's garrison.
+    clientGarrisons.TryFind hero.clientId
+    |> Option.bind (fun garrisonId ->
+      garrisons.TryFind garrisonId
+    )
+    |> Option.iter (fun garrison ->
+      let heroes = garrison.stats.heroes |> Array.append [| hero.id |]
+
+      let stats = { garrison.stats with
+          heroes = heroes
+      }
+      garrisons <- garrisons.Add(garrison.id, {
+        garrison with
+          stats = stats
+      })
+    )
+
     heroes <- heroes.Add(hero.id, hero)
     heroNames <- heroNames.Add(hero.name)
     AddHeroReply.Success hero.id

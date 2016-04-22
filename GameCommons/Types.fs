@@ -16,6 +16,7 @@ type Faction =
 
 type Hero = {
   id: string
+  clientId: string
   name: string
   race: Race
   faction: Faction
