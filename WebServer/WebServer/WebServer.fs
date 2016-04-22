@@ -240,6 +240,9 @@ module WebServer =
             HandleSocket(context) |> agent.Post
           else
             RouteWork <| Handle(context.Request, context.Response) |> agent.Post
+
+        // Token is cancelled.
+        listener.Stop()
       }
     }
 
