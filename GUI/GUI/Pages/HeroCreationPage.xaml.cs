@@ -22,6 +22,8 @@ namespace GUI.Pages
     /// </summary>
     public sealed partial class HeroCreationPage : Page
     {
+        ClientState state = ClientState.state;
+
         public HeroCreationPage()
         {
             this.InitializeComponent();
@@ -30,7 +32,7 @@ namespace GUI.Pages
         private void backButton_Click(object sender, RoutedEventArgs e)
         {
             //Navigate to hero selection page
-            this.Frame.Navigate(typeof(HeroSelectionPage));
+            this.Frame.Navigate(typeof(HeroesPage));
         }
 
         private void maleToggleButton_Checked(object sender, RoutedEventArgs e)
@@ -60,9 +62,12 @@ namespace GUI.Pages
         private void doneButton_Click(object sender, RoutedEventArgs e)
         {
             //TO DO: Create specified hero
+            var garrison = state.Garrison;
+
+            
 
             //Navigate back to hero selecion screen
-            this.Frame.Navigate(typeof(HeroSelectionPage));
+            this.Frame.Navigate(typeof(HeroesPage));
         }  
     }
 }

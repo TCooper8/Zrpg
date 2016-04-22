@@ -17,6 +17,7 @@ namespace GUI
         private string username;
         private string clientId;
         private Garrison garrison;
+        private List<Hero> heroes = new List<Hero>();
 
         private ClientState()
         {
@@ -51,6 +52,19 @@ namespace GUI
             return reply;
         }
 
+        public async Task<AddHeroReply> AddHero(string clientID, string name, Race race, Faction faction, Gender gender, HeroClass heroClass)
+        {
+            var reply = await gameClient.AddHero(new AddHero(
+                clientID,
+                name,
+                race,
+                faction,
+                gender,
+                heroClass              
+            ));
+            return reply;
+        }
+
         public async Task<GetClientGarrisonReply> GetGarrison()
         {
             var reply = await gameClient.GetClientGarrison(this.ClientId);
@@ -67,5 +81,6 @@ namespace GUI
         public string ClientId { get { return EnsureDefined<string>(clientId, "clientId is not defined"); } }
         public string Username { get { return EnsureDefined<string>(username, "username is not defined"); } }
         public Garrison Garrison { get { return EnsureDefined<Garrison>(garrison, "garrison is not defined"); } }
+        public List<Hero> Heroes { get { return EnsureDefined<List<Hero>>(heroes, "hero is not defined"); } }
     }
 }
