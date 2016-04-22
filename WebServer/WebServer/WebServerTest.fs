@@ -18,6 +18,9 @@ type Testrun () =
   let defaultFile = "index.html"
   let fileData = "Hello!"
 
+  static let port = (new Random()).Next(1 <<< 10, 1 <<< 15) |> uint16
+  static let endPoint = sprintf "http://localhost:%i" port
+
   let enc = new UTF8Encoding()
 
   [<TestInitialize>]
@@ -38,7 +41,7 @@ type Testrun () =
     <| Some defaultFile
     |> server.get
 
-    server.listen "localhost" 8080us |> Async.Start |> ignore
+    server.listen "localhost" port |> Async.Start |> ignore
 
   [<TestCleanup>]
   member this.cleanup () =
@@ -49,7 +52,10 @@ type Testrun () =
 
   [<TestMethod>]
   member this.addModules () =
-    let req = WebRequest.Create "http://localhost:8080/index.html"
+    let req = 
+      endPoint
+      |> sprintf "%s/index.html"
+      |> WebRequest.Create
     use resp = req.GetResponse() :?> HttpWebResponse
 
     use resp = resp.GetResponseStream()
