@@ -89,6 +89,8 @@ namespace GUI.Pages
             gearButton.IsEnabled = true;
             inventoryButton.IsEnabled = true;
             mapButton.IsEnabled = true;
+
+            GetHeroStats();
         }
 
         private void gearButton_Click(object sender, RoutedEventArgs e)
@@ -109,13 +111,29 @@ namespace GUI.Pages
             mapButton.IsEnabled = true;
         }
 
-        private void mapButton_Click(object sender, RoutedEventArgs e)
+        private async void mapButton_Click(object sender, RoutedEventArgs e)
         {
             mapButton.IsEnabled = false;
 
             gearButton.IsEnabled = true;
             inventoryButton.IsEnabled = true;
             statsButton.IsEnabled = true;
+
+            var reply = await state.GetHeroes();
+
+            if (reply.IsSuccess)
+            {
+                var success = (GetHeroArrayReply.Success)reply;
+
+                if (listView.SelectedIndex == -1)
+                {
+                }
+                else
+                {
+                    hero = success.Item[listView.SelectedIndex];
+                    infoFrame.Navigate(typeof(HeroMapTab), hero);
+                }
+            }      
         }
 
         private void listView_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -146,9 +164,7 @@ namespace GUI.Pages
             }
             catch
             {
-            }
-
-            GetHeroStats();
+            }           
         }
 
         private void createHeroButton_Click(object sender, RoutedEventArgs e)
