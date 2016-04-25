@@ -24,12 +24,13 @@ namespace GUI.Pages
     public sealed partial class HeroesPage : Page
     {
         ClientState state = ClientState.state;
+        Hero hero;
         
         public HeroesPage()
         {
             this.InitializeComponent();
-            var garrison = state.Garrison;                   
-           
+
+            GetUserGarrison();
             LoadHeroes();
             GetHeroStats();
         }
@@ -37,29 +38,48 @@ namespace GUI.Pages
         private async void LoadHeroes()
         {
             var reply = await state.GetHeroes();
-            var garrison = state.Garrison;
-
+            
             if (reply.IsSuccess)
             {
                 var success = (GetHeroArrayReply.Success)reply;
-                listView.ItemsSource = success.Item;            
+                listView.ItemsSource = success.Item;
+                listView.SelectedIndex = 0;
             }
-            listView.SelectedIndex = 0;
         }
-        
+
+        private async void GetUserGarrison()
+        {
+            await state.GetGarrison();
+        }
+
         private async void GetHeroStats()
         {
             var reply = await state.GetHeroes();
-            var garrison = state.Garrison;
-            Hero hero; 
 
             if (reply.IsSuccess)
             {
                 var success = (GetHeroArrayReply.Success)reply;
-                hero = success.Item[listView.SelectedIndex];
-                infoFrame.Content = hero.faction;
-            }
-           
+
+                if(listView.SelectedIndex == -1)
+                {
+                }
+                else
+                {
+                    hero = success.Item[listView.SelectedIndex];
+                    infoFrame.Content = String.Format("Name: {0}\n" +
+                                                      "Faction: {1}\n" +
+                                                      "Gender: {2}\n" +
+                                                      "Race: {3}\n" +
+                                                      "Class: {4}\n" +
+                                                      "Level: {5}\n" +
+                                                      "Strength: {6}\n" +
+                                                      "Stamina: {7}\n" +
+                                                      "Travel Speed: {8}",
+                                                      hero.name, hero.faction.ToString(), hero.gender.ToString(), 
+                                                      hero.race.ToString(), hero.heroClass.ToString(), hero.level.ToString(), 
+                                                      hero.stats.strength.ToString(), hero.stats.stamina.ToString(), hero.stats.groundTravelSpeed.ToString());
+                }
+            }        
         }
 
         private void statsButton_Click(object sender, RoutedEventArgs e)
@@ -100,7 +120,7 @@ namespace GUI.Pages
 
         private void listView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //Logic for the behavior of buttons
+            //Logic for the behavior of buttons 
             try
             {
                 if (statsButton.IsEnabled == false)
@@ -127,6 +147,8 @@ namespace GUI.Pages
             catch
             {
             }
+
+            GetHeroStats();
         }
 
         private void createHeroButton_Click(object sender, RoutedEventArgs e)

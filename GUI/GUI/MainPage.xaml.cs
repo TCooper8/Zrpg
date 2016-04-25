@@ -25,7 +25,7 @@ namespace GUI
     public sealed partial class MainPage : Page
     {
         public static MainPage Current;
-        static ClientState client = ClientState.state;
+        static ClientState state = ClientState.state;
 
         public MainPage()
         {
@@ -38,13 +38,13 @@ namespace GUI
             //TO DO: Authenticate credentials
             
             // This should populate the clientId.
-            client.Authenticate(
+            state.Authenticate(
                 this.usernameTextBox.Text,
                 this.passwordBox.Password
             );
 
             // After authenticating, check to see if the client has a garrison already.
-            var reply = await client.GetGarrison();
+            var reply = await state.GetGarrison();
             if (reply.IsEmpty)
             {
                 // The client has no Garrison, take them to create a new one.

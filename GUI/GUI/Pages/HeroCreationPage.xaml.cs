@@ -28,24 +28,23 @@ namespace GUI.Pages
         public HeroCreationPage()
         {
             this.InitializeComponent();
+
+            //Behavior for the horde/alliance list views
+            if(state.Garrison.faction == Faction.Alliance)
+            {
+                hordeListView.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+            }
+            else
+            {
+                allianceListView.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                hordeListView.Margin = new Thickness(0, 135, 0, 0);
+            }
         }
 
         private void backButton_Click(object sender, RoutedEventArgs e)
         {
             //Navigate to hero selection page
             this.Frame.Navigate(typeof(HeroesPage));
-        }
-
-        private void maleToggleButton_Checked(object sender, RoutedEventArgs e)
-        {
-            //Uncheck female toggle button
-            femaleToggleButton.IsChecked = false;
-        }
-
-        private void femaleToggleButton_Checked(object sender, RoutedEventArgs e)
-        {
-            //Uncheck male toggle button
-            maleToggleButton.IsChecked = false;
         }
 
         private void allianceListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -62,14 +61,51 @@ namespace GUI.Pages
 
         private async void doneButton_Click(object sender, RoutedEventArgs e)
         {
-            //TO DO: Create specified hero
-            var garrison = state.Garrison;
             var clientId = state.ClientId;
+            var garrison = state.Garrison;
+            Gender gender;
 
-            await state.AddHero(clientId, "Hero1", Race.Human, Faction.Alliance, Gender.Male, HeroClass.Warrior);
-            await state.AddHero(clientId, "Hero2", Race.Human, Faction.Horde, Gender.Female, HeroClass.Warrior);
-            //Navigate back to hero selecion screen
-            this.Frame.Navigate(typeof(HeroesPage));
-        }  
+            //Get user selected gender
+            if(maleToggleButton.IsChecked == true)
+            {
+                gender = Gender.Male;
+            }
+            else
+            {
+                gender = Gender.Female;
+            }
+
+            //Get user selected name
+            if(heroNameTextBox.Text == "")
+            {
+            }
+            else
+            {
+                var create = await state.AddHero(clientId, heroNameTextBox.Text, Race.Human, garrison.faction, gender, HeroClass.Warrior);
+
+                if(create.IsSuccess)
+                {
+                    //Navigate back to hero selecion screen
+                    this.Frame.Navigate(typeof(HeroesPage));
+                }
+            }
+        }
+
+        //Behavior for gender buttons
+        private void maleToggleButton_Click(object sender, RoutedEventArgs e)
+        {
+            maleToggleButton.IsEnabled = false;
+            femaleToggleButton.IsEnabled = true;
+
+            femaleToggleButton.IsChecked = false;        
+        }
+
+        private void femaleToggleButton_Click(object sender, RoutedEventArgs e)
+        {
+            femaleToggleButton.IsEnabled = false;
+            maleToggleButton.IsEnabled = true;
+
+            maleToggleButton.IsChecked = false;
+        }
     }
 }

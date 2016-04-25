@@ -79,7 +79,8 @@ namespace GUI
         }
 
         public async Task<GetHeroArrayReply> GetHeroes()
-        {          
+        {
+            await GetGarrison();
             var reply = await gameClient.GetHeroArray(garrison.stats.heroes);
 
             return reply;
