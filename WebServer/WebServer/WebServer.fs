@@ -172,7 +172,7 @@ module WebServer =
     )
 
     do 
-      [ 0 .. 2 ]
+      [ 0 .. 20 ]
       |> List.map (fun i ->
         let worker = MailboxProcessor.Start(fun inbox ->
           let rec loop handlers = async {
@@ -184,7 +184,6 @@ module WebServer =
 
             | Handle (req, resp) ->
               use resp = resp
-
               let url = req.Url
 
               let rec iter handlers = async {
