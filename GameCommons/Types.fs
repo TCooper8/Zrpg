@@ -54,6 +54,7 @@ type GarrisonStats = {
 type Garrison = {
   id: string
   clientId: string
+  worldId: string
   name: string
   race: Race
   faction: Faction
@@ -61,6 +62,50 @@ type Garrison = {
   ownedZones: string Set
   vaultId: string
   stats: GarrisonStats
+}
+
+type Terrain =
+  | Plains
+  | Forest
+
+type Zone = {
+  id: string
+  name: string
+  regionId: string
+  terrain: Terrain
+}
+
+type Region = {
+  id: string
+  name: string
+  zones: string array
+}
+
+type ZoneConnection =
+  | GroundConnection of GroundConnection
+  | FlightConnection of FlightConnection
+
+and GroundConnection = {
+  srcZoneId: string
+  dstZoneId: string
+  terrain: Terrain
+  distance: float
+}
+
+and FlightConnection = {
+  srcZoneId: string
+  dstZoneId: string
+  terrain: Terrain
+  distance: float
+}
+
+type ClientWorld = {
+  id: string
+  clientId: string
+  zoneConnections: Map<string, ZoneConnection array>
+  zoneOwners: Map<string, string>
+  discoveredZones: string array
+  discoveredRegions: string array
 }
 
 type Objective =

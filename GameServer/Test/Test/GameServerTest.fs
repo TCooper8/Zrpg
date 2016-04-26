@@ -25,6 +25,67 @@ type Test () =
   static member server = new Pario.WebServer.Server(Test.log)
   static member client = GameClient.RESTClient endPoint
 
+  member this.addAnyRegion () =
+    let id = uuid()
+    Test.client.AddRegion {
+      name = id
+    }
+    |> sync()
+    |> fun m -> 
+      match m with
+      | AddRegionReply.Success id -> id
+      | reply ->
+        failwith <| sprintf "Expected AddRegionReply.Success but got %A" reply
+
+  member this.addAnyZone regionId =
+    let id = uuid()
+    Test.client.AddZone {
+      name = id
+      regionId = regionId
+      terrain = Forest
+    }
+    |> sync()
+    |> fun m -> 
+      match m with
+      | AddZoneReply.Success id -> id
+      | reply ->
+        failwith <| sprintf "Expected AddZoneReply.Success but got %A" reply
+
+  member this.setStartingZone (race, zoneId) =
+    Test.client.SetStartingZone(race, zoneId)
+    |> sync()
+    |> fun m ->
+      match m with
+      | SetStartingZoneReply.Success -> ()
+      | reply ->
+        failwith <| sprintf "Expected SetStartingZone.Success but got %A" reply
+
+  member this.addAnyGarrison clientId race faction =
+    this.addAnyRegion ()
+    |> this.addAnyZone
+    |> fun zoneId -> this.setStartingZone(race, zoneId)
+
+    Test.client.AddGarrison(
+      clientId,
+      uuid(),
+      race,
+      faction
+    )
+    |> sync()
+    |> fun reply ->
+      match reply with
+      | AddGarrisonReply.Success -> ()
+      | reply -> sprintf "Expected AddGarrisonReply.Success but got %A" reply |> failwith
+
+  member this.getClientGarrison clientId =
+    Test.client.GetClientGarrison(clientId)
+    |> sync()
+    |> fun reply ->
+      match reply with
+      | GetClientGarrisonReply.Success garrison -> garrison
+      | reply -> sprintf "Expected GetClientGarrisonReply.Success but got %A" reply |> failwith
+      
+
   [<ClassInitialize>]
   static member init (ctx:TestContext) =
     async {
@@ -51,51 +112,48 @@ type Test () =
     Test.server.stop()
 
   [<TestMethod>]
+  member this.testNewGarrisonN () =
+    for i in 0 .. 10 do
+      uuid() |> this.addAnyGarrison
+      <| Human
+      <| Alliance
+
+  [<TestMethod>]
+  member this.testNewRegion () =
+    this.addAnyRegion () |> ignore
+
+  [<TestMethod>]
+  member this.TestNewZone () =
+    this.addAnyRegion ()
+    |> this.addAnyZone
+    |> ignore
+
+  [<TestMethod>]
   member this.testNewGarrison () =
-    let reply = Test.client.AddGarrison(uuid(), "My garrison", Human, Alliance) |> sync()
-    match reply with
-    | AddGarrisonReply.Success -> ()
-    | AddGarrisonReply.ClientHasGarrison -> failwith "Client should not have a garrison at this point"
+    uuid() |> this.addAnyGarrison
 
   [<TestMethod>]
   member this.testClientFirstGarrison () =
     let clientId = uuid()
 
-    Test.client.GetClientGarrison(clientId) |> sync()
-    |> fun m ->
-      match m with
-      | GetClientGarrisonReply.Empty -> ()
-      | reply ->
-        failwith <| sprintf "Expected client not to have a garrison, but got %A" reply
+    try clientId |> this.getClientGarrison |> Some
+    with e -> None
+    |> Option.iter (fun garrison ->
+      sprintf "Client should not have a garrison but got %A" garrison |> failwith
+    )
 
     // No garrison, let's create one.
-    Test.client.AddGarrison(clientId, "My garrison", Human, Alliance) |> sync()
-    |> fun m ->
-      match m with
-      | AddGarrisonReply.Success ->
-        () // good.
-      | reply ->
-        failwith <| sprintf "Expected AddGarrisonReply of GarrisonAdded but got %A" reply
-
-    match Test.client.GetClientGarrison(clientId) |> sync() with
-    | GetClientGarrisonReply.Success garrison ->
-      () // Got the garrison, good.
-    | reply ->
-      failwith <| sprintf "Expceted GetClientGarrisonReply but got %A" reply
+    this.addAnyGarrison clientId Human Alliance
+    this.getClientGarrison clientId
+    |> ignore
 
   [<TestMethod>]
   member this.testClientHasGarrison () =
     let clientId = uuid()
-    match Test.client.AddGarrison(clientId, "My garrison", Human, Alliance) |> sync() with
-    | AddGarrisonReply.Success -> ()
-    | msg -> failwith <| sprintf "Expected AddGarrisonReply with id, but got %A" msg
 
-    match Test.client.GetClientGarrison(clientId) |> sync() with
-    | GetClientGarrisonReply.Success garrison -> ()
-    | msg -> failwith <| sprintf "Expected GetClientGarrisonReply with id, but got %A" msg
-
-    // Got the garrison
-    ()
+    this.addAnyGarrison clientId Human Alliance
+    this.getClientGarrison clientId
+    |> ignore
 
   [<TestMethod>]
   member this.testAddHero () =

@@ -23,7 +23,10 @@ type IGameClient =
   abstract member GetClientGarrison : clientId:string -> GetClientGarrisonReply Task
   abstract member GetHero : heroId:string -> GetHeroReply Task
   abstract member GetHeroArray : heroIds:string array -> GetHeroArrayReply Task
+  abstract member AddRegion : AddRegion -> AddRegionReply Task
+  abstract member AddZone : AddZone -> AddZoneReply Task
   abstract member RemGarrison : garrisonId:string -> RemGarrisonReply Task
+  abstract member SetStartingZone: race:Race * zoneId:string -> SetStartingZoneReply Task
 
 type private RestGameClient (endPoint) =
   let enc = Encoding.UTF8
@@ -80,6 +83,28 @@ type private RestGameClient (endPoint) =
         return reply
       } |> Async.StartAsTask
 
+    member this.AddRegion region =
+      async {
+        let! reply = region |> AddRegion |> request
+        let reply = match reply with
+        | AddRegionReply reply -> reply
+        | ExnReply msg -> failwith msg
+        | msg -> failwith <| sprintf "Expected AddRegionReply but got %A" msg
+
+        return reply
+      } |> Async.StartAsTask
+
+    member this.AddZone region =
+      async {
+        let! reply = region |> AddZone |> request
+        let reply = match reply with
+        | AddZoneReply reply -> reply
+        | ExnReply msg -> failwith msg
+        | msg -> failwith <| sprintf "Expected AddZoneReply but got %A" msg
+
+        return reply
+      } |> Async.StartAsTask
+
     member this.GetClientGarrison clientId =
       async {
         let! reply = request <| GetClientGarrison clientId
@@ -120,6 +145,17 @@ type private RestGameClient (endPoint) =
         | RemGarrisonReply reply -> reply
         | ExnReply msg -> failwith msg
         | msg -> failwith <| sprintf "Expected AddGarrisonReply but got %A" msg
+
+        return reply
+      } |> Async.StartAsTask
+
+    member this.SetStartingZone (race, zoneId) =
+      async {
+        let! reply = request <| SetStartingZone(race, zoneId)
+        let reply = match reply with
+        | SetStartingZoneReply reply -> reply
+        | ExnReply msg -> failwith msg
+        | msg -> failwith <| sprintf "Expected SetStartingZoneReply but got %A" msg
 
         return reply
       } |> Async.StartAsTask

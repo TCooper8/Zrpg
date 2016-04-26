@@ -23,8 +23,7 @@ module GameServer =
     abstract WebSocketHandler: Net.HttpListenerContext -> bool Async
 
   type private GameServer (log:Logger) =
-    let gameState = GameState()
-    let game = GameRunner.Game(gameState, log)
+    //let game = GameRunner.Game(gameState, log)
     let webServer = Pario.WebServer.Server(log)
     let discovery = Zrpg.Discovery.createLocal() |> Async.RunSynchronously
 
@@ -44,92 +43,287 @@ module GameServer =
           groundTravelSpeed = 1.0
         }
 
+    let debug = Printf.ksprintf (fun res -> log.Debug (res))
+
+    let addGarrison (msg:AddGarrison) (state:GameState): GameState * AddGarrisonReply =
+      debug "Adding garrison %s" msg.name
+
+      // Check if the client has a world already.
+      if state.clientWorlds.ContainsKey msg.clientId then
+        (state, ClientHasWorld)
+      else if state.clientGarrisons.ContainsKey msg.clientId then
+        (state, ClientHasGarrison)
+      else
+        let stats = {
+          goldIncome = 10
+          heroes = Array.empty
+        }
+
+        let race = msg.race
+        let raceId = race.ToString()
+
+        // Get the starting zone for the race.
+        let startingZone =
+          match state.startingZones.TryFind raceId with
+          | None -> sprintf "Starting zone not defined for race %A" race |> failwith
+          | Some zoneId ->
+            match state.zones.TryFind zoneId with
+            | None -> sprintf "Starting zone defined for race %A, but does not map to an actual zone" race |> failwith
+            | Some zone -> zone
+
+        // Lookup the starting zone connections.
+        let zoneConnections =
+          match state.zoneConnections.TryFind startingZone.id with
+          | None -> Map.empty
+          | Some ls -> Map.add startingZone.id ls Map.empty
+
+        // Give ownership of the startingZone to the client.
+        let zoneOwners = Map.add startingZone.id msg.clientId Map.empty
+        // Discover the starting zone
+        let discoveredZones = [| startingZone.id |]
+        // Make the world.
+        let world = {
+          id = uuid()
+          clientId = msg.clientId
+          zoneConnections = zoneConnections
+          zoneOwners = zoneOwners
+          discoveredZones = discoveredZones
+          discoveredRegions = Array.empty
+        }
+
+        let garrison = {
+          id = uuid()
+          clientId = msg.clientId
+          worldId = world.id
+          name = msg.name
+          race = msg.race
+          faction = msg.faction
+          ownedRegions = Set []
+          ownedZones = Set [ startingZone.id ]
+          vaultId = ""
+          stats = stats
+        }
+
+        let state = {
+          state with
+            clientGarrisons = state.clientGarrisons.Add(msg.clientId, garrison.id)
+            garrisons = state.garrisons.Add(garrison.id, garrison)
+            worlds = state.worlds.Add(msg.clientId, world)
+            clientWorlds = state.clientWorlds.Add(world.id, world.id)
+        }
+
+        (state, AddGarrisonReply.Success)
+
+    let addHero (msg:AddHero) (state:GameState): GameState * AddHeroReply =
+      // Check and make sure there's not a duplicate hero name.
+      if state.heroNames.Contains msg.name then
+        state, AddHeroReply.NameTaken
+      else
+        let stats =
+          let classStats = baseClassStats msg.heroClass
+          let raceStats = raceStatMod msg.race
+          classStats * raceStats
+
+        let hero = {
+          id = uuid()
+          clientId = msg.clientId
+          name = msg.name
+          race = msg.race
+          faction = msg.faction
+          gender = msg.gender
+          heroClass = msg.heroClass
+          level = 1
+          stats = stats
+        }
+
+        // Lookup the client's garrison, and add the hero to it.
+        let garrison = 
+          match state.clientGarrisons.TryFind msg.clientId with
+          | None -> sprintf "Client has no garrison" |> failwith
+          | Some id ->
+            match state.garrisons.TryFind id with
+            | None -> sprintf "Client has a garrison, but garrison %s doesn't contain any data" id |> failwith
+            | Some garrison -> garrison
+
+        let stats = {
+          garrison.stats with
+            heroes = garrison.stats.heroes |> Array.append [| hero.id |]
+        }
+        let garrison = {
+          garrison with
+            stats = stats
+        }
+
+        let state = {
+          state with
+            heroNames = state.heroNames.Add hero.name
+            heroes = state.heroes
+            garrisons = state.garrisons.Add (garrison.id, garrison)
+        }
+        (state, AddHeroReply.Success hero.id)
+
+    let handleMsg msg state =
+      match msg with
+      | AddGarrison msg ->
+        addGarrison msg state
+        |> fun (s, r) -> (s, AddGarrisonReply r)
+
+      | AddHero msg ->
+        addHero msg state
+        |> fun (s, r) -> (s, AddHeroReply r)
+
+      | AddRegion msg ->
+        match state.regionNames.Contains msg.name with
+        | true -> state, AddRegionReply.RegionExists |> AddRegionReply
+        | false ->
+          let region = {
+            id = uuid()
+            name = msg.name
+            zones = Array.empty
+          }
+          let state = {
+            state with
+              regionNames = state.regionNames.Add region.name
+              regions = state.regions.Add(region.id, region)
+          }
+
+          state, AddRegionReply.Success region.id |> AddRegionReply
+
+      | AddZone msg ->
+        match state.zoneNames.Contains msg.name with
+        | true -> state, AddZoneReply.ZoneExists |> AddZoneReply
+        | false ->
+          match state.regions.TryFind msg.regionId with
+          | None -> state, AddZoneReply.RegionDoesNotExist |> AddZoneReply
+          | Some region ->
+            let zone: Zone = {
+              id = uuid()
+              regionId = msg.regionId
+              name = msg.name
+              terrain = msg.terrain
+            }
+            let region = {
+              region with
+                zones = region.zones |> Array.append [| zone.id |]
+            }
+            let state = {
+              state with
+                zoneNames = state.zoneNames.Add zone.name
+                zones = state.zones.Add(zone.id, zone)
+            }
+            state, zone.id |> AddZoneReply.Success |> AddZoneReply
+
+      | GetClientGarrison clientId ->
+        let r =
+          match state.clientGarrisons.TryFind clientId with
+          | None -> GetClientGarrisonReply.Empty
+          | Some garrisonId ->
+            match state.garrisons.TryFind garrisonId with
+            | None -> GetClientGarrisonReply.Empty
+            | Some garrison -> GetClientGarrisonReply.Success garrison
+        (state, GetClientGarrisonReply r)
+
+      | GetHero heroId ->
+        match state.heroes.TryFind heroId with
+        | None -> GetHeroReply.Empty
+        | Some hero -> GetHeroReply.Success hero
+        |> fun r -> (state, GetHeroReply r)
+
+      | GetHeroArray heroIds ->
+        heroIds |> Array.map (fun id ->
+          match state.heroes.TryFind id with
+          | None -> sprintf "Hero %s does not map to a hero" id |> failwith
+          | Some hero -> hero
+        )
+        |> fun heroes -> (state, heroes |> GetHeroArrayReply.Success |> GetHeroArrayReply)
+
+      | RemGarrison garrisonId ->
+        let r = 
+          match state.garrisons.TryFind garrisonId with
+          | None -> RemGarrisonReply.Success
+          | Some garrison ->
+            // Remove all of the heroes in this garrison.
+            let toRemove = garrison.stats.heroes |> Set
+            let heroes = state.heroes |> Map.filter (fun id _ -> id |> toRemove.Contains |> not)
+
+            let toRemoveNames =
+              garrison.stats.heroes |> Array.collect (fun id ->
+                match state.heroes.TryFind id with
+                | None -> [||]
+                | Some hero -> [| hero.name |]
+              ) |> Set
+            let heroNames = state.heroNames |> Set.filter (fun name ->
+              name |> toRemoveNames.Contains |> not
+            )
+
+            let state = {
+              state with
+                garrisons = state.garrisons.Remove garrisonId
+                heroes = heroes
+                worlds = state.worlds.Remove garrison.worldId
+                clientGarrisons = state.clientGarrisons.Remove garrison.clientId
+                clientWorlds = state.clientWorlds.Remove garrison.clientId
+                heroNames = heroNames
+            }
+            RemGarrisonReply.Success
+        (state, RemGarrisonReply r)
+
+      | SetStartingZone (race, zoneId) ->
+        let raceId = race.ToString()
+
+        match state.zones.ContainsKey zoneId with
+        | false ->
+          state, SetStartingZoneReply.ZoneDoesNotExist |> SetStartingZoneReply
+        | true ->
+          let state = {
+            state with
+              startingZones = state.startingZones.Add (raceId, zoneId)
+          }
+          state, SetStartingZoneReply.Success |> SetStartingZoneReply
+
+      | Tick ->
+        (state, TickReply)
+
     let agent = MailboxProcessor<Cmd>.Start(fun inbox ->
       log.Debug <| "Starting server..."
 
-      let rec loop () = async {
+      let rec loop state = async {
         let! cmd = inbox.Receive()
-        let msg, reply = cmd
+        let msg, chan = cmd
 
-        let res: Reply =
+        let state, reply =
           try
             log.Debug <| sprintf "Received \n\t%A" msg
-            match msg with
-            | AddGarrison msg ->
-              log.Debug <| sprintf "Adding garrison %s" msg.name
-
-              let stats = {
-                goldIncome = 10
-                heroes = Array.empty
-              }
-
-              let garrison = {
-                id = uuid()
-                clientId = msg.clientId
-                name = msg.name
-                race = msg.race
-                faction = msg.faction
-                ownedRegions = Set []
-                ownedZones = Set []
-                vaultId = ""
-                stats = stats
-              }
-
-              gameState.addGarrison garrison
-              |> AddGarrisonReply
-
-            | AddHero msg ->
-              log.Debug <| sprintf "Adding hero %A" msg
-
-              baseClassStats msg.heroClass
-              |> fun stats ->
-                raceStatMod msg.race * stats
-              |> fun stats ->
-                { id = uuid()
-                  clientId = msg.clientId
-                  name = msg.name
-                  race = msg.race
-                  faction = msg.faction
-                  gender = msg.gender
-                  heroClass = msg.heroClass
-                  level = 1
-                  stats = stats
-                }
-              |> gameState.addHero
-              |> AddHeroReply
-
-            | GetClientGarrison clientId ->
-              gameState.getClientGarrison clientId
-              |> GetClientGarrisonReply
-
-            | GetHero id ->
-              gameState.getHero id
-              |> GetHeroReply
-
-            | GetHeroArray heroIds ->
-              heroIds |> Array.collect (fun id ->
-                match gameState.getHero id with
-                | GetHeroReply.Empty -> Array.empty
-                | GetHeroReply.Success hero -> [| hero |]
-              )
-              |> fun heroes ->
-                if heroes.Length = 0 then GetHeroArrayReply.Empty
-                else GetHeroArrayReply.Success heroes
-              |> GetHeroArrayReply
-
-            | RemGarrison id ->
-              gameState.remGarrison id
-              |> RemGarrisonReply
-
+            handleMsg msg state
           with e ->
-            ExnReply e.Message
+            state, ExnReply e.Message
 
-        log.Debug <| sprintf "Reply with %A" res
-        reply.Reply(res)
+        log.Debug <| sprintf "Reply with %A" reply
+        chan.Reply(reply)
 
-        return! loop ()
+        return! loop state
       }
-      loop()
+
+      let gameState = {
+        gameTime = 0
+        garrisons = Map.empty
+        zones = Map.empty
+        regions = Map.empty
+        heroes = Map.empty
+        worlds = Map.empty
+
+        clientGarrisons = Map.empty
+        clientWorlds = Map.empty
+
+        heroNames = Set.empty
+        regionNames = Set.empty
+        zoneNames = Set.empty
+
+        startingZones = Map.empty
+        zoneConnections = Map.empty
+      }
+
+      loop gameState
     )
 
     let enc = Encoding.UTF8
@@ -149,8 +343,6 @@ module GameServer =
         if n.EndOfMessage then
           let res = inStream.ToArray() |> enc.GetString
           inStream.Position <- 0L
-
-
 
           return res.Substring(0, res.Length - (1024 - n.Count))
         else
@@ -209,6 +401,7 @@ module GameServer =
           return true
 
         with e ->
+          log.Debug <| sprintf "Error: %A" e
           resp.StatusCode <- 400
           resp.StatusDescription <- e.Message
           return true
