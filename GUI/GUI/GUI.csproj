@@ -120,6 +120,15 @@
     <Compile Include="Pages\HeroSubPages\HeroMapTab.xaml.cs">
       <DependentUpon>HeroMapTab.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\HeroSubPages\ZoneTestPages\GarrisonZone.xaml.cs">
+      <DependentUpon>GarrisonZone.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\HeroSubPages\ZoneTestPages\GoldshireZone.xaml.cs">
+      <DependentUpon>GoldshireZone.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\HeroSubPages\ZoneTestPages\NorthshireZone.xaml.cs">
+      <DependentUpon>NorthshireZone.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\HordeGarrisonCreationPage.xaml.cs">
       <DependentUpon>HordeGarrisonCreationPage.xaml</DependentUpon>
     </Compile>
@@ -137,6 +146,7 @@
   <ItemGroup>
     <Content Include="Assets\background3.jpg" />
     <Content Include="Assets\genericBackground.jpg" />
+    <Content Include="Assets\squareGuy.png" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -176,6 +186,18 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\HeroSubPages\HeroMapTab.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\HeroSubPages\ZoneTestPages\GarrisonZone.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\HeroSubPages\ZoneTestPages\GoldshireZone.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\HeroSubPages\ZoneTestPages\NorthshireZone.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

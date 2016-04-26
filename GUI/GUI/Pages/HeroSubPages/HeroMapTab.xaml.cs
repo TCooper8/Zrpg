@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GUI.Pages.HeroSubPages.ZoneTestPages;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -26,9 +27,13 @@ namespace GUI.Pages
         ClientState state = ClientState.state;
         Hero hero;
 
+        Thickness garrisonLocation = new Thickness(340, 120, 0, 0);
+        Thickness northshireLocation = new Thickness(970, 15, 0, 0);
+        Thickness goldshireLocation = new Thickness(690, 420, 0, 0);
+
         public HeroMapTab()
         {
-            this.InitializeComponent();           
+            this.InitializeComponent();
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -46,7 +51,25 @@ namespace GUI.Pages
         //Update hero location location and information
         private void UpdateHeroStatus()
         {
-            textBlockTest.Text = "Hero Name: " + hero.name;
+            textBlockTest.Text = hero.name;
+        }
+
+        private void garrisonButton_Click(object sender, RoutedEventArgs e)
+        {
+            heroIcon.Margin = garrisonLocation;
+            //this.Frame.Navigate(typeof(GarrisonZone));          
+        }
+
+        private void northshireButton_Click(object sender, RoutedEventArgs e)
+        {
+            heroIcon.Margin = northshireLocation;
+            //this.Frame.Navigate(typeof(NorthshireZone));
+        }
+
+        private void goldshireButton_Click(object sender, RoutedEventArgs e)
+        {
+            heroIcon.Margin = goldshireLocation;
+            //this.Frame.Navigate(typeof(GoldshireZone));           
         }
     }
 }
