@@ -34,7 +34,11 @@ namespace GUI.Pages
         private void GetGarrisonInfo()
         {
             var garrison = state.Garrison;
-            infoFrame.Content = garrison.name;
+            infoFrame.Content = string.Format(garrison.name + "\n" +
+                                            "Faction: {0}\n" +
+                                            "Race: {1}\n" +
+                                            "Gold Income: {2}",
+                                            garrison.faction.ToString(), garrison.race.ToString(), garrison.stats.goldIncome.ToString());
         }
 
         private void backButton_Click(object sender, RoutedEventArgs e)
