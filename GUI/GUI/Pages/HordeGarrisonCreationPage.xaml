@@ -36,6 +36,10 @@
             </Button>
             <Frame x:Name="infoFrame" Content="Frame To Display Race Info" HorizontalAlignment="Left" Margin="400,100,0,0" Grid.Row="1" VerticalAlignment="Top" FontSize="20" Foreground="White" Width="600" Height="500" HorizontalContentAlignment="Left"/>
             <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="50,0,0,0" TextWrapping="Wrap" Text="Back" VerticalAlignment="Top" Height="40" FontSize="20" Foreground="White" Padding="0,5,0,0"/>
+            <RelativePanel x:Name="relativePanel" HorizontalAlignment="Center" Margin="0,250,0,0" VerticalAlignment="Top" Background="#4C000000" Width="500" Height="150" Grid.Row="1" Visibility="Collapsed">
+                <ProgressRing x:Name="progressRing" HorizontalAlignment="Center" VerticalAlignment="Center" Width="60" Height="60" Margin="0,20,0,0" Foreground="White" RelativePanel.AlignTopWithPanel="True" RelativePanel.AlignHorizontalCenterWithPanel="True"/>
+                <TextBlock x:Name="infoTextBlock" TextWrapping="Wrap" Text="Creating Garrison. . ." FontSize="20" Foreground="White" Margin="0,0,0,20" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignHorizontalCenterWithPanel="True"/>
+            </RelativePanel>
         </Grid>
     </ScrollViewer>
 </Page>

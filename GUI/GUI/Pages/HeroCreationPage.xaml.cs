@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -65,8 +66,13 @@ namespace GUI.Pages
             var garrison = state.Garrison;
             Gender gender;
 
+            //Behavior for loading visual. Using a delay for testing purposes
+            relativePanel.Visibility = Visibility.Visible;
+            progressRing.IsActive = true;
+            await Task.Delay(2000);
+
             //Get user selected gender
-            if(maleToggleButton.IsChecked == true)
+            if (maleToggleButton.IsChecked == true)
             {
                 gender = Gender.Male;
             }

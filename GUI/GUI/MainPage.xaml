@@ -26,6 +26,10 @@
                     <SolidColorBrush Color="White" Opacity="0.4"/>
                 </Button.Background>
             </Button>
+            <RelativePanel x:Name="relativePanel" HorizontalAlignment="Center" Margin="0,0,0,50" VerticalAlignment="Center" Background="#4C000000" Width="500" Height="150" Visibility="Collapsed">
+                <ProgressRing x:Name="progressRing" HorizontalAlignment="Center" VerticalAlignment="Center" Width="60" Height="60" Margin="0,20,0,0" Foreground="White" RelativePanel.AlignTopWithPanel="True" RelativePanel.AlignHorizontalCenterWithPanel="True"/>
+                <TextBlock x:Name="infoTextBlock" TextWrapping="Wrap" Text="Signing In. . ." FontSize="20" Foreground="White" Margin="0,0,0,20" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignHorizontalCenterWithPanel="True"/>
+            </RelativePanel>
         </Grid>
     </ScrollViewer>
 </Page>

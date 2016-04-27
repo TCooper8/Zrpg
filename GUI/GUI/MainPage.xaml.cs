@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -35,7 +36,10 @@ namespace GUI
 
         private async void loginButton_Click(object sender, RoutedEventArgs e)
         {
-            //TO DO: Authenticate credentials
+            //Behavior for loading visual. Using a delay for testing purposes
+            relativePanel.Visibility = Visibility.Visible; 
+            progressRing.IsActive = true;
+            await Task.Delay(2000);
             
             // This should populate the clientId.
             state.Authenticate(
