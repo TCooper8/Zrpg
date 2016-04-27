@@ -57,6 +57,7 @@ namespace GUI.Pages
                     {
                         throw new Exception("Cannot create garrison and client has no garrison to get");
                     }
+
                     this.Frame.Navigate(typeof(GarrisonPage));
                     return;
                 }
