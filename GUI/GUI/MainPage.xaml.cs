@@ -127,5 +127,25 @@ namespace GUI
             // Navigate to register page
             this.Frame.Navigate(typeof(RegisterPage));
         }
+
+        private void soundMuteButton_Click(object sender, RoutedEventArgs e)
+        {
+            char uVolume = '\uE767';
+            char uMute = '\uE74F';
+
+            string volume = uVolume.ToString();
+            string mute = uMute.ToString();
+
+            if(soundMuteButton.Content.ToString() == volume)
+            {
+                soundMuteButton.Content = mute;
+                mediaElement.Stop();
+            }
+            else
+            {
+                soundMuteButton.Content = volume;
+                mediaElement.Play();
+            }
+        }
     }
 }

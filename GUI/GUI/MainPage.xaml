@@ -31,6 +31,11 @@
                 <TextBlock x:Name="infoTextBlock" TextWrapping="Wrap" Text="Signing In. . ." FontSize="20" Foreground="White" Margin="0,0,0,20" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignHorizontalCenterWithPanel="True"/>
             </RelativePanel>
             <MediaElement x:Name="mediaElement" HorizontalAlignment="Left" Height="100" Margin="0" VerticalAlignment="Top" Width="100" Source="Assets/Music/CSC.mp3" IsLooping="True" Volume="0.5" AudioCategory="GameMedia"/>
+            <Button x:Name="soundMuteButton" Content="&#xE767;" HorizontalAlignment="Right" Margin="0,0,20,20" VerticalAlignment="Bottom" Width="40" Height="40" FontSize="20" FontFamily="Segoe MDL2 Assets" Click="soundMuteButton_Click" BorderBrush="#FF7A7A7A">
+                <Button.Background>
+                    <SolidColorBrush Color="White" Opacity="0.4"/>
+                </Button.Background>
+            </Button>
         </Grid>
     </ScrollViewer>
 </Page>
