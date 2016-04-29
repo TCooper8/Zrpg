@@ -1,0 +1,83 @@
+namespace Zrpg.Commons
+
+open System
+open System.IO
+
+open Logging
+open Zrpg.Commons.Bundle
+
+module LogBundle =
+  type private Msg =
+    | Fork of string * Logging.LogLevel
+    | Log of LogLevel * string
+
+  let private Id = "log"
+
+  type private LogBundle () =
+    inherit IBundle()
+
+    override this.Start context =
+      let bundle = LogBundleRun context :> IBundle
+      context.Become bundle
+
+    override this.Receive (msg, sender) = ()
+        
+  and private LogBundleRun (context) =
+    inherit IBundle()
+
+    let stream = new MemoryStream()
+    let reader = new StreamReader(stream)
+
+    let log = new Logging.StreamLogger("Log", LogLevel.Debug, stream)
+
+    let handle (msg, sender) =
+      match msg with
+      | Fork (name, level) ->
+        log.Fork(name, level)
+        |> fun log -> ChildLogBundle(context, log)
+        |> context.Platform.Register
+
+    override this.Stop context =
+      log.Dispose()
+
+    override this.Id = Id
+
+    override this.Receive (msg, sender) =
+      ()
+
+  and private ChildLogBundle (context:IContext, log:Logging.Logger) =
+    inherit IBundle()
+
+    let handle msg =
+      match msg with
+      | Fork (name, level) ->
+        log.Fork(name, level)
+        |> fun log -> ChildLogBundle(context, log)
+        |> context.Platform.Register
+      | Log(level, msg) ->
+        log.Log(level, msg)
+    
+    override this.Id = log.Name + ":log"
+
+    override this.Receive (msg, sender) =
+      match msg with
+      | :? Msg as msg ->
+        handle msg
+
+  type Log (bundle:IBundleRef) =
+    let log level = Printf.kprintf (fun res -> bundle.Send <| Msg.Log(level, res))
+    //let log level = Printf.ksprintf (fun res -> log.Debug (res))
+
+    member this.Info = log LogLevel.Info
+    member this.Debug = log LogLevel.Debug
+    member this.Warn = log LogLevel.Warn
+    member this.Error = log LogLevel.Error
+
+  let private bundle = LogBundle()
+  let private platform = Platform.createPlatform()
+  do platform.Register bundle
+
+  let private _log = platform.Lookup Id |> Option.get |> Log
+  
+  let log () =
+    _log

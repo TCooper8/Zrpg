@@ -5,8 +5,12 @@ open System.IO
 open System.Text
 open System.Net.WebSockets
 open System.Threading
+open System.Threading.Tasks
 open Newtonsoft.Json
 open System.Diagnostics
+open Zrpg.Game
+open Zrpg.Commons
+open Zrpg.Commons.Bundle
 
 open Logging
 
@@ -17,14 +21,17 @@ module GameServer =
 
   type Cmd = Msg * AsyncReplyChannel<Reply>
 
+  type PostMsg =
+    | RawrMsg of string
+
   [<Interface>]
   type IGameServer =
     abstract ApiHandler: Pario.WebServer.Handler
     abstract WebSocketHandler: Net.HttpListenerContext -> bool Async
 
-  type private GameServer (log:Logger) =
+  type private GameServer (log:LogBundle.Log) =
     //let game = GameRunner.Game(gameState, log)
-    let webServer = Pario.WebServer.Server(log)
+    //let webServer = Pario.WebServer.Server(log)
     let discovery = Zrpg.Discovery.createLocal() |> Async.RunSynchronously
 
     let baseClassStats heroClass =
@@ -43,10 +50,8 @@ module GameServer =
           groundTravelSpeed = 1.0
         }
 
-    let debug = Printf.ksprintf (fun res -> log.Debug (res))
-
     let addGarrison (msg:AddGarrison) (state:GameState): GameState * AddGarrisonReply =
-      debug "Adding garrison %s" msg.name
+      log.Debug <| sprintf "Adding garrison %s" msg.name
 
       // Check if the client has a world already.
       if state.clientWorlds.ContainsKey msg.clientId then
@@ -369,6 +374,8 @@ module GameServer =
       return ()
     }
 
+    member this.Agent = agent
+
     interface IGameServer with
       member this.ApiHandler: Pario.WebServer.Handler = fun req resp -> async {
         let path = req.Url.AbsolutePath
@@ -417,9 +424,73 @@ module GameServer =
 
           return true
         with e ->
-          log.Warn("Encountered a WebSocket error: {0}", e)
+          log.Warn <| sprintf "Encountered a WebSocket error: %A" e
           return false
       }
 
-  let server log =
-    GameServer(log) :> IGameServer
+  type private GameServerBundle (id) =
+    inherit IBundle()
+    let log = LogBundle.log()
+
+    let server = GameServer(log)
+    let agent = server.Agent
+
+    override this.Id = id
+
+    override this.Start context =
+      let repl = context.Platform.Lookup "REPL" |> Option.get
+      repl.Send <| CommandLine.LoadAssembly "GameServer.dll"
+      repl.Send <| CommandLine.LoadAssembly "GameCommons.dll"
+
+      sprintf "let game = Zrpg.Game.GameServer.server %A" this.Id
+      |> CommandLine.Eval
+      |> repl.Send
+      ()
+
+    override this.PreRestart (e, context) =
+      log.Warn <| sprintf "Error: %A" e
+
+    override this.Receive (msg, sender) =
+      match msg with
+      | :? Zrpg.Game.Msg as msg ->
+        agent.PostAndAsyncReply(fun reply -> (msg, reply))
+        |> Async.RunSynchronously
+        |> fun reply ->
+          match sender with
+          | Some sender ->
+            sender.Send reply
+          | None -> ()
+
+  type GameServerChan(gameBundle:IBundleRef) =
+    let fromChoice res =
+      match res with
+      | Choice1Of2 reply -> reply
+      | Choice2Of2 e -> sprintf "Error: %A" e |> failwith
+
+    let send msg = async {
+      let chan = Chan<Reply>()
+      gameBundle.Send (msg, chan)
+      let! res = chan.Await()
+      let reply = fromChoice res
+      return reply
+    }
+
+    member this.AddRegion addRegion = async {
+      let! res = addRegion |> AddRegion |> send
+      return
+        match res with
+        | AddRegionReply reply -> reply
+        | reply -> sprintf "Expected AddRegion reply but got %A" reply |> failwith
+    }
+
+    member this.AddRegionSync addRegion =
+      this.AddRegion addRegion
+      |> Async.RunSynchronously
+
+  let private platform = Platform.createPlatform()
+
+  let server id =
+    let bundle = GameServerBundle id
+    platform.Register bundle
+    platform.Lookup id |> Option.get
+    |> GameServerChan
