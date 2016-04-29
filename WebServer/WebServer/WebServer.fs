@@ -21,6 +21,9 @@ module WebServer =
     priority: int
   }
 
+  type Msg =
+    | AddHandler of Handler * priority:int
+
   module FileLoader =
     let serveStatic rootDirectory defaultFile =
       let handler: Handler = fun req resp -> async {
@@ -100,7 +103,7 @@ module WebServer =
     member this.getModules () =
       modules
 
-  type Msg =
+  type private RouterMsg =
     | AddModule of ServerModule
     | AddSocketHandler of (HttpListenerContext -> bool Async)
     | SetWorkers of List<MailboxProcessor<Work>>
@@ -270,10 +273,8 @@ module WebServer =
       }
       agent.Post <| AddModule _serverModule
 
-  type private WebServerBundle (id) =
+  type private WebServerBundle (log, id) =
     inherit IBundle()
-
-    let log = Zrpg.Commons.LogBundle.log()
     let server = Server(log)
 
     override this.Id = id
@@ -286,15 +287,23 @@ module WebServer =
       log.Warn <| sprintf "Error: %A" e
 
     override this.Receive (msg, sender) =
-      ()
+      match msg with
+      | :? Msg as msg ->
+        match msg with
+        | AddHandler(handler, priority) ->
+          do server.handle {
+            handler = handler
+            priority = priority
+          }
 
   let create (platform:IPlatform) id =
     match platform.Lookup id with
     | Some bundleRef -> bundleRef
     | None ->
-      let bundle = WebServerBundle id
+      let log = LogBundle.log platform (id + ":log")
+      let bundle = WebServerBundle (log, id)
       platform.Register bundle
       match platform.Lookup id with
       | Some bundleRef -> bundleRef
       | None -> failwith "Unable to link bundle"
-    
+

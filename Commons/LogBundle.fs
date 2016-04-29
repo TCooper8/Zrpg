@@ -10,9 +10,7 @@ module LogBundle =
   type private Msg =
     | Log of LogLevel * string
 
-  let private Id = "log"
-
-  type private LogBundle () =
+  type private LogBundle (id) =
     inherit IBundle()
 
     let stream = new MemoryStream()
@@ -28,23 +26,27 @@ module LogBundle =
     override this.Stop context =
       log.Dispose()
 
-    override this.Id = Id
+    override this.Id = id
 
     override this.Receive (msg, sender) =
       ()
 
   type Log (bundle:IBundleRef) =
     let log level msg = bundle.Send <| Msg.Log(level, msg)
-    //let log level = Printf.ksprintf (fun res -> log.Debug (res))
 
     member this.Info = log LogLevel.Info
     member this.Debug = log LogLevel.Debug
     member this.Warn = log LogLevel.Warn
     member this.Error = log LogLevel.Error
-
-  let private bundle = LogBundle()
-  let private platform = Platform.createPlatform()
-  do platform.Register bundle
   
-  let log () =
-    platform.Lookup Id |> Option.get |> Log
+  let log (platform:IPlatform) id =
+    match platform.Lookup id with
+    | None ->
+      let log = LogBundle id
+      platform.Register log
+      platform.Lookup id
+      |> Option.get
+      |> Log
+    | Some log ->
+      log
+      |> Log

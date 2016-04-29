@@ -320,11 +320,20 @@ module Platform =
       member this.BundleIds =
         [ for pair in bundles do yield pair.Key ]
 
-  let private platform = Platform() :> Bundle.IPlatform
+  let private platformsLock = new Object()
+  let mutable private platforms = Map.empty<string, IPlatform>
 
-  do
-    let repl = CommandLine.create ()
-    platform.Register repl
+  //do
+    //let repl = CommandLine.create ()
+    //platform.Register repl
 
-  let createPlatform () =
-    platform
+  let create id =
+    lock platformsLock (fun () ->
+      match platforms.TryFind id with
+      | None ->
+        let platform = Platform()
+        platforms <- platforms.Add(id, platform)
+        platform :> IPlatform
+      | Some platform ->
+        platform
+    )

@@ -1,7 +1,5 @@
 ﻿namespace Zrpg
 
-open StackExchange.Redis
-
 module Discovery =
   type ServiceName = string
   type ServiceId = string

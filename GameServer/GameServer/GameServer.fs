@@ -428,9 +428,8 @@ module GameServer =
           return false
       }
 
-  type private GameServerBundle (id) =
+  type private GameServerBundle (log, id) =
     inherit IBundle()
-    let log = LogBundle.log()
 
     let server = GameServer(log)
     let agent = server.Agent
@@ -487,10 +486,15 @@ module GameServer =
       this.AddRegion addRegion
       |> Async.RunSynchronously
 
-  let private platform = Platform.createPlatform()
-
-  let server id =
-    let bundle = GameServerBundle id
-    platform.Register bundle
-    platform.Lookup id |> Option.get
-    |> GameServerChan
+  let server (platform:IPlatform) id =
+    let log = LogBundle.log platform (id + ":log")
+    match platform.Lookup id with
+    | None ->
+      let bundle = GameServerBundle (log, id)
+      platform.Register bundle
+      platform.Lookup id
+      |> Option.get
+      |> GameServerChan
+    | Some game ->
+      game
+      |> GameServerChan

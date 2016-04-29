@@ -4,6 +4,7 @@
 open System
 open System.IO
 open System.Text
+open System.Diagnostics
 
 open Zrpg
 open Logging
@@ -20,18 +21,63 @@ let httpEndPoint = sprintf "http://%s:%i" httpHost httpPort
 let logStreamInner = new MemoryStream(1 <<< 20)
 let logStream = new StreamReader(logStreamInner)
 
+type Msg =
+  | Report
+
+type TestBundle () =
+  inherit IBundle()
+
+  let mutable i = 0
+
+  override this.Id = "Test"
+
+  override this.Receive (msg, sender) =
+    i <- i + 1
+    printfn "%i" i
+    match msg with
+    | :? Msg as msg ->
+      printfn "%i" i
+    | _ -> ()
+
 [<EntryPoint>]
 let main argv =
   let log = new StreamLogger("main", LogLevel.Debug, logStreamInner)
-  let platform = Platform.createPlatform()
+  let platform = Platform.create "Main"
 
-  let repl = platform.Lookup "REPL" |> Option.get
-  repl.Send <| CommandLine.LoadConsole
+  //let repl = platform.Lookup "REPL" |> Option.get
+  //repl.Send <| CommandLine.LoadConsole
+
+  let bundle = TestBundle()
+  platform.Register bundle
+  let test = platform.Lookup bundle.Id |> Option.get
+
+  let msgs = 1000
+  let runners = 4
+
+  let watch = new Stopwatch()
+  watch.Start()
+  [ for i in 1 .. runners do
+    yield
+      async {
+        for i in 1 .. msgs do
+          test.Send 1
+      }
+  ]
+  |> Async.Parallel
+  |> Async.RunSynchronously
+  |> ignore
+
+  watch.Stop()
+
+  let msgs = msgs * runners |> float
+  let dt = watch.Elapsed.TotalSeconds
+  let mps = msgs / dt
+  printfn "%f mps" mps
 
   let web = WebServer.create platform "web"
 
   //log
-  let game = Game.GameServer.server "Zrpg.GameServer"
+  let game = Game.GameServer.server platform "Zrpg.GameServer"
   game.AddRegion ({ name = "bob" })
   |> Async.RunSynchronously
   |> printfn "Result = %A"
