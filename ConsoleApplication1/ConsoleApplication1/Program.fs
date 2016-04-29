@@ -9,21 +9,45 @@ open Zrpg
 open Logging
 open Pario
 
-open Newtonsoft.Json
+open Zrpg.Commons
+open Zrpg.Commons.Bundle
+open Zrpg.Game
 
-module Main =
-  let log = new StreamLogger("main", LogLevel.Debug, Console.OpenStandardOutput())
-  let server = WebServer.Server <| log.Fork("Web", log.Level)
-  let enc = Encoding.UTF8
+let httpHost = "localhost"
+let httpPort = 8080us
+let httpEndPoint = sprintf "http://%s:%i" httpHost httpPort
 
-  let gameServer = Zrpg.Game.GameServer.server log
-
-  do server.handle {
-    priority = 100
-    handler = gameServer.ApiHandler
-  }
+let logStreamInner = new MemoryStream(1 <<< 20)
+let logStream = new StreamReader(logStreamInner)
 
 [<EntryPoint>]
 let main argv =
-  Main.server.listen "localhost" 8080us |> Async.RunSynchronously
+  let log = new StreamLogger("main", LogLevel.Debug, logStreamInner)
+  let platform = Platform.createPlatform()
+
+  let repl = platform.Lookup "REPL" |> Option.get
+  repl.Send <| CommandLine.LoadConsole
+
+  let web = WebServer.create platform "web"
+
+  //log
+  let game = Game.GameServer.server "Zrpg.GameServer"
+  game.AddRegion ({ name = "bob" })
+  |> Async.RunSynchronously
+  |> printfn "Result = %A"
+
+  async {
+    while true do
+      do! Async.Sleep(Int32.MaxValue)
+  } |> Async.RunSynchronously
+
+  // Add the game's API to the server.
+  //do server.handle {
+  //  priority = 100
+  //  handler = game.ApiHandler
+  //}
+
+  //server.listen httpHost httpPort |> Async.RunSynchronously
+
+  //Main.server.listen "localhost" 8080us |> Async.RunSynchronously
   0
