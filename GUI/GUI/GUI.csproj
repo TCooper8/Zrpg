@@ -146,6 +146,7 @@
   <ItemGroup>
     <Content Include="Assets\background3.jpg" />
     <Content Include="Assets\genericBackground.jpg" />
+    <Content Include="Assets\Music\CSC.mp3" />
     <Content Include="Assets\squareGuy.png" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
@@ -220,6 +221,7 @@
       <Name>GameCommons</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

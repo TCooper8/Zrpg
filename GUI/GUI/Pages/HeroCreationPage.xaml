@@ -54,6 +54,10 @@
             <AppBarToggleButton x:Name="maleToggleButton" HorizontalAlignment="Center" Icon="Accept" Label="Male" Margin="400,500,0,40" Grid.Row="1" VerticalAlignment="Center" Width="60" Height="60" Foreground="White" IsChecked="True" Click="maleToggleButton_Click" IsEnabled="False"/>
             <AppBarToggleButton x:Name="femaleToggleButton" HorizontalAlignment="Center" Icon="Accept" Label="Female" Margin="550,500,0,40" Grid.Row="1" VerticalAlignment="Center" Width="60" Height="60" Foreground="White" Click="femaleToggleButton_Click"/>
             <TextBlock x:Name="textBlock_Copy" HorizontalAlignment="Left" Margin="50,0,0,0" TextWrapping="Wrap" Text="Back" VerticalAlignment="Top" Height="40" FontSize="20" Foreground="White" Padding="0,5,0,0"/>
+            <RelativePanel x:Name="relativePanel" HorizontalAlignment="Center" Margin="390,250,390,0" VerticalAlignment="Top" Background="#4C000000" Width="500" Height="150" Grid.Row="1" Visibility="Collapsed">
+                <ProgressRing x:Name="progressRing" HorizontalAlignment="Center" VerticalAlignment="Center" Width="60" Height="60" Margin="0,20,0,0" Foreground="White" RelativePanel.AlignTopWithPanel="True" RelativePanel.AlignHorizontalCenterWithPanel="True"/>
+                <TextBlock x:Name="infoTextBlock" TextWrapping="Wrap" Text="Creating Hero. . ." FontSize="20" Foreground="White" Margin="0,0,0,20" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignHorizontalCenterWithPanel="True"/>
+            </RelativePanel>
 
         </Grid>
     </ScrollViewer>

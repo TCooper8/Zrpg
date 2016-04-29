@@ -40,7 +40,10 @@ namespace GUI.Pages
 
         private async void createButton_Click(object sender, RoutedEventArgs e)
         {
-            infoFrame.Content = "Creating Garrison!...";
+            //Behavior for loading visual. Using a delay for testing purposes
+            relativePanel.Visibility = Visibility.Visible;
+            progressRing.IsActive = true;
+            await Task.Delay(2000);
 
             //Create alliance garrison
             try
@@ -53,7 +56,8 @@ namespace GUI.Pages
                     if (getReply.IsEmpty)
                     {
                         throw new Exception("Cannot create garrison and client has no garrison to get");
-                    }
+                    }                  
+                    
                     this.Frame.Navigate(typeof(GarrisonPage));
                     return;
                 }

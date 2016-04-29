@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -33,9 +34,12 @@ namespace GUI.Pages
             this.Frame.Navigate(typeof(MainPage));
         }
 
-        private void createButton_Click(object sender, RoutedEventArgs e)
+        private async void createButton_Click(object sender, RoutedEventArgs e)
         {
             //TO DO: Create user account
+            relativePanel.Visibility = Visibility.Visible;
+            progressRing.IsActive = true;
+            await Task.Delay(2000);
 
             //Navigate to login page
             this.Frame.Navigate(typeof(MainPage));

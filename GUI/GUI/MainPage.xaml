@@ -20,8 +20,18 @@
             </Button>
             <TextBox x:Name="usernameTextBox" HorizontalAlignment="Center" Margin="0,0,0,300" TextWrapping="Wrap" Text="" PlaceholderText="Username" Width="300" FontSize="20" Height="40" VerticalAlignment="Center" TabIndex="2147483645" BorderBrush="#FF7A7A7A" Background="White" Foreground="Black"/>
             <PasswordBox x:Name="passwordBox" HorizontalAlignment="Center" Margin="0,0,0,200" VerticalAlignment="Center" Width="300" Height="40" PlaceholderText="Password" FontSize="20" TabIndex="2147483646" Background="White" BorderBrush="#FF7A7A7A"/>
-            <CheckBox x:Name="checkBox" Content="remember me" HorizontalAlignment="Center" Margin="0,100,175,200" VerticalAlignment="Center" Height="30" Width="125" IsTabStop="False" Foreground="Black" BorderBrush="White"/>
+            <CheckBox x:Name="rememberCheckBox" Content="remember me" HorizontalAlignment="Center" Margin="0,100,175,200" VerticalAlignment="Center" Height="30" Width="125" IsTabStop="False" Foreground="Black" BorderBrush="White"/>
             <Button x:Name="registerButton" Content="Register" HorizontalAlignment="Center" Margin="200,250,0,200" VerticalAlignment="Center" BorderBrush="#FF7A7A7A" Width="100" Height="40" Click="registerButton_Click">
+                <Button.Background>
+                    <SolidColorBrush Color="White" Opacity="0.4"/>
+                </Button.Background>
+            </Button>
+            <RelativePanel x:Name="relativePanel" HorizontalAlignment="Center" Margin="0,0,0,50" VerticalAlignment="Center" Background="#4C000000" Width="500" Height="150" Visibility="Collapsed">
+                <ProgressRing x:Name="progressRing" HorizontalAlignment="Center" VerticalAlignment="Center" Width="60" Height="60" Margin="0,20,0,0" Foreground="White" RelativePanel.AlignTopWithPanel="True" RelativePanel.AlignHorizontalCenterWithPanel="True"/>
+                <TextBlock x:Name="infoTextBlock" TextWrapping="Wrap" Text="Signing In. . ." FontSize="20" Foreground="White" Margin="0,0,0,20" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignHorizontalCenterWithPanel="True"/>
+            </RelativePanel>
+            <MediaElement x:Name="mediaElement" HorizontalAlignment="Left" Height="100" Margin="0" VerticalAlignment="Top" Width="100" Source="Assets/Music/CSC.mp3" IsLooping="True" Volume="0.5" AudioCategory="GameMedia"/>
+            <Button x:Name="soundMuteButton" Content="&#xE767;" HorizontalAlignment="Right" Margin="0,0,20,20" VerticalAlignment="Bottom" Width="40" Height="40" FontSize="20" FontFamily="Segoe MDL2 Assets" Click="soundMuteButton_Click" BorderBrush="#FF7A7A7A">
                 <Button.Background>
                     <SolidColorBrush Color="White" Opacity="0.4"/>
                 </Button.Background>
