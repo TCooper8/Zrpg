@@ -10,7 +10,8 @@ open System.Security.Authentication
 open System.Threading
 
 open System.Diagnostics
-open Logging
+open Zrpg.Commons
+open Zrpg.Commons.Bundle
 
 module WebServer =
   type Handler = HttpListenerRequest -> HttpListenerResponse -> Async<bool>
@@ -107,7 +108,7 @@ module WebServer =
     | HandleSocket of HttpListenerContext
     | Kill
 
-  type Server (log:Logger) =
+  type Server (log:LogBundle.Log) =
     let rand = new Random()
     let tokenSource = new CancellationTokenSource()
     let token = tokenSource.Token
@@ -233,7 +234,8 @@ module WebServer =
         while not <| token.IsCancellationRequested do
           let! context = task
 
-          log.Debug("Received headers {0}", context.Request.Headers)
+          log.Debug <| sprintf "Received headers %A" context.Request.Headers
+
           if context.Request.Headers.["Upgrade"] = "websocket" then
             log.Debug("Got websocket upgrade request!")
             HandleSocket(context) |> agent.Post
@@ -267,3 +269,32 @@ module WebServer =
         priority = serverModule.priority
       }
       agent.Post <| AddModule _serverModule
+
+  type private WebServerBundle (id) =
+    inherit IBundle()
+
+    let log = Zrpg.Commons.LogBundle.log()
+    let server = Server(log)
+
+    override this.Id = id
+
+    override this.Start context =
+      let repl = context.Platform.Lookup "REPL" |> Option.get
+      repl.Send <| CommandLine.LoadAssembly "WebServer.dll"
+
+    override this.PreRestart (e, context) =
+      log.Warn <| sprintf "Error: %A" e
+
+    override this.Receive (msg, sender) =
+      ()
+
+  let create (platform:IPlatform) id =
+    match platform.Lookup id with
+    | Some bundleRef -> bundleRef
+    | None ->
+      let bundle = WebServerBundle id
+      platform.Register bundle
+      match platform.Lookup id with
+      | Some bundleRef -> bundleRef
+      | None -> failwith "Unable to link bundle"
+    

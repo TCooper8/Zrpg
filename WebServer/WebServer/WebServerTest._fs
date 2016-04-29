@@ -12,7 +12,7 @@ open System.Diagnostics
 [<TestClass>]
 type Testrun () =
   let log = new Logging.StreamLogger("Test", Logging.LogLevel.Debug, Console.OpenStandardOutput())
-  let server = new WebServer.Server(log)
+  //let server = new WebServer.Server()
 
   let staticDir = Path.Combine(Directory.GetCurrentDirectory(), "static")
   let defaultFile = "index.html"

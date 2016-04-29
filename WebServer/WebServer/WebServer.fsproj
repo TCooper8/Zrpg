@@ -79,7 +79,7 @@
     <Compile Include="Try.fs" />
     <Compile Include="IO.fs" />
     <Compile Include="WebServer.fs" />
-    <Compile Include="WebServerTest.fs" />
+    <None Include="WebServerTest._fs" />
     <None Include="Script.fsx" />
     <Content Include="packages.config" />
     <Content Include="test.js" />
@@ -124,6 +124,11 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Commons\Commons.fsproj">
+      <Name>Commons</Name>
+      <Project>{b47b5e70-b2a8-4ad2-a8d7-98ba52bcb42d}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\..\Discovery\Discovery\Discovery.fsproj">
       <Name>Discovery</Name>
       <Project>{7827978d-378c-447a-915d-e72f6ad88d28}</Project>
