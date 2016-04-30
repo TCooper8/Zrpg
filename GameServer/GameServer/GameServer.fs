@@ -159,7 +159,7 @@ module GameServer =
         let state = {
           state with
             heroNames = state.heroNames.Add hero.name
-            heroes = state.heroes
+            heroes = state.heroes.Add(hero.id, hero)
             garrisons = state.garrisons.Add (garrison.id, garrison)
         }
         (state, AddHeroReply.Success hero.id)
