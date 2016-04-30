@@ -143,15 +143,24 @@ module Platform =
     let task =
       async {
         while not token.IsCancellationRequested do
-          // Consume all of the cells on the queue.
-          let ok, cell = queue.TryDequeue()
-          if not ok then
-            do! Async.Sleep 16
-          else
-            if cell.tokSource.IsCancellationRequested then
-              ()
+          try
+            //printfn "Worker..."
+            // Consume all of the cells on the queue.
+            let ok, cell = queue.TryDequeue()
+            //printfn "Got %A" ok
+            if not ok then
+              //printfn "Sleeping..."
+              do! Async.Sleep 4
             else
-              handleCell cell
+              if cell.tokSource.IsCancellationRequested then
+                //printfn "Cancelled."
+                ()
+              else
+                //printfn "Handling cell %s" cell.id
+                handleCell cell
+            //printfn "Done"
+          with e ->
+            printfn "%A" e
       } |> Async.StartAsTask
 
     member this.Queue = queue
@@ -170,18 +179,20 @@ module Platform =
     let activeCells = Map.empty<string, Cell> |> ref
     let workQueue = new ConcurrentQueue<Cell>()
     let cellWorkers = [
-      for i in 1 .. 1 do
+      for i in 1 .. 4 do
         yield CellWorker (workQueue, deadBundle)
     ]
 
     let task =
       let rec loop (): unit Async = async {
         let cells = !activeCells
+        //printfn "Cells %A" cells
+
         let nCells = cells.Count
         let mutable toRemove = Set.empty<string>
 
-        if workQueue.Count > nCells * cellWorkers.Length then
-          do! Async.Sleep 16
+        if workQueue.Count > (1 <<< 20) then
+          do! Async.Sleep 4
           return! loop()
         else
 
@@ -301,6 +312,7 @@ module Platform =
 
             // Start the proxy lifecycle.
             start (bundle.Id, props, tokSource, proxy, context, queue)
+            printfn "Started bundle %s" bundle.Id
             
             PreStart |> queue.Enqueue
             Start |> queue.Enqueue

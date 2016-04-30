@@ -58,15 +58,12 @@ module Bundle =
 
     interface IBundleRef with
       member this.Send (msg, sender) =
-        printfn "Got result %A" msg
-        printfn "Result type = %A" (msg.GetType())
         match msg with
         | :? 'a as msg ->
           res := Choice1Of2 msg
         | reply ->
           res := sprintf "Wrong reply type %A" reply |> Exception |> Choice2Of2
 
-        printfn "Notifying waiting threads..."
         mut.Set() |> ignore
 
     member this.Await (?timeout: int) = async {
