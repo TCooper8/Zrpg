@@ -52,5 +52,11 @@ namespace GUI.Pages
             //Navigate to hero page
             this.Frame.Navigate(typeof(HeroesPage));
         }
+
+        private void settingsPageButton_Click(object sender, RoutedEventArgs e)
+        {
+            //Navigate to settings page
+            this.Frame.Navigate(typeof(SettingsPage));
+        }
     }
 }

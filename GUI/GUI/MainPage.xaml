@@ -36,6 +36,11 @@
                     <SolidColorBrush Color="White" Opacity="0.4"/>
                 </Button.Background>
             </Button>
+            <Button x:Name="settingsPageButton" Content="&#xE713;" HorizontalAlignment="Right" Margin="0,0,70,20" VerticalAlignment="Bottom" Width="40" Height="40" FontSize="20" FontFamily="Segoe MDL2 Assets" BorderBrush="#FF7A7A7A" Click="settingsPageButton_Click">
+                <Button.Background>
+                    <SolidColorBrush Color="White" Opacity="0.4"/>
+                </Button.Background>
+            </Button>
         </Grid>
     </ScrollViewer>
 </Page>

@@ -113,5 +113,11 @@ namespace GUI.Pages
 
             maleToggleButton.IsChecked = false;
         }
+
+        private void settingsPageButton_Click(object sender, RoutedEventArgs e)
+        {
+            //Navigate to settings page
+            this.Frame.Navigate(typeof(SettingsPage));
+        }
     }
 }

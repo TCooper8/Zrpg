@@ -28,6 +28,7 @@ namespace GUI
     {
         public static MainPage Current;
         static ClientState state = ClientState.state;
+        static SettingsState settingState = SettingsState.state;
 
         // Initializes app data containers
         StorageFolder roamingFolder = null;
@@ -41,6 +42,9 @@ namespace GUI
         {
             this.InitializeComponent();
             Current = this;
+
+            //Load all settings
+            settingState.LoadAllSettings();
 
             // Sets app data containers to current roaming folder
             roamingFolder = ApplicationData.Current.RoamingFolder;
@@ -152,6 +156,12 @@ namespace GUI
                 soundMuteButton.Content = volume;
                 mediaElement.Play();
             }
+        }
+
+        private void settingsPageButton_Click(object sender, RoutedEventArgs e)
+        {
+            //Navigate to settings page
+            this.Frame.Navigate(typeof(SettingsPage));
         }
     }
 }

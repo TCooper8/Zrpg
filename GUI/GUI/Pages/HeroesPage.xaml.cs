@@ -186,5 +186,11 @@ namespace GUI.Pages
             //Navigate back to garrison page
             this.Frame.Navigate(typeof(GarrisonPage));
         }
+
+        private void settingsPageButton_Click(object sender, RoutedEventArgs e)
+        {
+            //Navigate to settings page
+            this.Frame.Navigate(typeof(SettingsPage));
+        }
     }
 }

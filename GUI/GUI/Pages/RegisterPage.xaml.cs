@@ -44,5 +44,11 @@ namespace GUI.Pages
             //Navigate to login page
             this.Frame.Navigate(typeof(MainPage));
         }
+
+        private void settingsPageButton_Click(object sender, RoutedEventArgs e)
+        {
+            //Navigate to settings page
+            this.Frame.Navigate(typeof(SettingsPage));
+        }
     }
 }

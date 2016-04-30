@@ -38,6 +38,11 @@
                 </Button.Background>
             </Button>
             <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="50,0,0,0" TextWrapping="Wrap" Text="Back" VerticalAlignment="Top" Height="40" FontSize="20" Foreground="White" Padding="0,5,0,0"/>
+            <Button x:Name="settingsPageButton" Content="&#xE713;" HorizontalAlignment="Right" Margin="0,0,20,20" VerticalAlignment="Bottom" Width="40" Height="40" FontSize="20" FontFamily="Segoe MDL2 Assets" BorderBrush="#FF7A7A7A" Click="settingsPageButton_Click" Grid.Row="1">
+                <Button.Background>
+                    <SolidColorBrush Color="White" Opacity="0.4"/>
+                </Button.Background>
+            </Button>
         </Grid>
     </ScrollViewer>
 </Page>

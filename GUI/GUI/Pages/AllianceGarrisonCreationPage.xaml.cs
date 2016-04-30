@@ -111,5 +111,11 @@ namespace GUI.Pages
                                 "Gnome info detail 3\n\n" +
                                 "Gnome info detail 4";
         }
+
+        private void settingsPageButton_Click(object sender, RoutedEventArgs e)
+        {
+            //Navigate to settings page
+            this.Frame.Navigate(typeof(SettingsPage));
+        }
     }
 }

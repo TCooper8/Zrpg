@@ -53,5 +53,11 @@ namespace GUI.Pages
             //Navigate to horde garrison creation page
             this.Frame.Navigate(typeof(HordeGarrisonCreationPage));
         }
+
+        private void settingsPageButton_Click(object sender, RoutedEventArgs e)
+        {
+            //Navigate to settings page
+            this.Frame.Navigate(typeof(SettingsPage));
+        }
     }
 }

@@ -109,5 +109,11 @@ namespace GUI.Pages
                                 "Goblin info detail 3\n\n" +
                                 "Goblin info detail 4";
         }
+
+        private void settingsPageButton_Click(object sender, RoutedEventArgs e)
+        {
+            //Navigate to settings page
+            this.Frame.Navigate(typeof(SettingsPage));
+        }
     }
 }

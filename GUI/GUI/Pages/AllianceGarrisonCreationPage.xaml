@@ -40,6 +40,11 @@
                 <ProgressRing x:Name="progressRing" HorizontalAlignment="Center" VerticalAlignment="Center" Width="60" Height="60" Margin="0,20,0,0" Foreground="White" RelativePanel.AlignTopWithPanel="True" RelativePanel.AlignHorizontalCenterWithPanel="True"/>
                 <TextBlock x:Name="infoTextBlock" TextWrapping="Wrap" Text="Creating Garrison. . ." FontSize="20" Foreground="White" Margin="0,0,0,20" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignHorizontalCenterWithPanel="True"/>
             </RelativePanel>
+            <Button x:Name="settingsPageButton" Content="&#xE713;" HorizontalAlignment="Right" Margin="0,0,20,20" VerticalAlignment="Bottom" Width="40" Height="40" FontSize="20" FontFamily="Segoe MDL2 Assets" BorderBrush="#FF7A7A7A" Click="settingsPageButton_Click" Grid.Row="1">
+                <Button.Background>
+                    <SolidColorBrush Color="White" Opacity="0.4"/>
+                </Button.Background>
+            </Button>
         </Grid>
     </ScrollViewer>
 </Page>
