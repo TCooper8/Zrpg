@@ -26,12 +26,30 @@ let main argv =
 
   //log
   let game = Game.GameServer.server platform "Zrpg.GameServer"
-  game.AddRegion ({ name = "bob" })
-  |> Async.RunSynchronously
-  |> printfn "Result = %A"
 
   // Have the web server listen.
   async {
+    let! reply = game.AddRegion ({ name = "Elwyn Forest" })
+    let regionId =
+      match reply with
+      | AddRegionReply.Success id -> id
+      | RegionExists -> failwith "Region exists"
+
+    let! reply = game.AddZone {
+      name = "Northshire"
+      regionId = regionId
+      terrain = Plains
+    }
+    let zoneId =
+      match reply with
+      | AddZoneReply.Success id -> id
+      | _ -> failwith <| sprintf "Expected AddZoneReply.Success but got %A" reply
+
+    let! reply = game.SetStartingZone (Human, zoneId)
+    match reply with
+    | SetStartingZoneReply.Success -> ()
+    | _ -> failwith <| sprintf "Expected AddZoneReply.Success but got %A" reply
+
     let! handler = game.GetApiHandler()
     web.Send <| WebServer.AddHandler (handler, 100)
     

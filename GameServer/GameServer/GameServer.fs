@@ -483,6 +483,22 @@ module GameServer =
         | reply -> sprintf "Expected AddRegion reply but got %A" reply |> failwith
     }
 
+    member this.AddZone addZone = async {
+      let! res = addZone |> AddZone |> send
+      return
+        match res with
+        | AddZoneReply reply -> reply
+        | reply -> sprintf "Expected AddZone reply but got %A" reply |> failwith
+    }
+
+    member this.SetStartingZone (race, zoneId) = async {
+      let! res = SetStartingZone(race, zoneId) |> send
+      return
+        match res with
+        | SetStartingZoneReply reply -> reply
+        | reply -> sprintf "Expected SetStartingZone reply but got %A" reply |> failwith
+    }
+
     member this.GetApiHandler (): Pario.WebServer.Handler Async = async {
       let! res = send GetApiHandler
       return res
