@@ -14,12 +14,12 @@ open FSharp.Reflection
 open FSharp.Reflection.FSharpReflectionExtensions
 
 module CommandLine =
-  type Msg = 
+  type private Msg = 
     | Eval of string
     | LoadAssembly of string
     | LoadConsole
 
-  type REPLBundle () =
+  type private REPLBundle (id) =
     inherit IBundle()
 
     let argv = [| "C:\\fsi.exe" |]
@@ -99,8 +99,15 @@ module CommandLine =
         else
         printfn "Running %s" seq
 
+        let doEval = [
+          "let"
+          "open"
+          "#"
+        ]
+
         let res, warnings =
-          if seq.StartsWith("let") then
+          if doEval |> List.tryFind (fun s -> seq.StartsWith(s)) |> Option.isSome then
+          //if seq.StartsWith("let") then
             session.EvalInteractionNonThrowing seq
             |> fun (a, b) ->
               match a with
@@ -123,7 +130,7 @@ module CommandLine =
 
       loop () |> Async.Start
 
-    override this.Id = "REPL"
+    override this.Id = id
 
     override this.Receive (msg, sender) =
       match msg with
@@ -134,5 +141,23 @@ module CommandLine =
         | LoadConsole -> start()
       ()
 
-  let create () =
-    REPLBundle() :> IBundle
+  type ReplRef (bundle:IBundleRef) =
+    member this.Eval code =
+      code |> Eval |> bundle.Send
+
+    member this.LoadAssembly asm =
+      asm |> LoadAssembly |> bundle.Send
+
+    member this.LoadConsole () =
+      LoadConsole |> bundle.Send
+
+  let create (platform:IPlatform) id =
+    match platform.Lookup id with
+    | None ->
+      let bundle = REPLBundle id :> IBundle
+      platform.Register bundle
+      platform.Lookup id
+      |> Option.get
+      |> ReplRef
+    | Some ref ->
+      ref |> ReplRef

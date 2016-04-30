@@ -64,6 +64,10 @@ let main argv =
   |> Async.RunSynchronously
   |> printfn "Result = %A"
 
+  // Run the REPL
+  //let repl = CommandLine.create platform "repl"
+  //repl.LoadConsole ()
+
   async {
     while true do
       do! Async.Sleep(Int32.MaxValue)

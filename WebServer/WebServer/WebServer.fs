@@ -296,10 +296,6 @@ module WebServer =
 
     override this.Id = id
 
-    override this.Start context =
-      let repl = context.Platform.Lookup "REPL" |> Option.get
-      repl.Send <| CommandLine.LoadAssembly "WebServer.dll"
-
     override this.PreRestart (e, context) =
       log.Warn <| sprintf "Error: %A" e
 

@@ -190,6 +190,7 @@ module Platform =
 
         let nCells = cells.Count
         let mutable toRemove = Set.empty<string>
+        let mutable cellsQueued = 0
 
         if workQueue.Count > (1 <<< 20) then
           do! Async.Sleep 4
@@ -203,7 +204,11 @@ module Platform =
 
           if cell.tokSource.IsCancellationRequested then
             toRemove <- toRemove.Add id
+          else if cell.queue.Count = 0 then
+            // Do nothing
+            ()
           else
+            cellsQueued <- cellsQueued + 1
             workQueue.Enqueue (cell)
 
         if not toRemove.IsEmpty then
@@ -214,6 +219,9 @@ module Platform =
         for worker in cellWorkers do
           if worker.Task.IsFaulted then
             printfn "Worker has faulted!"
+
+        if cellsQueued = 0 then
+          do! Async.Sleep 16
 
         return! loop ()
       }
