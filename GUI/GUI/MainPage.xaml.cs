@@ -163,5 +163,21 @@ namespace GUI
             //Navigate to settings page
             this.Frame.Navigate(typeof(SettingsPage));
         }
+
+        private void usernameTextBox_KeyDown(object sender, KeyRoutedEventArgs e)
+        {
+            if (e.Key == Windows.System.VirtualKey.Enter)
+            {
+                loginButton_Click(sender, e);
+            }
+        }
+
+        private void passwordBox_KeyDown(object sender, KeyRoutedEventArgs e)
+        {
+            if (e.Key == Windows.System.VirtualKey.Enter)
+            {
+                loginButton_Click(sender, e);
+            }
+        }
     }
 }
