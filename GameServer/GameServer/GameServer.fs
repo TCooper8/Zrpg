@@ -21,9 +21,6 @@ module GameServer =
 
   type Cmd = Msg * AsyncReplyChannel<Reply>
 
-  type PostMsg =
-    | RawrMsg of string
-
   [<Interface>]
   type IGameServer =
     abstract ApiHandler: Pario.WebServer.Handler
@@ -428,23 +425,20 @@ module GameServer =
           return false
       }
 
+  type Msg =
+    | GetApiHandler
+
   type private GameServerBundle (log, id) =
     inherit IBundle()
 
     let server = GameServer(log)
     let agent = server.Agent
+    let mutable context: IContext option = None
 
     override this.Id = id
 
-    override this.Start context =
-      let repl = context.Platform.Lookup "REPL" |> Option.get
-      repl.Send <| CommandLine.LoadAssembly "GameServer.dll"
-      repl.Send <| CommandLine.LoadAssembly "GameCommons.dll"
-
-      sprintf "let game = Zrpg.Game.GameServer.server %A" this.Id
-      |> CommandLine.Eval
-      |> repl.Send
-      ()
+    override this.Start _context =
+      context <- Some _context
 
     override this.PreRestart (e, context) =
       log.Warn <| sprintf "Error: %A" e
@@ -459,6 +453,13 @@ module GameServer =
           | Some sender ->
             sender.Send reply
           | None -> ()
+      | :? Msg as msg ->
+        match msg with
+        | GetApiHandler ->
+          sender |> Option.iter (fun sender ->
+            let handler = (server :> IGameServer).ApiHandler
+            sender.Send handler
+          )
 
   type GameServerChan(gameBundle:IBundleRef) =
     let fromChoice res =
@@ -467,7 +468,7 @@ module GameServer =
       | Choice2Of2 e -> sprintf "Error: %A" e |> failwith
 
     let send msg = async {
-      let chan = Chan<Reply>()
+      let chan = Chan<'a>()
       gameBundle.Send (msg, chan)
       let! res = chan.Await()
       let reply = fromChoice res
@@ -480,6 +481,11 @@ module GameServer =
         match res with
         | AddRegionReply reply -> reply
         | reply -> sprintf "Expected AddRegion reply but got %A" reply |> failwith
+    }
+
+    member this.GetApiHandler (): Pario.WebServer.Handler Async = async {
+      let! res = send GetApiHandler
+      return res
     }
 
     member this.AddRegionSync addRegion =
