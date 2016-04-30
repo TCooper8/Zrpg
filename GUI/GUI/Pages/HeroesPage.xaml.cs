@@ -43,7 +43,16 @@ namespace GUI.Pages
             {
                 var success = (GetHeroArrayReply.Success)reply;
                 listView.ItemsSource = success.Item;
-                listView.SelectedIndex = 0;
+
+                var item = success.Item;
+                
+                if(listView.Items.Count == 0)
+                {
+                }
+                else
+                {
+                    listView.SelectedIndex = 0;
+                }               
             }
         }
 
