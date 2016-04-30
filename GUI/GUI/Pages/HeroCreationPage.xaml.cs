@@ -66,11 +66,6 @@ namespace GUI.Pages
             var garrison = state.Garrison;
             Gender gender;
 
-            //Behavior for loading visual. Using a delay for testing purposes
-            relativePanel.Visibility = Visibility.Visible;
-            progressRing.IsActive = true;
-            await Task.Delay(2000);
-
             //Get user selected gender
             if (maleToggleButton.IsChecked == true)
             {
@@ -87,6 +82,11 @@ namespace GUI.Pages
             }
             else
             {
+                //Behavior for loading visual. Using a delay for testing purposes
+                relativePanel.Visibility = Visibility.Visible;
+                progressRing.IsActive = true;
+                await Task.Delay(2000);
+
                 var create = await state.AddHero(clientId, heroNameTextBox.Text, Race.Human, garrison.faction, gender, HeroClass.Warrior);
 
                 if(create.IsSuccess)
