@@ -8,6 +8,7 @@ open System.Text.RegularExpressions
 open System.Diagnostics
 open System.Security.Authentication
 open System.Threading
+open System.Threading.Tasks
 
 open System.Diagnostics
 open Zrpg.Commons
@@ -23,6 +24,10 @@ module WebServer =
 
   type Msg =
     | AddHandler of Handler * priority:int
+    | Listen of host:string * port:uint16
+
+  type Reply =
+    | ListenReply of Choice<unit, exn>
 
   module FileLoader =
     let serveStatic rootDirectory defaultFile =
@@ -277,6 +282,18 @@ module WebServer =
     inherit IBundle()
     let server = Server(log)
 
+    let mutable listenTasks = Map.empty<string, Task>
+
+    let startListening host port =
+      try
+        let endPoint = sprintf "http://%s:%i" host port
+
+        server.listen host port
+        |> Async.StartAsTask
+        |> fun task -> listenTasks <- listenTasks.Add(endPoint, task)
+        |> fun () -> Choice1Of2 ()
+      with e -> Choice2Of2 e
+
     override this.Id = id
 
     override this.Start context =
@@ -295,6 +312,10 @@ module WebServer =
             handler = handler
             priority = priority
           }
+
+        | Listen (host, port) ->
+          let reply = startListening host port |> ListenReply
+          sender |> Option.iter (fun sender -> sender.Send reply)
 
   let create (platform:IPlatform) id =
     match platform.Lookup id with
