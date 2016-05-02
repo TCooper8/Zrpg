@@ -117,6 +117,9 @@
     <Compile Include="Pages\HeroesPage.xaml.cs">
       <DependentUpon>HeroesPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\HeroSubPages\HeroInventoryTab.xaml.cs">
+      <DependentUpon>HeroInventoryTab.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\HeroSubPages\HeroMapTab.xaml.cs">
       <DependentUpon>HeroMapTab.xaml</DependentUpon>
     </Compile>
@@ -187,6 +190,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\HeroesPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\HeroSubPages\HeroInventoryTab.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

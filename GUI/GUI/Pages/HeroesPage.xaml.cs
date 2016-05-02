@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GUI.Pages.HeroSubPages;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -118,6 +119,8 @@ namespace GUI.Pages
             gearButton.IsEnabled = true;
             statsButton.IsEnabled = true;
             mapButton.IsEnabled = true;
+
+            infoFrame.Navigate(typeof(HeroInventoryTab));
         }
 
         private async void mapButton_Click(object sender, RoutedEventArgs e)
