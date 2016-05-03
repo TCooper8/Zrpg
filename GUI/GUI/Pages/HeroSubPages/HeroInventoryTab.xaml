@@ -13,22 +13,6 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <TextBlock x:Name="itemTextBlock" Margin="0" TextWrapping="Wrap" Text="Item Text Block" VerticalAlignment="Top" TextAlignment="Center" FontSize="20" Width="250" HorizontalAlignment="Left"/>
-        <GridView x:Name="gridView" Grid.Column="1" Margin="0" SelectionChanged="gridView_SelectionChanged">
-            <GridViewItem Content="Item 1" Height="200" Width="200" Foreground="White">
-                <GridViewItem.Background>
-                    <SolidColorBrush Color="#33FFFFFF"/>
-                </GridViewItem.Background>
-            </GridViewItem>
-            <GridViewItem Background="#33FFFFFF" Content="Item 2" Foreground="White" Width="200" Height="200"/>
-            <GridViewItem Background="#33FFFFFF" Content="Item 3" Foreground="White" Width="200" Height="200"/>
-            <GridViewItem Background="#33FFFFFF" Content="Item 4" Foreground="White" Width="200" Height="200"/>
-            <GridViewItem Background="#33FFFFFF" Content="Item 5" Foreground="White" Width="200" Height="200"/>
-            <GridViewItem Background="#33FFFFFF" Content="Item 6" Foreground="White" Width="200" Height="200"/>
-            <GridViewItem Background="#33FFFFFF" Content="Item 7" Foreground="White" Width="200" Height="200"/>
-            <GridViewItem Background="#33FFFFFF" Content="Item 8" Foreground="White" Width="200" Height="200"/>
-            <GridViewItem Background="#33FFFFFF" Content="Item 9" Foreground="White" Width="200" Height="200"/>
-            <GridViewItem Background="#33FFFFFF" Content="Item 10" Foreground="White" Width="200" Height="200"/>
-        </GridView>
         <Button x:Name="sellButton" Content="Sell" HorizontalAlignment="Left" Margin="10,0,0,20" VerticalAlignment="Bottom" Width="100" Height="40" FontSize="20" BorderBrush="#FF7A7A7A" Click="sellButton_Click">
             <Button.Background>
                 <SolidColorBrush Color="White" Opacity="0.4"/>
@@ -39,6 +23,61 @@
                 <SolidColorBrush Color="White" Opacity="0.4"/>
             </Button.Background>
         </Button>
+        <Pivot Title="" Margin="0" Grid.Column="1" Foreground="White" SelectionChanged="Pivot_SelectionChanged">
+            <PivotItem Header="Tab 1" Foreground="White">
+                <GridView x:Name="gridViewTab1" Margin="0" SelectionChanged="gridViewTab1_SelectionChanged">
+                    <GridViewItem Content="Item 1" Foreground="White" Height="100" Width="100">
+                        <GridViewItem.Background>
+                            <SolidColorBrush Color="Black" Opacity="0.4"/>
+                        </GridViewItem.Background>
+                    </GridViewItem>
+                    <GridViewItem Content="Item 2" Foreground="White" Width="100" Height="100">
+                        <GridViewItem.Background>
+                            <SolidColorBrush Color="Black" Opacity="0.4"/>
+                        </GridViewItem.Background>
+                    </GridViewItem>
+                    <GridViewItem Content="Item 3" Foreground="White" Width="100" Height="100">
+                        <GridViewItem.Background>
+                            <SolidColorBrush Color="Black" Opacity="0.4"/>
+                        </GridViewItem.Background>
+                    </GridViewItem>
+                    <GridViewItem Content="Item 4" Foreground="White" Width="100" Height="100">
+                        <GridViewItem.Background>
+                            <SolidColorBrush Color="Black" Opacity="0.4"/>
+                        </GridViewItem.Background>
+                    </GridViewItem>
+                    <GridViewItem Content="Item 5" Foreground="White" Width="100" Height="100">
+                        <GridViewItem.Background>
+                            <SolidColorBrush Color="Black" Opacity="0.4"/>
+                        </GridViewItem.Background>
+                    </GridViewItem>
+                    <GridViewItem Content="Item 6" Foreground="White" Width="100" Height="100">
+                        <GridViewItem.Background>
+                            <SolidColorBrush Color="Black" Opacity="0.4"/>
+                        </GridViewItem.Background>
+                    </GridViewItem>
+                </GridView>
+            </PivotItem>
+            <PivotItem Header="Tab 2" Foreground="White">
+                <GridView x:Name="gridViewTab2" Margin="0" SelectionChanged="gridViewTab2_SelectionChanged">
+                    <GridViewItem Content="Item 1" Foreground="White" Width="100" Height="100">
+                        <GridViewItem.Background>
+                            <SolidColorBrush Color="Black" Opacity="0.4"/>
+                        </GridViewItem.Background>
+                    </GridViewItem>
+                    <GridViewItem Content="Item 2" Foreground="White" Width="100" Height="100">
+                        <GridViewItem.Background>
+                            <SolidColorBrush Color="Black" Opacity="0.4"/>
+                        </GridViewItem.Background>
+                    </GridViewItem>
+                    <GridViewItem Content="Item 3" Foreground="White" Width="100" Height="100">
+                        <GridViewItem.Background>
+                            <SolidColorBrush Color="Black" Opacity="0.4"/>
+                        </GridViewItem.Background>
+                    </GridViewItem>
+                </GridView>
+            </PivotItem>
+        </Pivot>
 
     </Grid>
 </Page>
