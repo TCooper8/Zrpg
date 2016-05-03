@@ -27,10 +27,6 @@ namespace GUI.Pages
         ClientState state = ClientState.state;
         Hero hero;
 
-        Thickness garrisonLocation = new Thickness(340, 120, 0, 0);
-        Thickness northshireLocation = new Thickness(970, 15, 0, 0);
-        Thickness goldshireLocation = new Thickness(690, 420, 0, 0);
-
         public HeroMapTab()
         {
             this.InitializeComponent();
@@ -40,6 +36,11 @@ namespace GUI.Pages
         {
             this.hero = e.Parameter as Hero;
             UpdateHeroStatus();
+            zoneInfoTextBlock.Text = "Garrison Info";
+            informationTextBlock.Text = "Gold Income: 580 per day\n" +
+                                        "Soldiers: 250\n" +
+                                        "Trade Influence: +10%\n" +
+                                        "Holy Power: 5\n";
         }
         
         //Get client garrison information (owned regions, owned zones)
@@ -51,25 +52,54 @@ namespace GUI.Pages
         //Update hero location location and information
         private void UpdateHeroStatus()
         {
-            textBlockTest.Text = hero.name;
+            string heroLocation = hero.name + "'s Current Location: ";
+
+            if (zoneInfoTextBlock.Text == "Goldshire Info")
+            {
+                heroLocationText.Text = heroLocation + "\nGoldshire";
+            }
+
+            else if (zoneInfoTextBlock.Text == "Northshire Info")
+            {
+                heroLocationText.Text = heroLocation + "\nNorthshire";
+            }
+
+            else
+            {
+                heroLocationText.Text = heroLocation + "\nGarrison";
+            }
         }
 
         private void garrisonButton_Click(object sender, RoutedEventArgs e)
         {
-            heroIcon.Margin = garrisonLocation;
-            //this.Frame.Navigate(typeof(GarrisonZone));          
+            zoneInfoTextBlock.Text = "Garrison Info";
+            informationTextBlock.Text = "Gold Income: 580 per day\n" +
+                                        "Soldiers: 250\n" +
+                                        "Trade Influence: +10%\n" +
+                                        "Holy Power: 5\n";    
         }
 
         private void northshireButton_Click(object sender, RoutedEventArgs e)
         {
-            heroIcon.Margin = northshireLocation;
-            //this.Frame.Navigate(typeof(NorthshireZone));
+            zoneInfoTextBlock.Text = "Northshire Info";
+            informationTextBlock.Text = "Gold Income: 60 per day\n" +
+                                        "Soldiers: 30\n" +
+                                        "Trade Influence: +5%\n" +
+                                        "Holy Power: 10\n";
         }
 
         private void goldshireButton_Click(object sender, RoutedEventArgs e)
         {
-            heroIcon.Margin = goldshireLocation;
-            //this.Frame.Navigate(typeof(GoldshireZone));           
+            zoneInfoTextBlock.Text = "Goldshire Info";
+            informationTextBlock.Text = "Gold Income: 80 per day\n" +
+                                       "Soldiers: 50\n" +
+                                       "Trade Influence: +3%\n" +
+                                       "Holy Power: 2\n";
+        }
+
+        private void sendHeroButton_Click(object sender, RoutedEventArgs e)
+        {
+            UpdateHeroStatus();
         }
     }
 }
