@@ -66,6 +66,7 @@
     <Compile Include="Stats.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="Messages.fs" />
+    <Compile Include="IGameClient.fs" />
     <None Include="Script.fsx" />
   </ItemGroup>
   <ItemGroup>
