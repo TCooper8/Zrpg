@@ -75,11 +75,6 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Commons\Commons.fsproj">
-      <Name>Commons</Name>
-      <Project>{b47b5e70-b2a8-4ad2-a8d7-98ba52bcb42d}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\GameClient\GameClient\GameClient.fsproj">
       <Name>GameClient</Name>
       <Project>{0cf77619-8a7f-4059-89f1-cd6b24eac853}</Project>

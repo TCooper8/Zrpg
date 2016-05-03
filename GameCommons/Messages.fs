@@ -1,5 +1,7 @@
 ﻿namespace Zrpg.Game
 
+type ClientId = string
+
 type Msg =
   | AddGarrison of AddGarrison
   | AddHero of AddHero
@@ -8,7 +10,6 @@ type Msg =
   | GetClientGarrison of string
   | GetHero of string
   | GetHeroArray of string array
-  | GetHeroInventory of heroId:string
   | RemGarrison of string
   | SetStartingZone of Race * string
   | Tick
@@ -39,11 +40,6 @@ and AddZone = {
   terrain: Terrain
 }
 
-type AsyncMsg = {
-  msg: Msg
-  id: string
-}
-
 type Reply =
   | AddGarrisonReply of AddGarrisonReply
   | AddHeroReply of AddHeroReply
@@ -54,7 +50,6 @@ type Reply =
   | GetClientGarrisonReply of GetClientGarrisonReply
   | GetHeroReply of GetHeroReply
   | GetHeroArrayReply of GetHeroArrayReply
-  | GetHeroInventoryReply of GetHeroInventoryReply
   | GetStartingZoneReply of GetStartingZoneReply
   | GetZoneReply of GetZoneReply
   | GetZoneConnectionsReply of GetZoneConnectionsReply
@@ -99,10 +94,6 @@ and GetHeroArrayReply =
   | Success of Hero array
   | Empty
 
-and GetHeroInventoryReply =
-  | Success of HeroInventory
-  | Empty
-
 and GetStartingZoneReply =
   | Success of string
   | Empty
@@ -121,8 +112,3 @@ and RemGarrisonReply =
 and SetStartingZoneReply =
   | Success
   | ZoneDoesNotExist
-
-type AsyncReply = {
-  reply: Reply
-  id: string
-}

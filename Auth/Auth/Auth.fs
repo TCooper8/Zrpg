@@ -7,24 +7,15 @@ open System.IO
 open System.Security.Cryptography
 open System.Diagnostics
 open System.Text
-open System.Net
 
 open Logging
 open Pario.WebServer
 open Zrpg.Discovery
 
-
 module Auth =
   type Username = string
   type Screenname = string
   type Password = string
-
-  type Token = {
-    id: string
-    ttl: int
-  }
-
-  let uuid () = Guid.NewGuid().ToString()
 
   type private UserRegistry = {
     username: Username
@@ -32,12 +23,6 @@ module Auth =
     passwordSalt: string
     birthdate: DateTime
     screenname: Screenname
-  }
-
-  type private UserSession = {
-    token: Token
-    screenname: Username
-    originIp: IPAddress
   }
 
   type RegisterUserRecord = {
@@ -48,26 +33,17 @@ module Auth =
   }
 
   type private Msg =
-    | Login of Username * Password * IPAddress * AsyncReplyChannel<Choice<Token, exn>>
+    | Verify of Username * Password * AsyncReplyChannel<exn option>
     | Register of RegisterUserRecord * AsyncReplyChannel<exn option>
     | Deregister of Username * AsyncReplyChannel<exn option>
-    | VerifyToken of Token * AsyncReplyChannel<exn option>
-    | RefreshToken of Token * IPAddress * AsyncReplyChannel<exn option>
 
   type private LocalAuthReceive (log:Logger) =
     let enc = Encoding.UTF8
     let mutable userStore = Map.empty<string, UserRegistry>
-    let mutable sessionStore = Map.empty<string, UserSession>
-    let mutable userTokenMapping = Map.empty<string, Token>
-
-    let tokenTtl = 60 * 24 // 1 day in minutes.
-
-    let verifyLogin username password =
-      
     
     member this.receive =
       function 
-      | Login(username, password, ipAddress, reply) ->
+      | Verify(username, password, reply) ->
         log.Debug <| sprintf "Verying user %s" username
         try
           log.Debug <| sprintf "Verifying user %s" username
@@ -85,44 +61,10 @@ module Auth =
 
             if passHash <> reg.passwordHash then
               log.Debug <| sprintf "User %s is invalid" username
-              "User credentials are invalid." |> Exception |> Choice2Of2
+              "User credentials are invalid." |> Exception |> Some
             else
               log.Debug <| sprintf "User %s is valid" username
-
-              let token = match userTokenMapping.TryFind username with
-              | None ->
-                // Create a new session.
-                let token = {
-                  id = uuid()
-                  ttl = tokenTtl
-                }
-                let session = {
-                  token = token
-                  screenname = reg.screenname
-                  originIp = ipAddress
-                }
-                // Add the session.
-                sessionStore <- sessionStore.Add (token.id, session)
-                userTokenMapping <- userTokenMapping.Add (username, token)
-                token
-
-              | Some token ->
-                // Relogging in? Go ahead and log them and generate a new token.
-                let token = {
-                  id = uuid()
-                  ttl = tokenTtl
-                }
-                let session = {
-                  token = token
-                  screenname = reg.screenname
-                  originIp = ipAddress
-                }
-                // Add the session.
-                sessionStore <- sessionStore.Add (token.id, session)
-                userTokenMapping <- userTokenMapping.Add (username, token)
-                token
-
-              Choice1Of2 token
+              None
 
           reply.Reply(res)
         with e -> reply.Reply(Some e)

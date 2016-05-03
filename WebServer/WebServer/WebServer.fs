@@ -10,15 +10,12 @@ open System.Security.Authentication
 open System.Threading
 open System.Threading.Tasks
 
-open System.Reflection
-
 open System.Diagnostics
 open Zrpg.Commons
 open Zrpg.Commons.Bundle
 
 module WebServer =
   type Handler = HttpListenerRequest -> HttpListenerResponse -> Async<bool>
-  type WsHandler = HttpListenerContext -> bool Async
 
   type ServerModule = {
     handler: Handler
@@ -27,7 +24,6 @@ module WebServer =
 
   type Msg =
     | AddHandler of Handler * priority:int
-    | AddWsHandler of WsHandler
     | Listen of host:string * port:uint16
 
   type Reply =
@@ -185,7 +181,7 @@ module WebServer =
     )
 
     do 
-      [ 0 .. 3 ]
+      [ 0 .. 20 ]
       |> List.map (fun i ->
         let worker = MailboxProcessor.Start(fun inbox ->
           let rec loop handlers = async {
@@ -235,7 +231,6 @@ module WebServer =
       let listener = new HttpListener()
 
       listener.Prefixes.Add <| sprintf "http://%s:%i/" host port
-      listener.Prefixes.Add <| sprintf "https://%s:%i/" host (port + 1us)
       listener.Start()
 
       let task = Async.FromBeginEnd(
@@ -247,16 +242,9 @@ module WebServer =
         while not <| token.IsCancellationRequested do
           let! context = task
 
-          let headers =
-            [
-              for pair in context.Request.Headers do
-                yield (pair, context.Request.Headers.[pair])
-            ]
-            |> fun ls -> String.Join("; ", ls)
+          log.Debug <| sprintf "Received headers %A" context.Request.Headers
 
-          log.Debug <| sprintf "Received headers %A" headers
-
-          if context.Request.Headers.["Connection"] = "Upgrade" then
+          if context.Request.Headers.["Upgrade"] = "websocket" then
             log.Debug("Got websocket upgrade request!")
             HandleSocket(context) |> agent.Post
           else
@@ -320,9 +308,6 @@ module WebServer =
             handler = handler
             priority = priority
           }
-
-        | AddWsHandler (handler) ->
-          do server.handleSocket handler
 
         | Listen (host, port) ->
           let reply = startListening host port |> ListenReply

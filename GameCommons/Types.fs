@@ -32,26 +32,9 @@ type Faction =
       | Alliance -> "Alliance"
       | Horde -> "Horde"
 
-type ItemSlot = {
-  position: int
-  itemRecordId: string option
-}
-
-type InventoryPane = {
-  position: int
-  slots: ItemSlot array
-}
-
-type HeroInventory = {
-  id: string
-  heroId: string
-  panes: InventoryPane array
-}
-
 type Hero = {
   id: string
   clientId: string
-  zoneId: string // Shows what zone the hero is in.
   name: string
   race: Race
   faction: Faction
@@ -84,13 +67,6 @@ type Garrison = {
 type Terrain =
   | Plains
   | Forest
-
-type AssetPositionInfo = {
-  id: string
-  assetId: string
-  x: int
-  y: int
-}
 
 type Zone = {
   id: string
@@ -132,54 +108,23 @@ type ClientWorld = {
   discoveredRegions: string array
 }
 
+type Objective =
+  | MenialObjective of MenialObjective
+and MenialObjective = {
+  id: string
+  timeDelta: int
+}
+
 type Quest = {
   id: string
   title: string
   body: string
-  reward: QuestReward
-  objective: Objective
-}
-
-and Objective =
-  | TimeObjective of TimeObjective
-
-and QuestReward =
-  | ItemReward of ItemReward
-
-and TimeObjective = {
-  timeDelta: int
-}
-
-and ItemReward = {
-  itemId: string
-  quantity: int
+  rewards: string array
+  objectives: string array
 }
 
 type QuestRecord = {
   id: string
   questId: string
   startTime: string
-}
-
-type ItemRecord = {
-  id: string
-  itemId: string
-  stackSize: int
-  maxStackSize: int
-}
-
-type Rarity =
-  | Common
-  | Uncommon
-  | Rare
-  | Epic
-  | Legendary
-
-type Item =
-  | TradeGood of TradeGood
-
-and TradeGood = {
-  id: string
-  name: string
-  rarity: Rarity
 }
