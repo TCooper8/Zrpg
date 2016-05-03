@@ -27,21 +27,35 @@ namespace GUI.Pages.HeroSubPages
             this.InitializeComponent();
         }
 
-        private void gridView_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            itemTextBlock.Text = "Item Index: " + gridView.SelectedIndex.ToString();
-        }
-
         private void sellButton_Click(object sender, RoutedEventArgs e)
         {
-            gridView.Items.Remove(gridView.SelectedItem);
+            gridViewTab1.Items.Remove(gridViewTab1.SelectedItem);
+            gridViewTab2.Items.Remove(gridViewTab2.SelectedItem);
             itemTextBlock.Text = "Item sold!";
         }
 
         private void toVaultButton_Click(object sender, RoutedEventArgs e)
         {
-            gridView.Items.Remove(gridView.SelectedItem);
+            gridViewTab1.Items.Remove(gridViewTab1.SelectedItem);
+            gridViewTab2.Items.Remove(gridViewTab2.SelectedItem);
             itemTextBlock.Text = "Item moved to vault!";
+        }
+
+        private void gridViewTab1_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            itemTextBlock.Text = "Item Index: " + gridViewTab1.SelectedIndex;
+        }
+
+        private void gridViewTab2_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            itemTextBlock.Text = "Item Index: " + gridViewTab2.SelectedIndex;
+        }
+
+        private void Pivot_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            itemTextBlock.Text = "Item Index: ";
+            gridViewTab1.SelectedIndex = -1;
+            gridViewTab2.SelectedIndex = -1;
         }
     }
 }
