@@ -5,6 +5,8 @@ open System
 open System.IO
 open System.Text
 open System.Diagnostics
+open System.Xml.Xsl
+open System.Reflection
 
 open Zrpg
 open Logging
@@ -23,6 +25,10 @@ let main argv =
   let platform = Platform.create "Main"
 
   let web = WebServer.create platform "web"
+
+  do
+    let asm = Assembly.GetExecutingAssembly()
+    printfn "AppId = %A" <| asm.GetType().GUID.ToString()
 
   //log
   let game = Game.GameServer.server platform "Zrpg.GameServer"
@@ -52,6 +58,9 @@ let main argv =
 
     let! handler = game.GetApiHandler()
     web.Send <| WebServer.AddHandler (handler, 100)
+
+    let! handler = game.GetSocketHandler()
+    web.Send <| WebServer.AddWsHandler handler
     
     let chan = Chan<WebServer.Reply>()
     WebServer.Listen (httpHost, httpPort) |> fun msg -> web.Send(msg, chan)

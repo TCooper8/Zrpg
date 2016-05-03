@@ -3,8 +3,10 @@
 open System
 open System.Threading
 
+/// 
 module Bundle =
-
+  /// <summary>Defines as interface for an IPlatform bundle to load.
+  /// </summary>
   [<AbstractClass>]
   type IBundle () =
     abstract member PreStart: unit -> unit
