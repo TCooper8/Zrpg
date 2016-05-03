@@ -126,8 +126,14 @@ module GameServer =
           let raceStats = raceStatMod msg.race
           classStats * raceStats
 
+        let startingZoneId =
+          match state.startingZones.TryFind (msg.race.ToString()) with
+          | None -> sprintf "Starting zone is not defined for %A" msg.race |> failwith
+          | Some zoneId -> zoneId
+
         let hero = {
           id = uuid()
+          zoneId = startingZoneId
           clientId = msg.clientId
           name = msg.name
           race = msg.race
@@ -137,6 +143,31 @@ module GameServer =
           level = 1
           stats = stats
         }
+
+        // Create the inventory for the hero.
+        let inventory =
+          let slots = 
+            [
+              for i in 1 .. 10 do
+                let slot = {
+                  position = i
+                  itemRecordId = None
+                }
+                yield slot
+            ] |> Array.ofList
+
+          let panes =
+            [ { position = 0
+                slots = slots
+              }
+            ] |> Array.ofList
+
+          let inventory = {
+            HeroInventory.id = hero.id
+            heroId = hero.id
+            panes = panes
+          }
+          inventory
 
         // Lookup the client's garrison, and add the hero to it.
         let garrison = 
@@ -158,6 +189,7 @@ module GameServer =
 
         let state = {
           state with
+            heroInventories = state.heroInventories.Add (inventory.id, inventory)
             heroNames = state.heroNames.Add hero.name
             heroes = state.heroes.Add(hero.id, hero)
             garrisons = state.garrisons.Add (garrison.id, garrison)
@@ -239,6 +271,12 @@ module GameServer =
         )
         |> fun heroes -> (state, heroes |> GetHeroArrayReply.Success |> GetHeroArrayReply)
 
+      | GetHeroInventory id ->
+        match state.heroInventories.TryFind id with
+        | None -> GetHeroInventoryReply.Empty
+        | Some value -> GetHeroInventoryReply.Success value
+        |> fun reply -> state, GetHeroInventoryReply reply
+
       | RemGarrison garrisonId ->
         let r = 
           match state.garrisons.TryFind garrisonId with
@@ -306,24 +344,7 @@ module GameServer =
         return! loop state
       }
 
-      let gameState = {
-        gameTime = 0
-        garrisons = Map.empty
-        zones = Map.empty
-        regions = Map.empty
-        heroes = Map.empty
-        worlds = Map.empty
-
-        clientGarrisons = Map.empty
-        clientWorlds = Map.empty
-
-        heroNames = Set.empty
-        regionNames = Set.empty
-        zoneNames = Set.empty
-
-        startingZones = Map.empty
-        zoneConnections = Map.empty
-      }
+      let gameState = GameState.Default
 
       loop gameState
     )
@@ -346,24 +367,49 @@ module GameServer =
           let res = inStream.ToArray() |> enc.GetString
           inStream.Position <- 0L
 
-          return res.Substring(0, res.Length - (1024 - n.Count))
+          return (n, res.Substring(0, res.Length - (1024 - n.Count)))
         else
           return! receive()
       }
 
-      let send msg = async {
-        let outBuffer = JsonConvert.SerializeObject(msg) |> enc.GetBytes
+      let send msg frameType = async {
+        let outBuffer = JsonConvert.SerializeObject(msg) |> Encoding.ASCII.GetBytes
         let outSegment = ArraySegment(outBuffer)
-        do! ws.SendAsync(outSegment, WebSocketMessageType.Text, true, tok) |> Async.AwaitIAsyncResult |> Async.Ignore
+        //match frameType with
+        //| WebSocketMessageType.Text ->
+          //do! ws.SendAsync(outSegment, WebSocketMessageType.Text, true, CancellationToken.None) |> Async.AwaitIAsyncResult |> Async.Ignore
+        //| WebSocketMessageType.Binary ->
+        do! ws.SendAsync(outSegment, WebSocketMessageType.Binary, true, CancellationToken.None) |> Async.AwaitIAsyncResult |> Async.Ignore
       }
 
       let rec loop () = async {
-        let! msg = receive()
-        log.Info <| sprintf ">>> %s END" msg
 
-        do! send "Hello"
+        try
+          log.Info "Receiving data..."
+          let! (res, json) = receive()
+          log.Info "Received."
 
-        return! loop()
+          let asyncMsg = JsonConvert.DeserializeObject<AsyncMsg>(json)
+          let msg = asyncMsg.msg
+
+          log.Info "Deserialized msg"
+          let! reply = agent.PostAndAsyncReply(fun reply -> (msg, reply))
+          let reply = {
+            reply = reply
+            id = asyncMsg.id
+          }
+          log.Info <| sprintf "Got reply %A" reply
+          let replyJson = JsonConvert.SerializeObject(reply)
+
+          log.Info <| "Serialized reply"
+          do! send replyJson res.MessageType
+          log.Info <| sprintf "Sent %s" replyJson
+
+          return! loop()
+        with e ->
+          log.Warn <| sprintf "Socket %A closed for %A" ws.State e
+          do! ws.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, e.Message, tok) |> Async.AwaitTask
+          return ()
       }
 
       do! loop()
@@ -427,6 +473,7 @@ module GameServer =
 
   type Msg =
     | GetApiHandler
+    | GetWsHandler
 
   type private GameServerBundle (log, id) =
     inherit IBundle()
@@ -458,6 +505,12 @@ module GameServer =
         | GetApiHandler ->
           sender |> Option.iter (fun sender ->
             let handler = (server :> IGameServer).ApiHandler
+            sender.Send handler
+          )
+
+        | GetWsHandler ->
+          sender |> Option.iter (fun sender ->
+            let handler = (server :> IGameServer).WebSocketHandler
             sender.Send handler
           )
 
@@ -501,6 +554,11 @@ module GameServer =
 
     member this.GetApiHandler (): Pario.WebServer.Handler Async = async {
       let! res = send GetApiHandler
+      return res
+    }
+
+    member this.GetSocketHandler (): Pario.WebServer.WsHandler Async = async {
+      let! res = send GetWsHandler
       return res
     }
 
