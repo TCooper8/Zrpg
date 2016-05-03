@@ -23,6 +23,7 @@ type IGameClient =
   abstract member GetClientGarrison : clientId:string -> GetClientGarrisonReply Task
   abstract member GetHero : heroId:string -> GetHeroReply Task
   abstract member GetHeroArray : heroIds:string array -> GetHeroArrayReply Task
+  abstract member GetHeroInventory : heroId:string -> GetHeroInventoryReply Task
   abstract member AddRegion : AddRegion -> AddRegionReply Task
   abstract member AddZone : AddZone -> AddZoneReply Task
   abstract member RemGarrison : garrisonId:string -> RemGarrisonReply Task
@@ -134,6 +135,17 @@ type private RestGameClient (endPoint) =
         | GetHeroArrayReply reply -> reply
         | ExnReply msg -> failwith msg
         | msg -> failwith <| sprintf "Expected AddGarrisonReply but got %A" msg
+
+        return reply
+      } |> Async.StartAsTask
+
+    member this.GetHeroInventory heroId = 
+      async {
+        let! reply = request <| GetHeroInventory heroId
+        let reply = match reply with
+        | GetHeroInventoryReply reply -> reply
+        | ExnReply msg -> failwith msg
+        | msg -> failwith <| sprintf "Expected GetHeroInventoryReply but got %A" msg
 
         return reply
       } |> Async.StartAsTask

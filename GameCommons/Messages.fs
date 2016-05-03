@@ -101,10 +101,7 @@ and GetHeroArrayReply =
 
 and GetHeroInventoryReply =
   | Success of HeroInventory
-<<<<<<< HEAD
-=======
   | Empty
->>>>>>> origin/Develop
 
 and GetStartingZoneReply =
   | Success of string
