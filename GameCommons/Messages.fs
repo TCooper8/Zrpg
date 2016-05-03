@@ -10,6 +10,7 @@ type Msg =
   | GetClientGarrison of string
   | GetHero of string
   | GetHeroArray of string array
+  | GetHeroInventory of heroId:string
   | RemGarrison of string
   | SetStartingZone of Race * string
   | Tick
@@ -50,6 +51,7 @@ type Reply =
   | GetClientGarrisonReply of GetClientGarrisonReply
   | GetHeroReply of GetHeroReply
   | GetHeroArrayReply of GetHeroArrayReply
+  | GetHeroInventoryReply of GetHeroInventoryReply
   | GetStartingZoneReply of GetStartingZoneReply
   | GetZoneReply of GetZoneReply
   | GetZoneConnectionsReply of GetZoneConnectionsReply
@@ -78,7 +80,7 @@ and AddWorldReply =
   | ClientHasWorld
 
 and AddZoneReply =
-  | Success of string
+  | Success of zoneId:string
   | RegionDoesNotExist
   | ZoneExists
 
@@ -93,6 +95,9 @@ and GetHeroReply =
 and GetHeroArrayReply =
   | Success of Hero array
   | Empty
+
+and GetHeroInventoryReply =
+  | Success of HeroInventory
 
 and GetStartingZoneReply =
   | Success of string
