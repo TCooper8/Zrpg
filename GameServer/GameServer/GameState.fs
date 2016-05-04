@@ -22,6 +22,7 @@ open System
 
     clientGarrisons: Map<string, string>
     clientWorlds: Map<string, string>
+    clientNotifications: Map<string, ClientNotification list>
 
     heroNames: string Set
     regionNames: string Set
@@ -42,8 +43,10 @@ open System
       zoneQuests = Map.empty
       quests = Map.empty
       questRecords = Map.empty
+
       clientGarrisons = Map.empty
       clientWorlds = Map.empty
+      clientNotifications = Map.empty
 
       heroNames = Set.empty
       regionNames = Set.empty
@@ -52,3 +55,51 @@ open System
       startingZones = Map.empty
       zoneConnections = Map.empty
     }
+
+    member this.CompleteQuest (hero:Hero) (record:QuestRecord) (quest:Quest) =
+      let messageTitle =
+        sprintf "Hero %s completed quest \"%s\"" hero.name quest.title
+
+      let messageBody =
+        quest.rewards
+        |> List.map (fun reward ->
+          match reward with
+          | XpReward xp ->
+            sprintf "XP : %f" xp
+        )
+        |> fun rewards -> String.Join("\n\t", rewards)
+        |> sprintf "Rewards = \n\t%s"
+
+      let notify = NotifyQuestCompleted {
+        questId = quest.id
+        finishTime = this.gameTime
+        messageTitle = messageTitle
+        messageBody = messageBody
+      }
+
+      let notifications =
+        this.clientNotifications.TryFind hero.clientId
+        |> defaultArg <| []
+
+      let stats =
+        quest.rewards |> List.fold (fun stats reward ->
+          match reward with
+          | XpReward xp ->
+            { stats with xp = stats.xp + xp }
+        ) hero.stats
+
+      let hero = {
+        hero with
+          state = HeroState.Idle
+          stats = stats
+      }
+
+      let state = {
+        this with
+          questRecords = this.questRecords.Remove record.id
+          heroes = this.heroes.Add(hero.id, hero)
+          heroQuestRecords = this.heroQuestRecords.Remove hero.id
+          clientNotifications = this.clientNotifications.Add(hero.clientId, notifications)
+      }
+
+      state

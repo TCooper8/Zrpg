@@ -11,23 +11,58 @@ open Newtonsoft.Json
 
 open Zrpg.Game.GameServer
 open Zrpg.Game
+open Zrpg.Commons
+open Zrpg.Commons.Bundle
 open Logging
 
 [<TestClass>]
-type Test () =
+type TestClass () =
   let sync () = Async.AwaitTask >> Async.RunSynchronously
   let uuid () = Guid.NewGuid().ToString()
 
-  static let port = (new Random()).Next(1 <<< 10, 1 <<< 15) |> uint16
-  static let endPoint = sprintf "http://localhost:%i" port
+  let testId = "test"
+  let httpHost = "localhost"
+  let httpPort = (new Random()).Next(1 <<< 10, 1 <<< 15) |> uint16
+  let httpEndPoint = sprintf "http://%s:%i" httpHost httpPort
 
-  static member log = new Logging.StreamLogger("Test", LogLevel.Debug, Console.OpenStandardOutput())
-  static member server = new Pario.WebServer.Server(Test.log)
-  static member client = GameClient.RESTClient endPoint
+  let gameId = testId + "game"
+  let client = GameClient.RESTClient httpEndPoint
+  let platform = Platform.create testId
+  let game = GameServer.server platform gameId
+
+  [<TestInitialize>]
+  member this.Init () =
+    let web = Pario.WebServer.create platform (testId + "web")
+
+    async {
+      printfn "Getting api handler..."
+      try
+        let! handler = game.GetApiHandler()
+        printfn "Handler = %A" handler
+        web.Send <| Pario.WebServer.AddHandler (handler, 100)
+
+        let chan = Chan<Pario.WebServer.Reply>()
+        Pario.WebServer.Listen (httpHost, httpPort) |> fun msg -> web.Send(msg, chan)
+        let! res = chan.Await()
+        match res with
+        | Choice1Of2 reply -> printfn "Web reply = %A" reply
+        | Choice2Of2 e -> raise e
+
+        let regionId = this.addAnyRegion()
+        let zoneId = this.addAnyZone(regionId)
+        this.setStartingZone(Human, zoneId)
+      with e ->
+        printfn "Error: %A" e
+
+      return ()
+    }
+    |> Async.RunSynchronously
+    
+    ()
 
   member this.addAnyRegion () =
     let id = uuid()
-    Test.client.AddRegion {
+    client.AddRegion {
       name = id
     }
     |> sync()
@@ -37,9 +72,30 @@ type Test () =
       | reply ->
         failwith <| sprintf "Expected AddRegionReply.Success but got %A" reply
 
+  member this.addAnyQuest () =
+    let rewards = [|
+      XpReward 10.0
+    |]
+    let objective = TimeObjective {
+      timeDelta = 5
+    }
+
+    client.AddQuest {
+      title = sprintf "Test title %s" <| uuid()
+      body = sprintf "Test body %s" <| uuid()
+      rewards = rewards
+      objective = objective
+    }
+    |> sync()
+    |> fun m ->
+      match m with
+      | AddQuestReply.Success id -> id
+      | reply ->
+        failwith <| sprintf "Expected AddQuestReply.Success but got %A" reply
+
   member this.addAnyZone regionId =
     let id = uuid()
-    Test.client.AddZone {
+    client.AddZone {
       name = id
       regionId = regionId
       terrain = Forest
@@ -52,7 +108,7 @@ type Test () =
         failwith <| sprintf "Expected AddZoneReply.Success but got %A" reply
 
   member this.setStartingZone (race, zoneId) =
-    Test.client.SetStartingZone(race, zoneId)
+    client.SetStartingZone(race, zoneId)
     |> sync()
     |> fun m ->
       match m with
@@ -65,7 +121,7 @@ type Test () =
     |> this.addAnyZone
     |> fun zoneId -> this.setStartingZone(race, zoneId)
 
-    Test.client.AddGarrison(
+    client.AddGarrison(
       clientId,
       uuid(),
       race,
@@ -78,42 +134,16 @@ type Test () =
       | reply -> sprintf "Expected AddGarrisonReply.Success but got %A" reply |> failwith
 
   member this.getClientGarrison clientId =
-    Test.client.GetClientGarrison(clientId)
+    client.GetClientGarrison(clientId)
     |> sync()
     |> fun reply ->
       match reply with
       | GetClientGarrisonReply.Success garrison -> garrison
       | reply -> sprintf "Expected GetClientGarrisonReply.Success but got %A" reply |> failwith
-      
-
-  [<ClassInitialize>]
-  static member init (ctx:TestContext) =
-    async {
-      let server = Test.server
-      let log = Test.log
-      let gameServer = GameServer.server log
-
-      do server.handle {
-        priority = 100
-        handler = gameServer.ApiHandler
-      }
-
-      do server.handleSocket gameServer.WebSocketHandler
-
-      let! res = server.listen "localhost" port |> Async.Catch
-      match res with
-      | Choice2Of2 e ->
-        Debug.WriteLine(sprintf "%A" e)
-      | _ -> ()
-    } |> Async.Start
-
-  [<ClassCleanup>]
-  static member cleanup () =
-    Test.server.stop()
 
   [<TestMethod>]
   member this.testNewGarrisonN () =
-    for i in 0 .. 10 do
+    for i in 0 .. 1000 do
       uuid() |> this.addAnyGarrison
       <| Human
       <| Alliance
@@ -159,7 +189,7 @@ type Test () =
   member this.testAddHero () =
     let clientId = uuid()
 
-    match Test.client.AddGarrison(clientId, "My garrison", Human, Alliance) |> sync() with
+    match client.AddGarrison(clientId, "My garrison", Human, Alliance) |> sync() with
     | AddGarrisonReply.Success -> ()
     | msg -> failwith <| sprintf "Expected Success but got %A" msg
 
@@ -173,12 +203,12 @@ type Test () =
     }
 
     let heroId =
-      match Test.client.AddHero msg |> sync() with
+      match client.AddHero msg |> sync() with
       | AddHeroReply.Success id -> id
       | msg -> failwith <| sprintf "Expected Success but got %A" msg
 
     let garrison =
-      match Test.client.GetClientGarrison clientId |> sync() with
+      match client.GetClientGarrison clientId |> sync() with
       | GetClientGarrisonReply.Success garrison -> garrison
       | msg -> failwith <| sprintf "Expected Success but got %A" msg
 
@@ -189,3 +219,88 @@ type Test () =
       match res with
       | None -> failwith "Hero was not in the garrison heroes"
       | _ -> ()
+
+  [<TestMethod>]
+  member this.testHeroQuest () =
+    let clientId = uuid()
+
+    match client.AddGarrison(clientId, "My garrison", Human, Alliance) |> sync() with
+    | AddGarrisonReply.Success -> ()
+    | msg -> failwith <| sprintf "Expected Success but got %A" msg
+
+    let msg:AddHero = { 
+      clientId = clientId
+      name = "hero" + uuid()
+      race = Human
+      faction = Alliance
+      gender = Male
+      heroClass = Warrior
+    }
+
+    let heroId =
+      match client.AddHero msg |> sync() with
+      | AddHeroReply.Success id -> id
+      | msg -> failwith <| sprintf "Expected Success but got %A" msg
+
+    // Get the hero before the quest.
+    let heroI = client.GetHero heroId |> sync() |> fun m ->
+      match m with
+      | GetHeroReply.Success hero -> hero
+      | msg -> failwith <| sprintf "Expected Success but got %A" msg
+
+    // Add a quest.
+    let questId = this.addAnyQuest()
+    client.HeroBeginQuest(heroId, questId)
+    |> sync()
+    |> fun m ->
+      match m with
+      | HeroBeginQuestReply.Success recordId -> recordId
+      | reply -> sprintf "Expected GetClientGarrisonReply.Success but got %A" reply |> failwith
+    |> ignore
+
+    // Make sure the hero does the quest.
+    let _game = platform.Lookup gameId |> Option.get
+    for i in 1 .. 5 do
+      let chan = Chan<Reply>()
+      _game.Send(Tick, chan)
+      chan.Await() |> Async.RunSynchronously |> ignore
+
+    let quest, record =
+      client.GetHeroQuest heroId
+      |> sync()
+      |> fun m ->
+        match m with
+        | GetHeroQuestReply.Success (record, quest) ->
+          // Got em!
+          quest, record
+        | reply -> sprintf "Expected GetHeroQuestReply.Success but got %A" reply |> failwith
+    printfn "Got quest %A record %A" quest record
+
+    do
+      let chan = Chan<Reply>()
+      _game.Send(Tick, chan)
+      chan.Await() |> Async.RunSynchronously |> ignore
+
+    client.GetHeroQuest heroId |> sync() |> fun m ->
+      match m with
+      | GetHeroQuestReply.Empty -> ()
+      | reply -> sprintf "Expected Empty but got %A" m |> failwith
+
+    // Get the hero after the quest.
+    let heroF = client.GetHero heroId |> sync() |> fun m ->
+      match m with
+      | GetHeroReply.Success hero -> hero
+      | msg -> failwith <| sprintf "Expected Success but got %A" msg
+
+    // The hero should have the rewards from the quest.
+    quest.rewards |> List.iter (fun reward ->
+      match reward with
+      | XpReward xp ->
+        // The hero should have the xp reward from the quest.
+        let finalXp = heroI.stats.xp + xp
+        if heroF.stats.xp <> finalXp then
+          sprintf "Expected hero to have %f xp after quest, but hero has %f xp" finalXp heroF.stats.xp
+          |> failwith
+        else ()
+    )
+    ()

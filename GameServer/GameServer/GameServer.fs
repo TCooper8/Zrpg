@@ -36,6 +36,8 @@ module GameServer =
       | Warrior -> 
         { strength = 10.0
           stamina = 10.0
+          xp = 0.0
+          finalXp = 100.0
           groundTravelSpeed = 100.0
         }
 
@@ -44,6 +46,8 @@ module GameServer =
       | Human ->
         { strength = 1.0
           stamina = 1.1
+          xp = 0.0
+          finalXp = 100.0
           groundTravelSpeed = 1.0
         }
 
@@ -100,8 +104,8 @@ module GameServer =
           name = msg.name
           race = msg.race
           faction = msg.faction
-          ownedRegions = Set []
-          ownedZones = Set [ startingZone.id ]
+          ownedRegions = [| startingZone.regionId |]
+          ownedZones = [| startingZone.id |]
           vaultId = ""
           stats = stats
         }
@@ -131,10 +135,11 @@ module GameServer =
           | None -> sprintf "Starting zone is not defined for %A" msg.race |> failwith
           | Some zoneId -> zoneId
 
-        let hero = {
+        let hero:Hero = {
           id = uuid()
-          zoneId = startingZoneId
           clientId = msg.clientId
+          state = Idle
+          zoneId = startingZoneId
           name = msg.name
           race = msg.race
           faction = msg.faction
@@ -146,7 +151,7 @@ module GameServer =
 
         // Create the inventory for the hero.
         let inventory =
-          let slots = 
+          let slots =
             [
               for i in 1 .. 10 do
                 let slot = {
@@ -196,6 +201,96 @@ module GameServer =
         }
         (state, AddHeroReply.Success hero.id)
 
+    let heroBeginQuest (state:GameState) (heroId:string) (questId:string) =
+      let mutable state = state
+      match state.heroes.TryFind heroId with
+      | None ->
+        state, HeroBeginQuestReply.HeroDoesNotExist
+      | Some hero when hero.state = HeroState.Questing ->
+        state, HeroBeginQuestReply.HeroIsQuesting
+      | Some hero when hero.state = HeroState.Idle ->
+        // Make sure the hero is in the same zone as the quest.
+        match state.zoneQuests.TryFind hero.zoneId with
+        | None -> sprintf "Hero zone %s does not have any quests" hero.zoneId |> failwith
+        | Some quests ->
+          // Make sure the quest is in this array.
+          quests |> Array.tryFind questId.Equals |> fun m ->
+            match m with
+            | None -> sprintf "Zone %s does not contain quest %s" hero.zoneId questId |> failwith
+            | _ -> ()
+        
+
+        // Get the quest from the id.
+        match state.quests.TryFind questId with
+        | None ->
+          state, HeroBeginQuestReply.QuestDoesNotExist
+        | Some quest ->
+          // Create a record for the quest and set the hero state.
+          let record = {
+            QuestRecord.id = uuid()
+            questId = questId
+            startTime = state.gameTime
+          }
+
+          let hero = {
+            hero with
+              state = HeroState.Questing
+          }
+          let state = {
+            state with
+              questRecords = state.questRecords.Add(record.id, record)
+              heroes = state.heroes.Add(heroId, hero)
+              heroQuestRecords = state.heroQuestRecords.Add(heroId, record.id)
+          }
+          state, HeroBeginQuestReply.Success record.id
+
+    let resolveTick (state:GameState) =
+      // Go through all of the heroes and run them for one cycle.
+      let mutable state = state
+
+      let heroes =
+        state.heroes |> Map.map (fun id hero ->
+          log.Debug <| sprintf "Resolving quest for hero %s" hero.id
+
+          state.heroQuestRecords.TryFind id
+          |> Option.map (fun id ->
+            log.Debug <| sprintf "Hero %s has quest record id %s" hero.id id
+            id
+          )
+          |> Option.bind state.questRecords.TryFind
+          |> Option.map (fun record ->
+            log.Debug <| sprintf "Hero %s has quest record %A" hero.id record
+
+            match state.quests.TryFind record.questId with
+            | None -> failwith <| sprintf "Hero quest record %s does not link to an actual quest." record.id
+            | Some quest ->
+              record, quest
+          )
+          |> Option.map (fun (record, quest) ->
+            log.Debug <| sprintf "Hero record %A quest %A" record quest
+            match quest.objective with
+            | TimeObjective objective ->
+              let tf = record.startTime + objective.timeDelta
+              let dt = tf - state.gameTime
+              log.Debug <| sprintf "Hero %s has %i ticks until completing quest %s" hero.id dt quest.id
+
+              if tf <= state.gameTime then
+                // Finish the quest.
+                log.Debug <| sprintf "Hero %s finished quest %A" hero.id quest
+                state <- state.CompleteQuest hero record quest
+                log.Debug <| "Updated "
+              // Quest is not finished
+            ()
+          )
+        )
+
+      state <- {
+        state with
+          gameTime = state.gameTime + 1
+      }
+
+      state, TickReply
+
     let handleMsg msg state =
       match msg with
       | AddGarrison msg ->
@@ -244,8 +339,36 @@ module GameServer =
               state with
                 zoneNames = state.zoneNames.Add zone.name
                 zones = state.zones.Add(zone.id, zone)
+                regions = state.regions.Add(region.id, region)
             }
             state, zone.id |> AddZoneReply.Success |> AddZoneReply
+
+      | AddQuest addQuest ->
+        // Make sure the zone exists.
+        match state.zones.TryFind addQuest.zoneId with
+        | None -> sprintf "Zone %s does not exist" addQuest.zoneId |> failwith
+        | _ -> ()
+
+        let quest = {
+          id = uuid()
+          zoneId = addQuest.zoneId
+          title = addQuest.title
+          body = addQuest.body
+          rewards = addQuest.rewards |> List.ofArray
+          objective = addQuest.objective
+        }
+
+        let zoneQuests =
+          state.zoneQuests.TryFind quest.zoneId
+          |> defaultArg <| Array.empty
+          |> Array.append [| quest.id |]
+
+        let state = {
+          state with
+            quests = state.quests.Add(quest.id, quest)
+            zoneQuests = state.zoneQuests.Add(quest.zoneId, zoneQuests)
+        }
+        state, AddQuestReply.Success quest.id |> AddQuestReply
 
       | GetClientGarrison clientId ->
         let r =
@@ -276,6 +399,36 @@ module GameServer =
         | None -> GetHeroInventoryReply.Empty
         | Some value -> GetHeroInventoryReply.Success value
         |> fun reply -> state, GetHeroInventoryReply reply
+
+      | GetHeroQuest heroId ->
+        let res r = GetHeroQuestReply r
+        match state.heroQuestRecords.TryFind heroId with
+        | None -> state, GetHeroQuestReply.Empty |> res
+        | Some recordId ->
+          match state.questRecords.TryFind recordId with
+          | None -> failwith <| sprintf "Hero %s has record id %s, but no quest record exists" heroId recordId
+          | Some record ->
+            // Now, try and get the quest.
+            match state.quests.TryFind record.questId with
+            | None -> failwith <| sprintf "Hero %s has record %s, but quest %s does not exist" heroId recordId record.questId
+            | Some quest ->
+              state, GetHeroQuestReply.Success(record, quest) |> res
+
+      | GetRegion regionId ->
+        match state.regions.TryFind regionId with
+        | None -> sprintf "Region %s does not exist" regionId |> failwith
+        | Some region ->
+          state, GetRegionReply.Success region |> GetRegionReply
+
+      | GetZone zoneId ->
+        match state.zones.TryFind zoneId with
+        | None -> sprintf "Zone %s does not eixst" zoneId |> failwith
+        | Some zone ->
+          state, GetZoneReply.Success zone |> GetZoneReply
+
+      | HeroBeginQuest (heroId, questId) ->
+        heroBeginQuest state heroId questId
+        |> fun (state, reply) -> state, reply |> HeroBeginQuestReply
 
       | RemGarrison garrisonId ->
         let r = 
@@ -322,26 +475,30 @@ module GameServer =
           state, SetStartingZoneReply.Success |> SetStartingZoneReply
 
       | Tick ->
-        (state, TickReply)
+        resolveTick state
 
     let agent = MailboxProcessor<Cmd>.Start(fun inbox ->
       log.Debug <| "Starting server..."
 
       let rec loop state = async {
-        let! cmd = inbox.Receive()
-        let msg, chan = cmd
+        try
+          let! cmd = inbox.Receive()
+          let msg, chan = cmd
 
-        let state, reply =
-          try
-            log.Debug <| sprintf "Received \n\t%A" msg
-            handleMsg msg state
-          with e ->
-            state, ExnReply e.Message
+          let state, reply =
+            try
+              log.Debug <| sprintf "Received \n\t%A" msg
+              handleMsg msg state
+            with e ->
+              state, ExnReply e.Message
 
-        log.Debug <| sprintf "Reply with %A" reply
-        chan.Reply(reply)
+          log.Debug <| sprintf "Reply with %A" reply
+          chan.Reply(reply)
 
-        return! loop state
+          return! loop state
+        with e ->
+          log.Error <| sprintf "Agent error: %A" e
+          return! loop state
       }
 
       let gameState = GameState.Default
@@ -488,9 +645,11 @@ module GameServer =
       context <- Some _context
 
     override this.PreRestart (e, context) =
+      printfn "Error: %A" e
       log.Warn <| sprintf "Error: %A" e
 
     override this.Receive (msg, sender) =
+      printfn "Received msg %A" msg
       match msg with
       | :? Zrpg.Game.Msg as msg ->
         agent.PostAndAsyncReply(fun reply -> (msg, reply))
@@ -521,9 +680,12 @@ module GameServer =
       | Choice2Of2 e -> sprintf "Error: %A" e |> failwith
 
     let send msg = async {
+      printfn "Sending msg %A" msg
       let chan = Chan<'a>()
       gameBundle.Send (msg, chan)
+      printfn "Waiting for reply..."
       let! res = chan.Await()
+      printfn "Reply = %A" res
       let reply = fromChoice res
       return reply
     }
@@ -535,6 +697,9 @@ module GameServer =
         | AddRegionReply reply -> reply
         | reply -> sprintf "Expected AddRegion reply but got %A" reply |> failwith
     }
+    member this.AddRegionSync addRegion =
+      this.AddRegion addRegion
+      |> Async.RunSynchronously
 
     member this.AddZone addZone = async {
       let! res = addZone |> AddZone |> send
@@ -553,6 +718,7 @@ module GameServer =
     }
 
     member this.GetApiHandler (): Pario.WebServer.Handler Async = async {
+      printfn "Getting api handler..."
       let! res = send GetApiHandler
       return res
     }
@@ -561,10 +727,6 @@ module GameServer =
       let! res = send GetWsHandler
       return res
     }
-
-    member this.AddRegionSync addRegion =
-      this.AddRegion addRegion
-      |> Async.RunSynchronously
 
   let server (platform:IPlatform) id =
     let log = LogBundle.log platform (id + ":log")
