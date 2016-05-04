@@ -45,6 +45,16 @@ let main argv =
       | AddZoneReply.Success id -> id
       | _ -> failwith <| sprintf "Expected AddZoneReply.Success but got %A" reply
 
+    let! reply = game.AddZone {
+      name = "Goldshire"
+      regionId = regionId
+      terrain = Plains
+    }
+    let zoneId =
+      match reply with
+      | AddZoneReply.Success id -> id
+      | _ -> failwith <| sprintf "Expected AddZoneReply.Success but got %A" reply
+
     let! reply = game.SetStartingZone (Human, zoneId)
     match reply with
     | SetStartingZoneReply.Success -> ()
@@ -73,7 +83,8 @@ let main argv =
 
   async {
     while true do
-      do! Async.Sleep(Int32.MaxValue)
+      do! Async.Sleep(1024)
+      game
   } |> Async.RunSynchronously
 
   0
