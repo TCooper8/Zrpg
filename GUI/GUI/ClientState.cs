@@ -86,6 +86,82 @@ namespace GUI
             return reply;
         }
 
+        public async Task<List<Region>> GetOwnedRegions()
+        {
+            var regions = new List<Region>();
+            foreach (var id in garrison.ownedRegions)
+            {
+                var reply = await gameClient.GetRegion(id);
+                if (reply.IsSuccess)
+                {
+                    var success = (GetRegionReply.Success)reply;
+                    regions.Add(success.Item);
+                }
+                else
+                {
+                    var msg = String.Format(
+                        "Expected GetRegionReply.Success but got {0}",
+                        reply
+                    );
+                    throw new Exception(msg);
+                }
+            }
+
+            return regions;
+        }
+
+        public async Task<List<Zone>> GetRegionZones(Region region)
+        {
+            var zones = new List<Zone>();
+            foreach (var zoneId in region.zones)
+            {
+                var reply = await gameClient.GetZone(zoneId);
+                if (reply.IsSuccess)
+                {
+                    var success = (GetZoneReply.Success)reply;
+                    zones.Add(success.Item);
+                }
+                else
+                {
+                    var msg = String.Format(
+                        "Expected GetRegionReply.Success but got {0}",
+                        reply
+                    );
+                    throw new Exception(msg);
+                }
+            }
+
+            return zones;
+        }
+
+        public List<string> GetOwnedZoneIds()
+        {
+            return Garrison.ownedZones.ToList<string>();
+        }
+
+        public async Task<List<Zone>> GetOwnedZones()
+        {
+            var zones = new List<Zone>();
+            foreach (var zoneId in garrison.ownedZones)
+            {
+                var reply = await gameClient.GetZone(zoneId);
+                if (reply.IsSuccess)
+                {
+                    var success = (GetZoneReply.Success)reply;
+                    zones.Add(success.Item);
+                }
+                else
+                {
+                    var msg = String.Format(
+                        "Expected GetRegionReply.Success but got {0}",
+                        reply
+                    );
+                    throw new Exception(msg);
+                }
+            }
+            return zones;
+        }
+
         public string ClientId { get { return EnsureDefined<string>(clientId, "clientId is not defined"); } }
         public string Username { get { return EnsureDefined<string>(username, "username is not defined"); } }
         public Garrison Garrison { get { return EnsureDefined<Garrison>(garrison, "garrison is not defined"); } }

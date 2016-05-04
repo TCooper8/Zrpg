@@ -1,6 +1,7 @@
 ﻿using GUI.Pages.HeroSubPages.ZoneTestPages;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -26,6 +27,10 @@ namespace GUI.Pages
     {
         ClientState state = ClientState.state;
         Hero hero;
+        Dictionary<string, Button> zoneButtons;
+        Dictionary<string, Zone> zones;
+        Dictionary<string, Region> ownedRegions;
+        Dictionary<string, AssetPositionInfo> zonePositions;
 
         public HeroMapTab()
         {
@@ -36,11 +41,11 @@ namespace GUI.Pages
         {
             this.hero = e.Parameter as Hero;
             UpdateHeroStatus();
-            zoneInfoTextBlock.Text = "Garrison Info";
-            informationTextBlock.Text = "Gold Income: 580 per day\n" +
-                                        "Soldiers: 250\n" +
-                                        "Trade Influence: +10%\n" +
-                                        "Holy Power: 5\n";
+            //zoneInfoTextBlock.Text = "Garrison Info";
+            //informationTextBlock.Text = "Gold Income: 580 per day\n" +
+            //                            "Soldiers: 250\n" +
+            //                            "Trade Influence: +10%\n" +
+            //                            "Holy Power: 5\n";
         }
         
         //Get client garrison information (owned regions, owned zones)
@@ -50,8 +55,69 @@ namespace GUI.Pages
         //Get current hero selected information (current quest, quest status, quest reward, location)
 
         //Update hero location location and information
-        private void UpdateHeroStatus()
+        private async void UpdateHeroStatus()
         {
+            zoneButtons = new Dictionary<string, Button>();
+            zones = new Dictionary<string, Zone>();
+            ownedRegions = new Dictionary<string, Region>();
+            zonePositions = new Dictionary<string, AssetPositionInfo>();
+
+            var _regions = await state.GetOwnedRegions();
+            foreach (var region in _regions)
+            {
+                Debug.WriteLine("Populating region {0}:{1}", region.id, region.name, null);
+
+                this.ownedRegions.Add(region.id, region);
+                // Get the zones in each region.
+                var _zones = await state.GetRegionZones(region);
+                // Should list all viewable zones in the region.
+                foreach (var zone in _zones)
+                {
+                    Debug.WriteLine("Populating region {0} zone {1}:{2}", region.name, zone.id, zone.name);
+
+                    zones.Add(zone.id, zone);
+
+                    if (zone.name == "Northshire")
+                    {
+                        var info = new AssetPositionInfo(zone.id, "", 420, 175);
+                        zonePositions.Add(zone.id, info);
+                    }
+                    else if (zone.name == "Goldshire")
+                    {
+                        var info = new AssetPositionInfo(zone.id, "", 358, 290);
+                        zonePositions.Add(zone.id, info);
+                    }
+                    else
+                    {
+                        Debug.WriteLine("Got unhaneld zone {0}", zone.name, null);
+                        throw new Exception("UnhaneldZone");
+                    }
+                }
+            }
+
+            // Go through the owned zones and give them a button.
+            var _ownedZoneIds = state.GetOwnedZoneIds();
+            var m = this.garrisonButton;
+
+            foreach (var zoneId in _ownedZoneIds)
+            {
+                Debug.WriteLine("Getting zone {0}", zoneId, null);
+                var zone = zones[zoneId];
+                Debug.WriteLine("Getting asset info for zone {0}", zone, null);
+                var info = zonePositions[zoneId];
+                // Create a button for the zone.
+                var button = new Button();
+                button.Width = 70;
+                button.Height = 70;
+                button.Margin = new Thickness(info.x, info.y, 0, 0);
+                button.HorizontalAlignment = HorizontalAlignment.Left;
+                button.VerticalAlignment = VerticalAlignment.Top;
+                button.Click += Button_Click;
+                button.Name = zone.name;
+
+                this.mapGrid.Children.Add(button);
+                Grid.SetColumn(button, 1);
+            }
             string heroLocation = hero.name + "'s Current Location: ";
 
             if (zoneInfoTextBlock.Text == "Goldshire Info")
@@ -68,6 +134,25 @@ namespace GUI.Pages
             {
                 heroLocationText.Text = heroLocation + "\nGarrison";
             }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            var button = (Button)sender;
+
+            heroLocationText.Text = "Hero location = " + button.Name;
+
+            if (button.Name == "Northshire")
+            {
+                northshireButton_Click(sender, e);
+                return;
+            }
+            else if (button.Name == "Goldshire")
+            {
+                goldshireButton_Click(sender, e);
+                return;
+            }
+            throw new NotImplementedException();
         }
 
         private void garrisonButton_Click(object sender, RoutedEventArgs e)
