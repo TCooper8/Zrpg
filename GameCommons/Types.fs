@@ -48,9 +48,14 @@ type HeroInventory = {
   panes: InventoryPane array
 }
 
+type HeroState =
+  | Questing
+  | Idle
+
 type Hero = {
   id: string
   clientId: string
+  state: HeroState
   zoneId: string // Shows what zone the hero is in.
   name: string
   race: Race
@@ -75,8 +80,8 @@ type Garrison = {
   name: string
   race: Race
   faction: Faction
-  ownedRegions: string Set
-  ownedZones: string Set
+  ownedRegions: string array
+  ownedZones: string array
   vaultId: string
   stats: GarrisonStats
 }
@@ -134,9 +139,10 @@ type ClientWorld = {
 
 type Quest = {
   id: string
+  zoneId: string
   title: string
   body: string
-  reward: QuestReward
+  rewards: QuestReward list
   objective: Objective
 }
 
@@ -145,6 +151,7 @@ and Objective =
 
 and QuestReward =
   | ItemReward of ItemReward
+  | XpReward of float
 
 and TimeObjective = {
   timeDelta: int
@@ -158,7 +165,12 @@ and ItemReward = {
 type QuestRecord = {
   id: string
   questId: string
-  startTime: string
+  startTime: int
+}
+
+type QuestCompleted = {
+  id: string
+  questId: string
 }
 
 type ItemRecord = {
