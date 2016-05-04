@@ -11,29 +11,32 @@ open Newtonsoft.Json
 type ClientId = string
 
 type private RestGameClient (endPoint) =
+  let lockObj = new Object()
   let enc = Encoding.UTF8
 
   let request (msg:Msg) =
-    async {
-      let data = JsonConvert.SerializeObject(msg) |> enc.GetBytes
-      let req = HttpWebRequest.Create (sprintf "%s/api" endPoint) :?> HttpWebRequest
+    lock lockObj (fun () ->
+      async {
+        let data = JsonConvert.SerializeObject(msg) |> enc.GetBytes
+        let req = HttpWebRequest.Create (sprintf "%s/api" endPoint) :?> HttpWebRequest
 
-      req.Method <- "POST"
-      req.ContentType <- "application/json"
+        req.Method <- "POST"
+        req.ContentType <- "application/json"
 
-      use! output = req.GetRequestStreamAsync() |> Async.AwaitTask
-      do! output.AsyncWrite data
-      output.Dispose()
+        use! output = req.GetRequestStreamAsync() |> Async.AwaitTask
+        do! output.AsyncWrite data
+        output.Dispose()
 
-      let! resp = req.AsyncGetResponse()
-      let resp = resp :?> HttpWebResponse
-      use resp = resp.GetResponseStream()
-      use reader = new StreamReader(resp, enc)
+        let! resp = req.AsyncGetResponse()
+        let resp = resp :?> HttpWebResponse
+        use resp = resp.GetResponseStream()
+        use reader = new StreamReader(resp, enc)
 
-      let! data = reader.ReadToEndAsync() |> Async.AwaitTask
-      let reply = JsonConvert.DeserializeObject<Reply>(data)
-      return reply
-    }
+        let! data = reader.ReadToEndAsync() |> Async.AwaitTask
+        let reply = JsonConvert.DeserializeObject<Reply>(data)
+        return reply
+      }
+    )
 
   interface IGameClient with
     member this.AddGarrison (clientId, garrisonName, race, faction) =
@@ -72,6 +75,17 @@ type private RestGameClient (endPoint) =
         | AddRegionReply reply -> reply
         | ExnReply msg -> failwith msg
         | msg -> failwith <| sprintf "Expected AddRegionReply but got %A" msg
+
+        return reply
+      } |> Async.StartAsTask
+
+    member this.AddQuest quest =
+      async {
+        let! reply = quest |> AddQuest |> request
+        let reply = match reply with
+        | AddQuestReply reply -> reply
+        | ExnReply msg -> failwith msg
+        | msg -> failwith <| sprintf "Expected AddQuestReply but got %A" msg
 
         return reply
       } |> Async.StartAsTask
@@ -127,6 +141,50 @@ type private RestGameClient (endPoint) =
         | GetHeroInventoryReply reply -> reply
         | ExnReply msg -> failwith msg
         | msg -> failwith <| sprintf "Expected GetHeroInventoryReply but got %A" msg
+
+        return reply
+      } |> Async.StartAsTask
+
+    member this.GetHeroQuest heroId = 
+      async {
+        let! reply = request <| GetHeroQuest heroId
+        let reply = match reply with
+        | GetHeroQuestReply reply -> reply
+        | ExnReply msg -> failwith msg
+        | msg -> failwith <| sprintf "Expected GetHeroQuestReply but got %A" msg
+
+        return reply
+      } |> Async.StartAsTask
+
+    member this.GetRegion heroId = 
+      async {
+        let! reply = request <| GetRegion heroId
+        let reply = match reply with
+        | GetRegionReply reply -> reply
+        | ExnReply msg -> failwith msg
+        | msg -> failwith <| sprintf "Expected GetRegionReply but got %A" msg
+
+        return reply
+      } |> Async.StartAsTask
+
+    member this.GetZone id = 
+      async {
+        let! reply = request <| GetZone id
+        let reply = match reply with
+        | GetZoneReply reply -> reply
+        | ExnReply msg -> failwith msg
+        | msg -> failwith <| sprintf "Expected GetZoneReply but got %A" msg
+
+        return reply
+      } |> Async.StartAsTask
+
+    member this.HeroBeginQuest (heroId, questId) =
+      async {
+        let! reply = request <| HeroBeginQuest(heroId, questId)
+        let reply = match reply with
+        | HeroBeginQuestReply reply -> reply
+        | ExnReply msg -> failwith msg
+        | msg -> failwith <| sprintf "Expected HeroBeginQuestReply but got %A" msg
 
         return reply
       } |> Async.StartAsTask
