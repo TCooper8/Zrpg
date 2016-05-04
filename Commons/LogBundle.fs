@@ -8,7 +8,7 @@ open Zrpg.Commons.Bundle
 
 module LogBundle =
   type Msg =
-    | Log of LogLevel * string
+    | Log of name:string * LogLevel * msg:string
     | ListLogs of limit:int
 
   type private LogBundle (id) =
@@ -17,7 +17,9 @@ module LogBundle =
     let stream = new MemoryStream()
     let reader = new StreamReader(stream)
 
-    let log = new Logging.StreamLogger("Log", LogLevel.Debug, Console.OpenStandardOutput())
+    let mutable logs = Map.empty<string, Logging.Logger>
+
+    //let log = new Logging.StreamLogger("Log", LogLevel.Debug, Console.OpenStandardOutput())
 
     let pullNLogs n =
       let rec loop i acc = async {
@@ -31,7 +33,11 @@ module LogBundle =
 
     let handle (msg, sender:IBundleRef option) =
       match msg with
-      | Log (level, msg) ->
+      | Log (name, level, msg) ->
+        let log =
+          match logs.TryFind name with
+          | None -> new Logging.StreamLogger(name, LogLevel.Debug, Console.OpenStandardOutput()) :> Logging.Logger
+          | Some log -> log
         log.Log(level, msg)
 
       | ListLogs limit ->
@@ -42,7 +48,7 @@ module LogBundle =
         )
 
     override this.Stop context =
-      log.Dispose()
+      logs |> Map.iter (fun _ log -> log.Dispose())
 
     override this.Id = id
 
@@ -52,8 +58,8 @@ module LogBundle =
         handle (msg, sender)
       ()
 
-  type Log (bundle:IBundleRef) =
-    let log level msg = bundle.Send <| Msg.Log(level, msg)
+  type Log (name, bundle:IBundleRef) =
+    let log level msg = bundle.Send <| Msg.Log(name, level, msg)
 
     member this.Info = log LogLevel.Info
     member this.Debug = log LogLevel.Debug
@@ -67,7 +73,7 @@ module LogBundle =
       platform.Register log
       platform.Lookup id
       |> Option.get
-      |> Log
+      |> fun bundle -> Log(id, bundle)
     | Some log ->
       log
-      |> Log
+      |> fun bundle -> Log(id, bundle)
