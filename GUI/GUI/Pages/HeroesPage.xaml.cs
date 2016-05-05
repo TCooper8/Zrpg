@@ -1,6 +1,7 @@
 ﻿using GUI.Pages.HeroSubPages;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -42,18 +43,37 @@ namespace GUI.Pages
             
             if (reply.IsSuccess)
             {
+                Debug.WriteLine("Generating hero controls");
                 var success = (GetHeroArrayReply.Success)reply;
-                listView.ItemsSource = success.Item;
+                var heroes = success.Item;
+                listView.ItemsSource = heroes;
 
-                var item = success.Item;
-                
-                if(listView.Items.Count == 0)
+                var heroControls = new List<ItemsControl>();
+                var xpControls = new List<ProgressBar>();
+
+                foreach (var hero in heroes)
+                {
+                    var xpProgress = new ProgressBar();
+                    xpProgress.Maximum = hero.stats.finalXp;
+                    xpProgress.Value = hero.stats.xp;
+                    xpProgress.Width = 250;
+                    xpProgress.Height = 40;
+
+                    xpControls.Add(xpProgress);
+                    //heroControl.Items.Add(heroDisplay);
+                    //heroControl.Items.Add(xpProgress);
+                }
+
+                if (listView.Items.Count == 0)
                 {
                 }
                 else
                 {
                     listView.SelectedIndex = 0;
-                }               
+                }
+
+                heroXpList.ItemsSource = xpControls;
+                //listView.ItemsSource = heroControls;
             }
         }
 
@@ -76,18 +96,26 @@ namespace GUI.Pages
                 else
                 {
                     hero = success.Item[listView.SelectedIndex];
-                    infoFrame.Content = String.Format("Name: {0}\n" +
-                                                      "Faction: {1}\n" +
-                                                      "Gender: {2}\n" +
-                                                      "Race: {3}\n" +
-                                                      "Class: {4}\n" +
-                                                      "Level: {5}\n" +
-                                                      "Strength: {6}\n" +
-                                                      "Stamina: {7}\n" +
-                                                      "Travel Speed: {8}",
-                                                      hero.name, hero.faction.ToString(), hero.gender.ToString(), 
-                                                      hero.race.ToString(), hero.heroClass.ToString(), hero.level.ToString(), 
-                                                      hero.stats.strength.ToString(), hero.stats.stamina.ToString(), hero.stats.groundTravelSpeed.ToString());
+                    infoFrame.Content = String.Format(
+                        "Name: {0}\n" +
+                        "Faction: {1}\n" +
+                        "Gender: {2}\n" +
+                        "Race: {3}\n" +
+                        "Class: {4}\n" +
+                        "Level: {5}\n" +
+                        "Strength: {6}\n" +
+                        "Stamina: {7}\n" +
+                        "Travel Speed: {8}",
+                        hero.name,
+                        hero.faction.ToString(),
+                        hero.gender.ToString(),
+                        hero.race.ToString(),
+                        hero.heroClass.ToString(),
+                        hero.level.ToString(),
+                        hero.stats.strength.ToString(),
+                        hero.stats.stamina.ToString(),
+                        hero.stats.groundTravelSpeed.ToString()
+                   );
                 }
             }        
         }

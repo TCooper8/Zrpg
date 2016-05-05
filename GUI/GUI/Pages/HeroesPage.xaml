@@ -23,6 +23,11 @@
                 </Button.Background>
             </Button>
             <TextBlock x:Name="textBlock" Margin="0" Text="Heroes Page" FontSize="30" HorizontalAlignment="Center" Foreground="White"/>
+            <ListView x:Name="heroXpList" HorizontalAlignment="Left" Margin="0,100,0,20" Grid.Row="1" Width="250" Foreground="White" Height="400" VerticalAlignment="Top" SelectionChanged="listView_SelectionChanged" SelectionMode="None">
+                <ListView.Background>
+                    <SolidColorBrush Color="#33000000"/>
+                </ListView.Background>
+            </ListView>
             <ListView x:Name="listView" HorizontalAlignment="Left" Margin="0,100,0,20" Grid.Row="1" Width="250" Foreground="White" Height="400" VerticalAlignment="Top" SelectionChanged="listView_SelectionChanged">
                 <ListView.Background>
                     <SolidColorBrush Color="#33000000"/>
