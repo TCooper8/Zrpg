@@ -181,5 +181,35 @@ namespace GUI.Pages
             }
 
         }
+
+        private void listView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            //Change view to visible
+            questPopUp.Visibility = Windows.UI.Xaml.Visibility.Visible;
+
+            //Update title text block
+            //titleTextBlock.Text = ?
+
+            //Update body text block
+            //bodyTextBlock.Text = ?
+        }
+
+        private void acceptButton_Click(object sender, RoutedEventArgs e)
+        {
+            //Change view to collapsed
+            questPopUp.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+
+            //Add accept behavior here
+            listView.SelectedIndex = -1;
+        }
+
+        private void declineButton_Click(object sender, RoutedEventArgs e)
+        {
+            //Change view to collapsed
+            questPopUp.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+
+            //Add decline behavior here
+            listView.SelectedIndex = -1;
+        }
     } 
 }

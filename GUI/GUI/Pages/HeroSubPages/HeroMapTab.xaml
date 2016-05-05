@@ -24,10 +24,15 @@
                 <SolidColorBrush Color="White" Opacity="0.4"/>
             </Button.Background>
         </Button>
-        <ItemsControl Grid.Column="1" HorizontalAlignment="Left" Height="200" Margin="174,294,0,0" VerticalAlignment="Top" Width="250"/>
         <TextBlock x:Name="heroLocationText" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Margin="0,50,0,0" FontSize="20"/>
-        <ListView x:Name="listView" Margin="0,0,0,100" VerticalAlignment="Bottom" FontSize="20" Height="400"/>
+        <ListView x:Name="listView" Margin="0,0,0,100" VerticalAlignment="Bottom" FontSize="20" Height="400" SelectionChanged="listView_SelectionChanged"/>
         <TextBlock x:Name="zoneQuests" Margin="0,0,0,500" TextWrapping="Wrap" Text="Available Quests" VerticalAlignment="Bottom" FontSize="20" TextAlignment="Center"/>
+        <RelativePanel x:Name="questPopUp" Grid.Column="1" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Background="#4C000000" Height="200" Width="250" Visibility="Collapsed">
+            <TextBlock x:Name="titleTextBlock" TextWrapping="Wrap" Text="Title Text" VerticalAlignment="Top" FontSize="20" RelativePanel.AlignTopWithPanel="True" RelativePanel.AlignHorizontalCenterWithPanel="True"/>
+            <TextBlock x:Name="bodyTextBlock" HorizontalAlignment="Center" TextWrapping="Wrap" Text="Body Text" VerticalAlignment="Top" RelativePanel.AlignTopWithPanel="True" RelativePanel.AlignHorizontalCenterWithPanel="True" Margin="0,30,0,0"/>
+            <Button x:Name="acceptButton" Content="Accept" Height="38" VerticalAlignment="Top" Width="100" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignLeftWithPanel="True" Click="acceptButton_Click"/>
+            <Button x:Name="declineButton" Content="Button" Height="40" VerticalAlignment="Bottom" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignRightWithPanel="True" Width="100" Click="declineButton_Click"/>
+        </RelativePanel>
 
     </Grid>
 </Page>
