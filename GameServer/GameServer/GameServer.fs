@@ -439,6 +439,18 @@ module GameServer =
         | Some info ->
           state, info |> GetZoneAssetPositionInfoReply
 
+      | GetZoneQuests zoneId ->
+        match state.zoneQuests.TryFind zoneId with
+        | None -> state, Array.empty |> GetZoneQuestsReply
+        | Some ids ->
+          ids |> Array.map (fun id ->
+            match state.quests.TryFind id with
+            | None -> sprintf "Zone contains unmapped quest id %s" id |> failwith
+            | Some quest -> quest
+          )
+          |> GetZoneQuestsReply
+          |> fun r -> state, r
+
       | HeroBeginQuest (heroId, questId) ->
         heroBeginQuest state heroId questId
         |> fun (state, reply) -> state, reply |> HeroBeginQuestReply
@@ -713,6 +725,14 @@ module GameServer =
     member this.AddRegionSync addRegion =
       this.AddRegion addRegion
       |> Async.RunSynchronously
+
+    member this.AddQuest addQuest = async {
+      let! res = addQuest |> AddQuest |> send
+      return
+        match res with
+        | AddQuestReply reply -> reply
+        | reply -> sprintf "Expected AddZone reply but got %A" reply |> failwith
+    }
 
     member this.AddZone addZone = async {
       let! res = addZone |> AddZone |> send

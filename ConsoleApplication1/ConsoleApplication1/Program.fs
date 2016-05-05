@@ -65,6 +65,17 @@ let main argv =
       | AddZoneReply.Success id -> id
       | _ -> failwith <| sprintf "Expected AddZoneReply.Success but got %A" reply
 
+    let! reply = game.AddQuest {
+      zoneId = zoneId
+      title = "First quest!"
+      body = "The priest needs you to talk to him"
+      rewards = [| XpReward 50.0 |]
+      objective = TimeObjective { timeDelta = 5 }
+    }
+    match reply with
+    | AddQuestReply.Success _ -> ()
+    | reply -> failwith <| sprintf "Expected AddQuestReply.Success but got %A" reply
+
     // Load the asset info
     do! game.AddZoneAssetPositionInfo {
       id = zoneId

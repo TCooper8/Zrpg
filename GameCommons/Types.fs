@@ -89,6 +89,9 @@ type Garrison = {
 type Terrain =
   | Plains
   | Forest
+  with
+    override this.ToString() =
+      sprintf "%A" this
 
 type AssetPositionInfo = {
   id: string

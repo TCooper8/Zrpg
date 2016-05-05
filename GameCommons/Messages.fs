@@ -15,6 +15,7 @@ type Msg =
   | GetRegion of regionId:string
   | GetZone of zoneId:string
   | GetZoneAssetPositionInfo of zoneId:string
+  | GetZoneQuests of zoneId:string
   | HeroBeginQuest of heroId:string * questId:string
   | RemGarrison of string
   | SetStartingZone of Race * string
@@ -78,6 +79,7 @@ type Reply =
   | GetZoneReply of GetZoneReply
   | GetZoneAssetPositionInfoReply of AssetPositionInfo
   | GetZoneConnectionsReply of GetZoneConnectionsReply
+  | GetZoneQuestsReply of Quest array
   | HeroBeginQuestReply of HeroBeginQuestReply
   | RemGarrisonReply of RemGarrisonReply
   | SetStartingZoneReply of SetStartingZoneReply

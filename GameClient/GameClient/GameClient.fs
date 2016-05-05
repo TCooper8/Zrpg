@@ -200,6 +200,17 @@ type private RestGameClient (endPoint) =
         return reply
       } |> Async.StartAsTask
 
+    member this.GetZoneQuests id = 
+      async {
+        let! reply = request <| GetZoneQuests id
+        let reply = match reply with
+        | GetZoneQuestsReply reply -> reply
+        | ExnReply msg -> failwith msg
+        | msg -> failwith <| sprintf "Expected GetZoneQuestsReply but got %A" msg
+
+        return reply
+      } |> Async.StartAsTask
+
     member this.HeroBeginQuest (heroId, questId) =
       async {
         let! reply = request <| HeroBeginQuest(heroId, questId)

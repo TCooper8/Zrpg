@@ -24,6 +24,7 @@ type IGameClient =
     abstract member GetRegion : heroId:string -> GetRegionReply Task
     abstract member GetZone : heroId:string -> GetZoneReply Task
     abstract member GetZoneAssetPositionInfo : zoneId:string -> AssetPositionInfo Task
+    abstract member GetZoneQuests: zoneId:string -> Quest array Task
     abstract member HeroBeginQuest: heroId:string * questId:string -> HeroBeginQuestReply Task
     abstract member RemGarrison : garrisonId:string -> RemGarrisonReply Task
     abstract member SetStartingZone: race:Race * zoneId:string -> SetStartingZoneReply Task

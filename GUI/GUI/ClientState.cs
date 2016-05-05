@@ -162,6 +162,12 @@ namespace GUI
             return zones;
         }
 
+        public async Task<List<Quest>> GetZoneQuests(string zoneId)
+        {
+            var quests = await gameClient.GetZoneQuests(zoneId);
+            return quests.ToList();
+        }
+
         public async Task<List<AssetPositionInfo>> GetZoneAssetPositionInfo(IEnumerable<string> zoneIds)
         {
             var infos = new List<AssetPositionInfo>();

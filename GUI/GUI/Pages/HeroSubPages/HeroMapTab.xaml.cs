@@ -110,47 +110,37 @@ namespace GUI.Pages
                 button.HorizontalAlignment = HorizontalAlignment.Left;
                 button.VerticalAlignment = VerticalAlignment.Top;
                 button.Click += Button_Click;
-                button.Name = zone.name;
+                button.Name = zone.id;
 
                 this.mapGrid.Children.Add(button);
                 Grid.SetColumn(button, 1);
                 zoneButtons.Add(zone.id, button);
             }
-            string heroLocation = hero.name + "'s Current Location: ";
 
-            if (zoneInfoTextBlock.Text == "Goldshire Info")
-            {
-                heroLocationText.Text = heroLocation + "\nGoldshire";
-            }
-
-            else if (zoneInfoTextBlock.Text == "Northshire Info")
-            {
-                heroLocationText.Text = heroLocation + "\nNorthshire";
-            }
-
-            else
-            {
-                heroLocationText.Text = heroLocation + "\nGarrison";
-            }
+            Zone heroZone = zones[hero.zoneId];
+            heroLocationText.Text = hero.name + "'s Current Location: " + heroZone.name;
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private async void Button_Click(object sender, RoutedEventArgs e)
         {
             var button = (Button)sender;
+            var zone = zones[button.Name];
 
-            heroLocationText.Text = hero.name + "'s Location: " + button.Name;
+            zoneInfoTextBlock.Text = zone.name + " info:";
+            var data = new List<string>();
+            data.Add(String.Format("Terrain = {0}", zone.terrain.ToString()));
 
-            if (button.Name == "Northshire")
+            var quests = await state.GetZoneQuests(zone.id);
+            foreach (var quest in quests)
             {
-                northshireButton_Click(sender, e);
-                return;
+                var questMsg = String.Format(
+                    "Quest: {0}",
+                    quest.title
+                );
+                data.Add(questMsg);
             }
-            else if (button.Name == "Goldshire")
-            {
-                goldshireButton_Click(sender, e);
-                return;
-            }
-            throw new NotImplementedException();
+
+            informationTextBlock.Text = "\n  " + String.Join("\n  ", data);
         }
 
         private void garrisonButton_Click(object sender, RoutedEventArgs e)
