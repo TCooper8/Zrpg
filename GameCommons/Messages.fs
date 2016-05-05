@@ -12,6 +12,7 @@ type Msg =
   | GetHeroArray of string array
   | GetHeroInventory of heroId:string
   | GetHeroQuest of heroId:string
+  | GetItem of recordId:string
   | GetRegion of regionId:string
   | GetZone of zoneId:string
   | GetZoneAssetPositionInfo of zoneId:string
@@ -74,6 +75,7 @@ type Reply =
   | GetHeroArrayReply of GetHeroArrayReply
   | GetHeroInventoryReply of GetHeroInventoryReply
   | GetHeroQuestReply of GetHeroQuestReply
+  | GetItemReply of record:ItemRecord * item:Item
   | GetRegionReply of GetRegionReply
   | GetStartingZoneReply of GetStartingZoneReply
   | GetZoneReply of GetZoneReply

@@ -12,7 +12,12 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <Button x:Name="sellButton" Content="Sell" HorizontalAlignment="Left" Margin="10,0,0,20" VerticalAlignment="Bottom" Width="100" Height="40" FontSize="20" BorderBrush="#FF7A7A7A" Click="sellButton_Click">
+
+        <Pivot x:Name="InventoryPivot" Grid.Column="1">
+        </Pivot>
+        <TextBlock x:Name="itemTitle" Grid.Column="0" HorizontalAlignment="Left" Margin="0" TextWrapping="Wrap" Text="Zone Info" VerticalAlignment="Top" Width="250" FontSize="20" TextAlignment="Center"/>
+        <TextBlock x:Name="itemInformation" Grid.Column="0" Margin="0,100,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" FontSize="20"/>
+        <Button x:Name="sellButton" Grid.Column="0" Content="Sell" HorizontalAlignment="Left" Margin="10,0,0,20" VerticalAlignment="Bottom" Width="100" Height="40" FontSize="20" BorderBrush="#FF7A7A7A" Click="sellButton_Click">
             <Button.Background>
                 <SolidColorBrush Color="White" Opacity="0.4"/>
             </Button.Background>
@@ -22,8 +27,5 @@
                 <SolidColorBrush Color="White" Opacity="0.4"/>
             </Button.Background>
         </Button>
-
-        <Pivot x:Name="InventoryPivot">
-        </Pivot>
     </Grid>
 </Page>

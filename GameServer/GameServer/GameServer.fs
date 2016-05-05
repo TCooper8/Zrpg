@@ -156,7 +156,7 @@ module GameServer =
               for i in 1 .. 10 do
                 let slot = {
                   position = i
-                  itemRecordId = None
+                  itemRecordId = GameNone
                 }
                 yield slot
             ] |> Array.ofList
@@ -423,6 +423,15 @@ module GameServer =
             | None -> failwith <| sprintf "Hero %s has record %s, but quest %s does not exist" heroId recordId record.questId
             | Some quest ->
               state, GetHeroQuestReply.Success(record, quest) |> res
+
+      | GetItem recordId ->
+        match state.itemRecords.TryFind recordId with
+        | None -> failwith "Item record does not exist"
+        | Some record ->
+          match state.items.TryFind record.itemId with
+          | None -> failwith "Item record found, but item does not exist"
+          | Some item ->
+            state, GetItemReply(record, item)
 
       | GetRegion regionId ->
         match state.regions.TryFind regionId with

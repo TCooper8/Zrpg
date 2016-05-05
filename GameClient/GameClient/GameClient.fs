@@ -167,6 +167,17 @@ type private RestGameClient (endPoint) =
         return reply
       } |> Async.StartAsTask
 
+    member this.GetItem recordId = 
+      async {
+        let! reply = request <| GetItem recordId
+        let reply = match reply with
+        | GetItemReply (record, item) -> record, item
+        | ExnReply msg -> failwith msg
+        | msg -> failwith <| sprintf "Expected GetItemReply but got %A" msg
+
+        return reply
+      } |> Async.StartAsTask
+
     member this.GetRegion heroId = 
       async {
         let! reply = request <| GetRegion heroId

@@ -32,9 +32,13 @@ type Faction =
       | Alliance -> "Alliance"
       | Horde -> "Horde"
 
+type 'a GameOption =
+  | GameSome of 'a
+  | GameNone
+
 type ItemSlot = {
   position: int
-  itemRecordId: string option
+  itemRecordId: string GameOption
 }
 
 type InventoryPane = {
@@ -192,11 +196,20 @@ type Rarity =
   | Epic
   | Legendary
 
-type Item =
+type Item = {
+  id:string
+  info:ItemInfo
+}
+
+and ItemInfo =
   | TradeGood of TradeGood
+  | PoorItem of PoorItem
 
 and TradeGood = {
-  id: string
   name: string
   rarity: Rarity
+}
+
+and PoorItem = {
+  name: string
 }

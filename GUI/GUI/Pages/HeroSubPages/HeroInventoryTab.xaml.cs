@@ -26,6 +26,7 @@ namespace GUI.Pages.HeroSubPages
     {
         ClientState state = ClientState.state;
         Hero hero;
+        Dictionary<string, ItemSlot> itemSlots;
 
         public HeroInventoryTab()
         {
@@ -36,6 +37,7 @@ namespace GUI.Pages.HeroSubPages
         {
             Debug.WriteLine("Generating inventory.");
             var heroInventory = await state.GetHeroInventory(hero.id);
+            itemSlots = new Dictionary<string, ItemSlot>();
 
             this.InventoryPivot.Items.Clear();
 
@@ -59,13 +61,18 @@ namespace GUI.Pages.HeroSubPages
                     Debug.WriteLine("Generating slot {0}", slot.position);
 
                     var button = new Button();
+                    button.Name = String.Format("{0}:{1}", pane.position, slot.position);
                     button.Background = new SolidColorBrush(Windows.UI.Colors.Black);
                     button.Background.Opacity = 0.4;
                     button.Foreground = new SolidColorBrush(Windows.UI.Colors.White);
                     button.Width = 100;
                     button.Height = 100;
 
+                    button.Click += Button_Click;
+
                     buttons.Add(button);
+                    Debug.WriteLine("Generated button {0}", button.Name, null);
+                    itemSlots.Add(button.Name, slot);
                 }
 
                 Debug.WriteLine("Binding sources");
@@ -76,6 +83,39 @@ namespace GUI.Pages.HeroSubPages
                 Debug.WriteLine("Adding items");
                 this.InventoryPivot.Items.Add(paneControl);
                 this.InventoryPivot.SelectedIndex = 0;
+            }
+        }
+
+        private async void Button_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            var slot = itemSlots[button.Name];
+            var recordOption = slot.itemRecordId;
+
+            if (recordOption.IsGameSome)
+            {
+                var recordId = ((GameOption<string>.GameSome)recordOption).Item;
+                var data = await state.GetItemRecordData(recordId);
+                var record = data.Item1;
+                var item = data.Item2;
+                var info = item.info;
+
+                // Determine the kind of item.
+                if (info.IsTradeGood)
+                {
+                    var tradeGood = (info as ItemInfo.TradeGood).Item;
+
+                    itemTitle.Text = "TradeGood: " + tradeGood.name;
+                    itemTitle.Foreground = new SolidColorBrush(Windows.UI.Colors.Gray);
+
+                }
+
+                //itemTitle.Text = 
+            }
+            else
+            {
+                itemTitle.Text = "Empty";
+                itemInformation.Text = "";
             }
         }
 

@@ -18,10 +18,14 @@ namespace GUI
         private string clientId;
         private Garrison garrison;
         private List<Hero> heroes = new List<Hero>();
+        private Dictionary<string, Item> items;
+        private Dictionary<string, ItemRecord> itemRecords;
 
         private ClientState()
         {
             this.gameClient = GameClient.RESTClient("http://localhost:8080");
+            this.items = new Dictionary<string, Item>();
+            this.itemRecords = new Dictionary<string, ItemRecord>();
         }
 
         private static T EnsureDefined<T>(T val, string msg)
@@ -168,6 +172,34 @@ namespace GUI
             if (reply.IsSuccess)
             {
                 var success = (GetHeroInventoryReply.Success)reply;
+                // Dig through the inventory and get all of the items.
+                var inventory = success.Item;
+                foreach (var pane in inventory.panes)
+                {
+                    foreach (var slot in pane.slots)
+                    {
+                        var option = slot.itemRecordId;
+                        if (option.IsGameSome)
+                        {
+                            var recordId = ((GameOption<string>.GameSome)option).Item;
+                            var data = await gameClient.GetItem(recordId);
+                            var item = data.Item2;
+                            var record = data.Item1;
+
+                            if (! items.ContainsKey(item.id))
+                            {
+                                items.Remove(item.id);
+                            }
+                            if (itemRecords.ContainsKey(record.id))
+                            {
+                                itemRecords.Remove(record.id);
+                            }
+                            items.Add(item.id, item);
+                            itemRecords.Add(record.id, record);
+                        }
+                    }
+                }
+
                 return success.Item;
             }
             else
@@ -178,6 +210,33 @@ namespace GUI
                 );
                 throw new Exception(msg);
             }
+        }
+
+        public async Task<Tuple<ItemRecord, Item>> GetItemRecordData(string recordId)
+        {
+            ItemRecord record;
+            if (itemRecords.TryGetValue(recordId, out record))
+            {
+                Item item;
+                if (items.TryGetValue(recordId, out item))
+                {
+                    return new Tuple<ItemRecord, Item>(record, item);
+                }
+            }
+
+            var data = await gameClient.GetItem(recordId);
+            try
+            {
+                items.Add(data.Item2.id, data.Item2);
+            }
+            catch (Exception e) { }
+            try
+            {
+                itemRecords.Add(data.Item1.id, data.Item1);
+            }
+            catch (Exception e) { }
+
+            return data;
         }
 
         public async Task<List<Quest>> GetZoneQuests(string zoneId)

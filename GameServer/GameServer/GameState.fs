@@ -14,6 +14,10 @@ open System
     heroQuestRecords: Map<string, string>
     heroInventories: Map<string, HeroInventory>
 
+    // Item data
+    itemRecords: Map<string, ItemRecord>
+    items: Map<string, Item>
+
     // Zone data
     zoneQuests: Map<string, string array>
     zoneAssetPositionInfo: Map<string, AssetPositionInfo>
@@ -39,8 +43,12 @@ open System
       regions = Map.empty
       heroes = Map.empty
       worlds = Map.empty
+
       heroQuestRecords = Map.empty
       heroInventories = Map.empty
+
+      itemRecords = Map.empty
+      items = Map.empty
 
       zoneQuests = Map.empty
       zoneAssetPositionInfo = Map.empty
