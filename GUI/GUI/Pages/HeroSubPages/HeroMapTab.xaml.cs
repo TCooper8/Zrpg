@@ -152,24 +152,6 @@ namespace GUI.Pages
                                         "Holy Power: 5\n";    
         }
 
-        private void northshireButton_Click(object sender, RoutedEventArgs e)
-        {
-            zoneInfoTextBlock.Text = "Northshire Info";
-            informationTextBlock.Text = "Gold Income: 60 per day\n" +
-                                        "Soldiers: 30\n" +
-                                        "Trade Influence: +5%\n" +
-                                        "Holy Power: 10\n";
-        }
-
-        private void goldshireButton_Click(object sender, RoutedEventArgs e)
-        {
-            zoneInfoTextBlock.Text = "Goldshire Info";
-            informationTextBlock.Text = "Gold Income: 80 per day\n" +
-                                       "Soldiers: 50\n" +
-                                       "Trade Influence: +3%\n" +
-                                       "Holy Power: 2\n";
-        }
-
         private void sendHeroButton_Click(object sender, RoutedEventArgs e)
         {
             UpdateHeroStatus();
