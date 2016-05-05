@@ -12,7 +12,6 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <TextBlock x:Name="itemTextBlock" Margin="0" TextWrapping="Wrap" Text="Item Text Block" VerticalAlignment="Top" TextAlignment="Center" FontSize="20" Width="250" HorizontalAlignment="Left"/>
         <Button x:Name="sellButton" Content="Sell" HorizontalAlignment="Left" Margin="10,0,0,20" VerticalAlignment="Bottom" Width="100" Height="40" FontSize="20" BorderBrush="#FF7A7A7A" Click="sellButton_Click">
             <Button.Background>
                 <SolidColorBrush Color="White" Opacity="0.4"/>
