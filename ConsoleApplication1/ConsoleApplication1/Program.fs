@@ -45,6 +45,16 @@ let main argv =
       | AddZoneReply.Success id -> id
       | _ -> failwith <| sprintf "Expected AddZoneReply.Success but got %A" reply
 
+    // Load the asset info
+    do! game.AddZoneAssetPositionInfo {
+      id = zoneId
+      assetId = "elwynnForestMap.jpg"
+      left = 420.0 / 930.0
+      right = 490.0 / 930.0
+      top = 175.0 / 510.0
+      bottom = 250.0 / 510.0
+    }
+
     let! reply = game.AddZone {
       name = "Goldshire"
       regionId = regionId
@@ -54,6 +64,16 @@ let main argv =
       match reply with
       | AddZoneReply.Success id -> id
       | _ -> failwith <| sprintf "Expected AddZoneReply.Success but got %A" reply
+
+    // Load the asset info
+    do! game.AddZoneAssetPositionInfo {
+      id = zoneId
+      assetId = "elwynnForestMap.jpg"
+      left = 358.0 / 930.0
+      right = 428.0 / 930.0
+      top = 320.0 / 510.0
+      bottom = 380.0 / 510.0
+    }
 
     let! reply = game.SetStartingZone (Human, zoneId)
     match reply with

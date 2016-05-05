@@ -79,6 +79,17 @@ type private RestGameClient (endPoint) =
         return reply
       } |> Async.StartAsTask
 
+    member this.AddZoneAssetPositionInfo info =
+      async {
+        let! reply = info |> AddZoneAssetPositionInfo |> request
+        let reply = match reply with
+        | AddZoneAssetPositionInfoReply -> ()
+        | ExnReply msg -> failwith msg
+        | msg -> failwith <| sprintf "Expected AddZoneAssetPositionInfoReply but got %A" msg
+
+        return reply
+      } |> Async.StartAsTask
+
     member this.AddQuest quest =
       async {
         let! reply = quest |> AddQuest |> request
@@ -174,6 +185,17 @@ type private RestGameClient (endPoint) =
         | GetZoneReply reply -> reply
         | ExnReply msg -> failwith msg
         | msg -> failwith <| sprintf "Expected GetZoneReply but got %A" msg
+
+        return reply
+      } |> Async.StartAsTask
+
+    member this.GetZoneAssetPositionInfo id = 
+      async {
+        let! reply = request <| GetZoneAssetPositionInfo id
+        let reply = match reply with
+        | GetZoneAssetPositionInfoReply reply -> reply
+        | ExnReply msg -> failwith msg
+        | msg -> failwith <| sprintf "Expected GetZoneAssetPositionInfoReply but got %A" msg
 
         return reply
       } |> Async.StartAsTask

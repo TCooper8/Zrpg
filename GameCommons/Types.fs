@@ -93,8 +93,10 @@ type Terrain =
 type AssetPositionInfo = {
   id: string
   assetId: string
-  x: int
-  y: int
+  left: float
+  right: float
+  top: float
+  bottom: float
 }
 
 type Zone = {

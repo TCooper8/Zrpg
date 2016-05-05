@@ -343,6 +343,13 @@ module GameServer =
             }
             state, zone.id |> AddZoneReply.Success |> AddZoneReply
 
+      | AddZoneAssetPositionInfo info ->
+        let state = {
+          state with
+            zoneAssetPositionInfo = state.zoneAssetPositionInfo.Add(info.id, info)
+        }
+        state, AddZoneAssetPositionInfoReply
+
       | AddQuest addQuest ->
         // Make sure the zone exists.
         match state.zones.TryFind addQuest.zoneId with
@@ -425,6 +432,12 @@ module GameServer =
         | None -> sprintf "Zone %s does not eixst" zoneId |> failwith
         | Some zone ->
           state, GetZoneReply.Success zone |> GetZoneReply
+
+      | GetZoneAssetPositionInfo zoneId ->
+        match state.zoneAssetPositionInfo.TryFind zoneId with
+        | None -> failwith "Zone asset info does not exist"
+        | Some info ->
+          state, info |> GetZoneAssetPositionInfoReply
 
       | HeroBeginQuest (heroId, questId) ->
         heroBeginQuest state heroId questId
@@ -707,6 +720,22 @@ module GameServer =
         match res with
         | AddZoneReply reply -> reply
         | reply -> sprintf "Expected AddZone reply but got %A" reply |> failwith
+    }
+
+    member this.AddZoneAssetPositionInfo info = async {
+      let! res = info |> AddZoneAssetPositionInfo |> send
+      return
+        match res with
+        | AddZoneAssetPositionInfoReply -> ()
+        | reply -> sprintf "Expected AddZoneAssetPositionInfo reply but got %A" reply |> failwith
+    }
+
+    member this.GetZoneAssetPositionInfo zoneId = async {
+      let! res = zoneId |> GetZoneAssetPositionInfo |> send
+      return
+        match res with
+        | GetZoneAssetPositionInfoReply info -> info
+        | reply -> sprintf "Expected GetZoneAssetPositionInfoReply but got %A" reply |> failwith
     }
 
     member this.SetStartingZone (race, zoneId) = async {

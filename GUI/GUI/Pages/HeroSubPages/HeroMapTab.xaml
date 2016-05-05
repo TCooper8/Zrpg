@@ -15,10 +15,8 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <Image x:Name="image1" Grid.Column="1" Margin="0" MinHeight="510" MinWidth="930" ScrollViewer.VerticalScrollBarVisibility="Disabled" NineGrid="0" UseLayoutRounding="True" RenderTransformOrigin="0.5,0.5" Stretch="None" Source="ms-appx:///Assets/elwynnForestMap.jpg" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        <Image x:Name="image1" Grid.Column="1" Margin="0" MinHeight="510" MinWidth="930" ScrollViewer.VerticalScrollBarVisibility="Disabled" NineGrid="0" UseLayoutRounding="True" RenderTransformOrigin="0.5,0.5" Stretch="Fill" Source="ms-appx:///Assets/elwynnForestMap.jpg" HorizontalAlignment="Left" VerticalAlignment="Top" SizeChanged="image1_SizeChanged"/>
         <Button x:Name="garrisonButton" Content="Garrison" HorizontalAlignment="Left" Margin="105,20,0,0" VerticalAlignment="Top" FontSize="50" Padding="0" Click="garrisonButton_Click" Grid.Column="1" Width="250" Height="200"/>
-        <Button x:Name="northshireButton" Content="" HorizontalAlignment="Left" Margin="420,175,0,0" VerticalAlignment="Top" FontSize="30" Click="northshireButton_Click" Grid.Column="1" Width="70" Height="70"/>
-        <Button x:Name="goldshireButton" Content="" HorizontalAlignment="Left" Margin="358,290,0,0" VerticalAlignment="Top" FontSize="20" Click="goldshireButton_Click" Grid.Column="1" Width="70" Height="70"/>
         <TextBlock x:Name="zoneInfoTextBlock" HorizontalAlignment="Left" Margin="0" TextWrapping="Wrap" Text="Zone Info" VerticalAlignment="Top" Width="250" FontSize="20" TextAlignment="Center"/>
         <TextBlock x:Name="informationTextBlock" Margin="0,100,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top"/>
         <Button x:Name="sendHeroButton" Content="Send Hero" HorizontalAlignment="Center" Margin="0,0,0,20" VerticalAlignment="Bottom" Width="115" Height="40" FontSize="20" BorderBrush="#FF7A7A7A" Click="sendHeroButton_Click">

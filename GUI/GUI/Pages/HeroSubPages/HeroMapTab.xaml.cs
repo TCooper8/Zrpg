@@ -47,7 +47,7 @@ namespace GUI.Pages
             //                            "Trade Influence: +10%\n" +
             //                            "Holy Power: 5\n";
         }
-        
+
         //Get client garrison information (owned regions, owned zones)
 
         //Update map tab with current information (quests available in zones)
@@ -76,22 +76,14 @@ namespace GUI.Pages
                     Debug.WriteLine("Populating region {0} zone {1}:{2}", region.name, zone.id, zone.name);
 
                     zones.Add(zone.id, zone);
+                }
 
-                    if (zone.name == "Northshire")
-                    {
-                        var info = new AssetPositionInfo(zone.id, "", 420, 175);
-                        zonePositions.Add(zone.id, info);
-                    }
-                    else if (zone.name == "Goldshire")
-                    {
-                        var info = new AssetPositionInfo(zone.id, "", 358, 290);
-                        zonePositions.Add(zone.id, info);
-                    }
-                    else
-                    {
-                        Debug.WriteLine("Got unhaneld zone {0}", zone.name, null);
-                        throw new Exception("UnhaneldZone");
-                    }
+                // Get all of the zone position information.
+
+                var positionInfos = await state.GetZoneAssetPositionInfo(_zones.Select(zone => zone.id));
+                foreach (var info in positionInfos)
+                {
+                    zonePositions.Add(info.id, info);
                 }
             }
 
@@ -107,9 +99,14 @@ namespace GUI.Pages
                 var info = zonePositions[zoneId];
                 // Create a button for the zone.
                 var button = new Button();
-                button.Width = 70;
-                button.Height = 70;
-                button.Margin = new Thickness(info.x, info.y, 0, 0);
+                button.Width = image1.ActualWidth * info.right - image1.ActualWidth * info.left;
+                button.Height = image1.ActualHeight * info.bottom - image1.ActualHeight * info.top;
+                button.Margin = new Thickness(
+                    info.left * image1.ActualWidth,
+                    info.top * image1.ActualHeight,
+                    0,
+                    0
+                );
                 button.HorizontalAlignment = HorizontalAlignment.Left;
                 button.VerticalAlignment = VerticalAlignment.Top;
                 button.Click += Button_Click;
@@ -117,6 +114,7 @@ namespace GUI.Pages
 
                 this.mapGrid.Children.Add(button);
                 Grid.SetColumn(button, 1);
+                zoneButtons.Add(zone.id, button);
             }
             string heroLocation = hero.name + "'s Current Location: ";
 
@@ -140,7 +138,7 @@ namespace GUI.Pages
         {
             var button = (Button)sender;
 
-            heroLocationText.Text = "Hero location = " + button.Name;
+            heroLocationText.Text = hero.name + "'s Location: " + button.Name;
 
             if (button.Name == "Northshire")
             {
@@ -185,6 +183,27 @@ namespace GUI.Pages
         private void sendHeroButton_Click(object sender, RoutedEventArgs e)
         {
             UpdateHeroStatus();
+        }
+
+        private void image1_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            foreach (var pair in zoneButtons)
+            {
+                var button = pair.Value;
+                var zoneId = pair.Key;
+                var zone = zones[zoneId];
+                var info = zonePositions[zoneId];
+
+                button.Width = image1.ActualWidth * info.right - image1.ActualWidth * info.left;
+                button.Height = image1.ActualHeight * info.bottom - image1.ActualHeight * info.top;
+                button.Margin = new Thickness(
+                    info.left * image1.ActualWidth,
+                    info.top * image1.ActualHeight,
+                    0,
+                    0
+                );
+            }
+
         }
     }
 }

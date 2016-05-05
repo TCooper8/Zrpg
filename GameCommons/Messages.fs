@@ -5,6 +5,7 @@ type Msg =
   | AddHero of AddHero
   | AddRegion of AddRegion
   | AddZone of AddZone
+  | AddZoneAssetPositionInfo of AssetPositionInfo
   | AddQuest of AddQuest
   | GetClientGarrison of string
   | GetHero of string
@@ -13,6 +14,7 @@ type Msg =
   | GetHeroQuest of heroId:string
   | GetRegion of regionId:string
   | GetZone of zoneId:string
+  | GetZoneAssetPositionInfo of zoneId:string
   | HeroBeginQuest of heroId:string * questId:string
   | RemGarrison of string
   | SetStartingZone of Race * string
@@ -62,6 +64,7 @@ type Reply =
   | AddHeroReply of AddHeroReply
   | AddRegionReply of AddRegionReply
   | AddZoneReply of AddZoneReply
+  | AddZoneAssetPositionInfoReply
   | AddQuestReply of AddQuestReply
   | AddWorldReply of AddWorldReply
   | ExnReply of string
@@ -73,6 +76,7 @@ type Reply =
   | GetRegionReply of GetRegionReply
   | GetStartingZoneReply of GetStartingZoneReply
   | GetZoneReply of GetZoneReply
+  | GetZoneAssetPositionInfoReply of AssetPositionInfo
   | GetZoneConnectionsReply of GetZoneConnectionsReply
   | HeroBeginQuestReply of HeroBeginQuestReply
   | RemGarrisonReply of RemGarrisonReply

@@ -162,6 +162,17 @@ namespace GUI
             return zones;
         }
 
+        public async Task<List<AssetPositionInfo>> GetZoneAssetPositionInfo(IEnumerable<string> zoneIds)
+        {
+            var infos = new List<AssetPositionInfo>();
+            foreach (var id in zoneIds)
+            {
+                var reply = await gameClient.GetZoneAssetPositionInfo(id);
+                infos.Add(reply);
+            }
+            return infos;
+        }
+
         public string ClientId { get { return EnsureDefined<string>(clientId, "clientId is not defined"); } }
         public string Username { get { return EnsureDefined<string>(username, "username is not defined"); } }
         public Garrison Garrison { get { return EnsureDefined<Garrison>(garrison, "garrison is not defined"); } }
