@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -26,15 +27,106 @@ namespace GUI.Pages
     public sealed partial class HeroesPage : Page
     {
         ClientState state = ClientState.state;
+        Dictionary<string, TextBlock> heroViews;
+        Dictionary<string, ProgressBar> heroBars;
         Hero hero;
         
         public HeroesPage()
         {
             this.InitializeComponent();
+            this.heroViews = new Dictionary<string, TextBlock>();
+            this.heroBars = new Dictionary<string, ProgressBar>();
 
             GetUserGarrison();
             LoadHeroes();
             GetHeroStats();
+        }
+
+        public async Task UpdateHero(string heroId)
+        {
+            Debug.WriteLine("Updating hero {0}", heroId, null);
+
+            if (listView.ItemsSource == null)
+            {
+                return;
+            }
+            var heroViews = listView.ItemsSource as List<TextBlock>;
+            var xpViews = heroXpList.ItemsSource as List<ProgressBar>;
+            //var newHeroViews = new List<TextBlock>();
+
+            // Find the hero in the controls.
+            var i = -1;
+            foreach (var view in heroViews)
+            {
+                ++i;
+                var hero = await state.GetHero(view.Name, true);
+                Debug.WriteLine("Checking hero {0}:{1}", hero.id, hero.name);
+
+                if (hero.id == heroId)
+                {
+                    // Need to update this hero.
+                    var heroF = await state.GetHero(heroId, false);
+                    view.Name = heroF.id;
+                    view.Text = heroF.ToString();
+
+                    var xpProgress = xpViews[i];
+
+                    // Determine the state of the hero and set the progress.
+                    if (hero.state.IsQuesting)
+                    {
+                        var questData = await state.GetHeroQuest(hero.id, true);
+                        await this.UpdateHeroQuesting(heroId);
+                        //this.SetHeroQuesting(hero.id, questData.Item2, questData.Item1);
+                    }
+                    else
+                    {
+                        await this.UpdateHeroXp(heroId);
+                    }
+
+                    Debug.WriteLine("Updated hero {0} Status = {1}", hero.name, hero.state.IsQuesting, null);
+                    return;
+                }
+            }
+
+            //listView.ItemsSource = newHeroViews;
+        }
+
+        private async Task UpdateHeroXp(string heroId)
+        {
+            var bar = heroBars[heroId];
+            var hero = await state.GetHero(heroId, true);
+
+            bar.Foreground = new SolidColorBrush(Windows.UI.Colors.Blue);
+
+            bar.Maximum = hero.stats.finalXp;
+            bar.Value = hero.stats.xp;
+            bar.Width = 250;
+            bar.Height = 40;
+        }
+
+        private async Task UpdateHeroQuesting(string heroId)
+        {
+            var data = await state.GetHeroQuest(heroId, true);
+            var quest = data.Item2;
+            var record = data.Item1;
+
+            var bar = heroBars[heroId];
+            var hero = await state.GetHero(heroId, true);
+            if (!hero.state.IsQuesting)
+            {
+                return;
+            }
+
+            var ti = record.startTime;
+            var dt = quest.objective.Item.timeDelta;
+            var tf = ti + dt;
+            var now = await state.GetGameTime(false);
+            var elapsed = now - ti;
+            var timeLeft = dt - elapsed;
+
+            bar.Foreground = new SolidColorBrush(Windows.UI.Colors.Yellow);
+            bar.Value = elapsed;
+            bar.Maximum = timeLeft;
         }
 
         private async void LoadHeroes()
@@ -46,23 +138,36 @@ namespace GUI.Pages
                 Debug.WriteLine("Generating hero controls");
                 var success = (GetHeroArrayReply.Success)reply;
                 var heroes = success.Item;
-                listView.ItemsSource = heroes;
+                var heroViews = new List<TextBlock>();
 
-                var heroControls = new List<ItemsControl>();
                 var xpControls = new List<ProgressBar>();
 
                 foreach (var hero in heroes)
                 {
                     var xpProgress = new ProgressBar();
-                    xpProgress.Maximum = hero.stats.finalXp;
-                    xpProgress.Value = hero.stats.xp;
+                    //xpProgress.Maximum = hero.stats.finalXp;
+                    //xpProgress.Value = hero.stats.xp;
                     xpProgress.Width = 250;
                     xpProgress.Height = 40;
 
                     xpControls.Add(xpProgress);
+
+                    var view = new TextBlock();
+                    view.Name = hero.id;
+                    view.Text = hero.ToString();
+
+                    heroViews.Add(view);
+                    this.heroViews.Add(hero.id, view);
+                    this.heroBars.Add(hero.id, xpProgress);
+
+                    await this.UpdateHero(hero.id);
+
                     //heroControl.Items.Add(heroDisplay);
                     //heroControl.Items.Add(xpProgress);
                 }
+
+                heroXpList.ItemsSource = xpControls;
+                listView.ItemsSource = heroViews;
 
                 if (listView.Items.Count == 0)
                 {
@@ -71,9 +176,6 @@ namespace GUI.Pages
                 {
                     listView.SelectedIndex = 0;
                 }
-
-                heroXpList.ItemsSource = xpControls;
-                //listView.ItemsSource = heroControls;
             }
         }
 
@@ -96,6 +198,9 @@ namespace GUI.Pages
                 else
                 {
                     hero = success.Item[listView.SelectedIndex];
+                    await this.UpdateHero(hero.id);
+                    hero = await state.GetHero(hero.id, true);
+
                     infoFrame.Content = String.Format(
                         "Name: {0}\n" +
                         "Faction: {1}\n" +
@@ -171,7 +276,8 @@ namespace GUI.Pages
                 else
                 {
                     hero = success.Item[listView.SelectedIndex];
-                    infoFrame.Navigate(typeof(HeroMapTab), hero);
+                    var param = new MapTabCell(this, hero.id);
+                    infoFrame.Navigate(typeof(HeroMapTab), param);
                 }
             }      
         }

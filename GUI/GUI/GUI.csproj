@@ -123,6 +123,7 @@
     <Compile Include="Pages\HeroSubPages\HeroMapTab.xaml.cs">
       <DependentUpon>HeroMapTab.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\HeroSubPages\MapTabCell.cs" />
     <Compile Include="Pages\HeroSubPages\ZoneTestPages\GarrisonZone.xaml.cs">
       <DependentUpon>GarrisonZone.xaml</DependentUpon>
     </Compile>

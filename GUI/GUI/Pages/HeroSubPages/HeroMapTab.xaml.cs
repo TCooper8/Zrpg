@@ -1,10 +1,12 @@
-﻿using GUI.Pages.HeroSubPages.ZoneTestPages;
+﻿using GUI.Pages.HeroSubPages;
+using GUI.Pages.HeroSubPages.ZoneTestPages;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -26,11 +28,16 @@ namespace GUI.Pages
     public sealed partial class HeroMapTab : Page
     {
         ClientState state = ClientState.state;
-        Hero hero;
+
+        string heroId;
+        HeroesPage heroesPage;
+
         Dictionary<string, Button> zoneButtons;
         Dictionary<string, Zone> zones;
         Dictionary<string, Region> ownedRegions;
         Dictionary<string, AssetPositionInfo> zonePositions;
+
+        Quest activeQuest;
 
         public HeroMapTab()
         {
@@ -39,7 +46,10 @@ namespace GUI.Pages
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            this.hero = e.Parameter as Hero;
+            var cell = e.Parameter as MapTabCell;
+            this.heroId = cell.HeroId;
+            this.heroesPage = cell.HeroesPage;
+
             UpdateHeroStatus();
             //zoneInfoTextBlock.Text = "Garrison Info";
             //informationTextBlock.Text = "Gold Income: 580 per day\n" +
@@ -95,8 +105,9 @@ namespace GUI.Pages
             {
                 Debug.WriteLine("Getting zone {0}", zoneId, null);
                 var zone = zones[zoneId];
-                Debug.WriteLine("Getting asset info for zone {0}", zone, null);
+                Debug.WriteLine("Getting asset info for zone {0}:{1}", zone.id, zone.name);
                 var info = zonePositions[zoneId];
+                Debug.WriteLine("Asset info for zone {0} = {1}", zone, info.ToString());
                 // Create a button for the zone.
                 var button = new Button();
                 button.Width = image1.ActualWidth * info.right - image1.ActualWidth * info.left;
@@ -116,7 +127,9 @@ namespace GUI.Pages
                 Grid.SetColumn(button, 1);
                 zoneButtons.Add(zone.id, button);
             }
+            Debug.WriteLine("Asset info loaded");
 
+            var hero = await state.GetHero(heroId, true);
             Zone heroZone = zones[hero.zoneId];
             heroLocationText.Text = hero.name + "'s Current Location: " + heroZone.name;
         }
@@ -130,17 +143,22 @@ namespace GUI.Pages
             zoneInfoTextBlock.Text = zone.name + " info:";           
 
             var data = new List<string>();
-            data.Add(String.Format("Terrain = {0}", zone.terrain.ToString()));           
+            data.Add(String.Format("Terrain = {0}", zone.terrain.ToString()));
 
             var quests = await state.GetZoneQuests(zone.id);
             foreach (var quest in quests)
             {
+                Debug.WriteLine("Loading quest view for {0}", quest.title, null);
+
                 var questMsg = String.Format(
                     "Quest: {0}",
                     quest.title
                 );
-                data.Add(questMsg);
-                listView.Items.Add(questMsg);
+                var view = new TextBlock();
+                view.Name = quest.id;
+                view.Text = questMsg;
+
+                listView.Items.Add(view);
             }
 
             informationTextBlock.Text = "\n  " + String.Join("\n  ", data);
@@ -184,23 +202,70 @@ namespace GUI.Pages
 
         private void listView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //Change view to visible
-            questPopUp.Visibility = Windows.UI.Xaml.Visibility.Visible;
+            Debug.WriteLine("Selection changed");
+
 
             //Update title text block
             //titleTextBlock.Text = ?
 
+
+            if (listView.SelectedItem == null)
+            {
+                this.activeQuest = null;
+                questPopUp.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                return;
+            }
+
+            Debug.WriteLine("Loading selection control for quest");
+            var view = listView.SelectedItem as TextBlock;
+            Debug.WriteLine("Loading quest from control {0}", view.Name, null);
+            var quest = state.GetQuest(view.Name);
+            this.activeQuest = quest;
+
+            Debug.WriteLine("Loading quest dialogue for {0}", quest.title, null);
+
+            titleTextBlock.Text = quest.title;
+            bodyTextBlock.Text = quest.body;
+
+            //Change view to visible
+            questPopUp.Visibility = Windows.UI.Xaml.Visibility.Visible;
+
             //Update body text block
-            //bodyTextBlock.Text = ?
+            //bodyTextBlock.Text = 
         }
 
-        private void acceptButton_Click(object sender, RoutedEventArgs e)
+        private async void BeginPollingHeroQuestState (QuestRecord record, Quest quest)
         {
+            var hero = await state.GetHero(heroId, true);
+            // Estimate the time to quest completion.
+            var ti = record.startTime;
+            var ticks = quest.objective.Item.timeDelta;
+            var tf = ti + ticks + 1;
+            var cur = await state.GetGameTime(false);
+
+            // If the current game time is less than the tf, the quest will not be resolved.
+            while (cur <= tf)
+            {
+                cur = await state.GetGameTime(false);
+                await heroesPage.UpdateHero(hero.id);
+            }
+        }
+
+        private async void acceptButton_Click(object sender, RoutedEventArgs e)
+        {
+            var quest = activeQuest;
+            await state.BeginHeroQuest(heroId, quest.id);
+
             //Change view to collapsed
             questPopUp.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
 
             //Add accept behavior here
             listView.SelectedIndex = -1;
+            activeQuest = null;
+
+            var data = await state.GetHeroQuest(heroId, false);
+            // Start a task to update the hero once the quest is done.
+            BeginPollingHeroQuestState(data.Item1, data.Item2);
         }
 
         private void declineButton_Click(object sender, RoutedEventArgs e)
@@ -210,6 +275,7 @@ namespace GUI.Pages
 
             //Add decline behavior here
             listView.SelectedIndex = -1;
+            activeQuest = null;
         }
     } 
 }

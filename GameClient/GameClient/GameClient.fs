@@ -123,6 +123,17 @@ type private RestGameClient (endPoint) =
         return reply
       } |> Async.StartAsTask
 
+    member this.GetGameTime () =
+      async {
+        let! reply = request <| GetGameTime
+        let reply = match reply with
+        | GetGameTimeReply gameTime -> gameTime
+        | ExnReply msg -> failwith msg
+        | msg -> failwith <| sprintf "Expected GetGameTimeReply but got %A" msg
+
+        return reply
+      } |> Async.StartAsTask
+
     member this.GetHero heroId =
       async {
         let! reply = request <| GetHero heroId

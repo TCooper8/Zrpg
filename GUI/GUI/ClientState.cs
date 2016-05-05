@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.UI.Xaml.Controls;
 using Zrpg.Game;
 
 namespace GUI
@@ -17,15 +18,23 @@ namespace GUI
         private string username;
         private string clientId;
         private Garrison garrison;
-        private List<Hero> heroes = new List<Hero>();
+        private int gameTime = 0;
+        private Dictionary<string, Hero> heroes;
         private Dictionary<string, Item> items;
         private Dictionary<string, ItemRecord> itemRecords;
+        private Dictionary<string, Quest> quests;
+        private Dictionary<string, QuestRecord> heroQuestRecords;
+        private Dictionary<string, QuestRecord> questRecords;
 
         private ClientState()
         {
             this.gameClient = GameClient.RESTClient("http://localhost:8080");
             this.items = new Dictionary<string, Item>();
             this.itemRecords = new Dictionary<string, ItemRecord>();
+            this.quests = new Dictionary<string, Quest>();
+            this.heroes = new Dictionary<string, Hero>();
+            this.heroQuestRecords = new Dictionary<string, QuestRecord>();
+            this.questRecords = new Dictionary<string, QuestRecord>();
         }
 
         private static T EnsureDefined<T>(T val, string msg)
@@ -69,6 +78,18 @@ namespace GUI
             return reply;
         }
 
+        public async Task<int> GetGameTime(bool cache)
+        {
+            if (cache)
+            {
+                return this.gameTime;
+            }
+
+            var gameTime = await gameClient.GetGameTime();
+            this.gameTime = gameTime;
+            return gameTime;
+        }
+
         public async Task<GetClientGarrisonReply> GetGarrison()
         {
             var reply = await gameClient.GetClientGarrison(this.ClientId);
@@ -82,12 +103,85 @@ namespace GUI
             return reply;
         }
 
+        public async Task<Hero> GetHero(string heroId, bool cache)
+        {
+            if (cache)
+            {
+                Hero hero;
+                if (heroes.TryGetValue(heroId, out hero))
+                {
+                    return hero;
+                }
+            }
+
+            var reply = await gameClient.GetHero(heroId);
+            if (reply.IsSuccess)
+            {
+                Hero hero = (reply as GetHeroReply.Success).Item;
+                this.heroes.Remove(heroId);
+                this.heroes.Add(heroId, hero);
+                return hero;
+            }
+            else if (reply.IsEmpty)
+            {
+                throw new Exception("No such hero");
+            }
+            else
+            {
+                throw new Exception("Unhandled reply case for GetHeroReply");
+            }
+        }
+
         public async Task<GetHeroArrayReply> GetHeroes()
         {
             await GetGarrison();
             var reply = await gameClient.GetHeroArray(garrison.stats.heroes);
 
             return reply;
+        }
+
+        public async Task<Tuple<QuestRecord, Quest>> GetHeroQuest(string heroId, bool cache)
+        {
+            Quest quest;
+            QuestRecord record;
+
+            if (cache)
+            {
+                if (heroQuestRecords.TryGetValue(heroId, out record))
+                {
+                    if (quests.TryGetValue(record.questId, out quest))
+                    {
+                        return new Tuple<QuestRecord, Quest>(record, quest);
+                    }
+                }
+            }
+
+            var reply = await gameClient.GetHeroQuest(heroId);
+            if (reply.IsSuccess)
+            {
+                var data = (reply as GetHeroQuestReply.Success);
+                quest = data.Item2;
+                record = data.Item1;
+
+                heroQuestRecords.Remove(heroId);
+                heroQuestRecords.Add(heroId, record);
+
+                questRecords.Remove(record.id);
+                questRecords.Add(record.id, record);
+
+                quests.Remove(quest.id);
+                quests.Add(quest.id, quest);
+
+                return new Tuple<QuestRecord, Quest>(record, quest);
+            }
+            else if (reply.IsEmpty)
+            {
+                throw new Exception("Hero does not have a quest!");
+            }
+            else
+            {
+                throw new Exception("Unhandled reply case for GetHeroQuestReply");
+            }
         }
 
         public async Task<List<Region>> GetOwnedRegions()
@@ -242,7 +336,53 @@ namespace GUI
         public async Task<List<Quest>> GetZoneQuests(string zoneId)
         {
             var quests = await gameClient.GetZoneQuests(zoneId);
+
+            foreach (var quest in quests)
+            {
+                this.quests.Remove(quest.id);
+                this.quests.Add(quest.id, quest);
+            }
+
             return quests.ToList();
+        }
+
+        public async Task BeginHeroQuest(string heroId, string questId)
+        {
+            var reply = await gameClient.HeroBeginQuest(heroId, questId);
+            if (reply.IsSuccess)
+            {
+                return;
+                throw new Exception(String.Format("Expected Success but got {0}", reply));
+            }
+            else if (reply.IsHeroDoesNotExist)
+            {
+                throw new Exception("Hero does not exist");
+            }
+            else if (reply.IsHeroIsQuesting)
+            {
+                // Notify player that hero is already questing.
+                var dialogue = new Windows.UI.Popups.MessageDialog("Hero is already on a quest!");
+                await dialogue.ShowAsync();
+            }
+            else if (reply.IsQuestDoesNotExist)
+            {
+                throw new Exception("Quest does not exist");
+            }
+            else
+            {
+                throw new Exception("Unhandled reply from HeroBeginQuest");
+            }
+        }
+
+        public Quest GetQuest(string questId)
+        {
+            Quest quest;
+            if (this.quests.TryGetValue(questId, out quest))
+            {
+                return quest;
+            }
+
+            throw new Exception("Cannot get quest");
         }
 
         public async Task<List<AssetPositionInfo>> GetZoneAssetPositionInfo(IEnumerable<string> zoneIds)
@@ -259,6 +399,5 @@ namespace GUI
         public string ClientId { get { return EnsureDefined<string>(clientId, "clientId is not defined"); } }
         public string Username { get { return EnsureDefined<string>(username, "username is not defined"); } }
         public Garrison Garrison { get { return EnsureDefined<Garrison>(garrison, "garrison is not defined"); } }
-        public List<Hero> Heroes { get { return EnsureDefined<List<Hero>>(heroes, "hero is not defined"); } }
     }
 }

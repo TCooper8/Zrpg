@@ -390,6 +390,9 @@ module GameServer =
             | Some garrison -> GetClientGarrisonReply.Success garrison
         (state, GetClientGarrisonReply r)
 
+      | GetGameTime ->
+        state, state.gameTime |> GetGameTimeReply
+
       | GetHero heroId ->
         match state.heroes.TryFind heroId with
         | None -> GetHeroReply.Empty

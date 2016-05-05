@@ -68,7 +68,7 @@ let main argv =
       title = "First quest!"
       body = "The priest needs you to talk to him"
       rewards = [| XpReward 50.0 |]
-      objective = TimeObjective { timeDelta = 5 }
+      objective = TimeObjective { timeDelta = 10 }
     }
     match reply with
     | AddQuestReply.Success _ -> ()
@@ -110,10 +110,11 @@ let main argv =
   //let repl = CommandLine.create platform "repl"
   //repl.LoadConsole ()
 
+  let game = platform.Lookup "Zrpg.GameServer" |> Option.get
   async {
     while true do
       do! Async.Sleep(1024)
-      game
+      game.Send Tick
   } |> Async.RunSynchronously
 
   0
