@@ -162,6 +162,24 @@ namespace GUI
             return zones;
         }
 
+        public async Task<HeroInventory> GetHeroInventory(string heroId)
+        {
+            var reply = await gameClient.GetHeroInventory(heroId);
+            if (reply.IsSuccess)
+            {
+                var success = (GetHeroInventoryReply.Success)reply;
+                return success.Item;
+            }
+            else
+            {
+                var msg = String.Format(
+                    "Expected GetHeroInventory.Success but got {0}",
+                    reply
+                );
+                throw new Exception(msg);
+            }
+        }
+
         public async Task<List<Quest>> GetZoneQuests(string zoneId)
         {
             var quests = await gameClient.GetZoneQuests(zoneId);

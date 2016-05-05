@@ -120,7 +120,7 @@ namespace GUI.Pages
             statsButton.IsEnabled = true;
             mapButton.IsEnabled = true;
 
-            infoFrame.Navigate(typeof(HeroInventoryTab));
+            infoFrame.Navigate(typeof(HeroInventoryTab), hero);
         }
 
         private async void mapButton_Click(object sender, RoutedEventArgs e)

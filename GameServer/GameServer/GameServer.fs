@@ -162,9 +162,12 @@ module GameServer =
             ] |> Array.ofList
 
           let panes =
-            [ { position = 0
-                slots = slots
-              }
+            [ for i in 1 .. 3 do
+                let pane = {
+                  position = i
+                  slots = slots
+                }
+                yield pane
             ] |> Array.ofList
 
           let inventory = {
@@ -210,15 +213,14 @@ module GameServer =
         state, HeroBeginQuestReply.HeroIsQuesting
       | Some hero when hero.state = HeroState.Idle ->
         // Make sure the hero is in the same zone as the quest.
-        match state.zoneQuests.TryFind hero.zoneId with
-        | None -> sprintf "Hero zone %s does not have any quests" hero.zoneId |> failwith
-        | Some quests ->
-          // Make sure the quest is in this array.
-          quests |> Array.tryFind questId.Equals |> fun m ->
-            match m with
-            | None -> sprintf "Zone %s does not contain quest %s" hero.zoneId questId |> failwith
-            | _ -> ()
-        
+        //match state.zoneQuests.TryFind hero.zoneId with
+        //| None -> sprintf "Hero zone %s does not have any quests" hero.zoneId |> failwith
+        //| Some quests ->
+        //  // Make sure the quest is in this array.
+        //  quests |> Array.tryFind questId.Equals |> fun m ->
+        //    match m with
+        //    | None -> sprintf "Zone %s does not contain quest %s" hero.zoneId questId |> failwith
+        //    | _ -> ()
 
         // Get the quest from the id.
         match state.quests.TryFind questId with
@@ -235,6 +237,7 @@ module GameServer =
           let hero = {
             hero with
               state = HeroState.Questing
+              zoneId = quest.zoneId // Move the hero.
           }
           let state = {
             state with

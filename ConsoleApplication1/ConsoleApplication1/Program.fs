@@ -4,8 +4,6 @@
 open System
 open System.IO
 open System.Text
-open System.Diagnostics
-open System.Reflection
 
 open Zrpg
 open Logging
@@ -101,7 +99,7 @@ let main argv =
     WebServer.Listen (httpHost, httpPort) |> fun msg -> web.Send(msg, chan)
     let! res = chan.Await()
     match res with
-    | Choice1Of2 reply -> printfn "Web reply = %s"
+    | Choice1Of2 reply -> printfn "Web reply = %A" reply
     | Choice2Of2 e -> raise e
   }
   |> Async.Catch
