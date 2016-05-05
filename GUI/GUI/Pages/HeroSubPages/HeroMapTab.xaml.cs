@@ -125,10 +125,12 @@ namespace GUI.Pages
         {
             var button = (Button)sender;
             var zone = zones[button.Name];
+            listView.Items.Clear();
 
-            zoneInfoTextBlock.Text = zone.name + " info:";
+            zoneInfoTextBlock.Text = zone.name + " info:";           
+
             var data = new List<string>();
-            data.Add(String.Format("Terrain = {0}", zone.terrain.ToString()));
+            data.Add(String.Format("Terrain = {0}", zone.terrain.ToString()));           
 
             var quests = await state.GetZoneQuests(zone.id);
             foreach (var quest in quests)
@@ -138,6 +140,7 @@ namespace GUI.Pages
                     quest.title
                 );
                 data.Add(questMsg);
+                listView.Items.Add(questMsg);
             }
 
             informationTextBlock.Text = "\n  " + String.Join("\n  ", data);
@@ -145,11 +148,12 @@ namespace GUI.Pages
 
         private void garrisonButton_Click(object sender, RoutedEventArgs e)
         {
-            zoneInfoTextBlock.Text = "Garrison Info";
+            zoneInfoTextBlock.Text = "Garrison Info:";
             informationTextBlock.Text = "Gold Income: 580 per day\n" +
                                         "Soldiers: 250\n" +
                                         "Trade Influence: +10%\n" +
-                                        "Holy Power: 5\n";    
+                                        "Holy Power: 5\n";
+            listView.Items.Clear();
         }
 
         private void sendHeroButton_Click(object sender, RoutedEventArgs e)
@@ -177,5 +181,5 @@ namespace GUI.Pages
             }
 
         }
-    }
+    } 
 }

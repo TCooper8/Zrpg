@@ -18,14 +18,16 @@
         <Image x:Name="image1" Grid.Column="1" Margin="0" MinHeight="510" MinWidth="930" ScrollViewer.VerticalScrollBarVisibility="Disabled" NineGrid="0" UseLayoutRounding="True" RenderTransformOrigin="0.5,0.5" Stretch="Fill" Source="ms-appx:///Assets/elwynnForestMap.jpg" HorizontalAlignment="Left" VerticalAlignment="Top" SizeChanged="image1_SizeChanged"/>
         <Button x:Name="garrisonButton" Content="Garrison" HorizontalAlignment="Left" Margin="105,20,0,0" VerticalAlignment="Top" FontSize="50" Padding="0" Click="garrisonButton_Click" Grid.Column="1" Width="250" Height="200"/>
         <TextBlock x:Name="zoneInfoTextBlock" HorizontalAlignment="Left" Margin="0" TextWrapping="Wrap" Text="Zone Info" VerticalAlignment="Top" Width="250" FontSize="20" TextAlignment="Center"/>
-        <TextBlock x:Name="informationTextBlock" Margin="0,100,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" FontSize="13.333"/>
+        <TextBlock x:Name="informationTextBlock" Margin="0,100,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" FontSize="20"/>
         <Button x:Name="sendHeroButton" Content="Send Hero" HorizontalAlignment="Center" Margin="0,0,0,20" VerticalAlignment="Bottom" Width="115" Height="40" FontSize="20" BorderBrush="#FF7A7A7A" Click="sendHeroButton_Click">
             <Button.Background>
                 <SolidColorBrush Color="White" Opacity="0.4"/>
             </Button.Background>
         </Button>
         <ItemsControl Grid.Column="1" HorizontalAlignment="Left" Height="200" Margin="174,294,0,0" VerticalAlignment="Top" Width="250"/>
-        <TextBlock x:Name="heroLocationText" HorizontalAlignment="Center" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Bottom" Margin="0,0,0,100" FontSize="20"/>
+        <TextBlock x:Name="heroLocationText" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Margin="0,50,0,0" FontSize="20"/>
+        <ListView x:Name="listView" Margin="0,0,0,100" VerticalAlignment="Bottom" FontSize="20" Height="400"/>
+        <TextBlock x:Name="zoneQuests" Margin="0,0,0,500" TextWrapping="Wrap" Text="Available Quests" VerticalAlignment="Bottom" FontSize="20" TextAlignment="Center"/>
 
     </Grid>
 </Page>
