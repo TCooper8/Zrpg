@@ -67,7 +67,7 @@ let main argv =
       zoneId = zoneId
       title = "First quest!"
       body = "The priest needs you to talk to him"
-      rewards = [| XpReward 50.0 |]
+      rewards = [| XpReward 100.0 |]
       objective = TimeObjective { timeDelta = 10 }
     }
     match reply with

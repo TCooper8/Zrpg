@@ -37,7 +37,7 @@ module GameServer =
         { strength = 10.0
           stamina = 10.0
           xp = 0.0
-          finalXp = 100.0
+          finalXp = 1000.0
           groundTravelSpeed = 100.0
         }
 
@@ -47,7 +47,7 @@ module GameServer =
         { strength = 1.0
           stamina = 1.1
           xp = 0.0
-          finalXp = 100.0
+          finalXp = 1.0
           groundTravelSpeed = 1.0
         }
 

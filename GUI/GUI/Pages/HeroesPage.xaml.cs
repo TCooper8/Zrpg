@@ -98,10 +98,12 @@ namespace GUI.Pages
 
             bar.Foreground = new SolidColorBrush(Windows.UI.Colors.Blue);
 
-            bar.Maximum = hero.stats.finalXp;
-            bar.Value = hero.stats.xp;
             bar.Width = 250;
             bar.Height = 40;
+            bar.Maximum = hero.stats.finalXp;
+            bar.Value = hero.stats.xp;
+
+            Debug.WriteLine("Hero {0} has xp {1} over {2}", hero.name, hero.stats.xp, hero.stats.finalXp);
         }
 
         private async Task UpdateHeroQuesting(string heroId)
@@ -118,15 +120,22 @@ namespace GUI.Pages
             }
 
             var ti = record.startTime;
-            var dt = quest.objective.Item.timeDelta;
-            var tf = ti + dt;
+            var timeDelta = quest.objective.Item.timeDelta;
             var now = await state.GetGameTime(false);
-            var elapsed = now - ti;
-            var timeLeft = dt - elapsed;
+            var tf = ti + timeDelta;
+            var range = tf - ti + 1;
 
             bar.Foreground = new SolidColorBrush(Windows.UI.Colors.Yellow);
-            bar.Value = elapsed;
-            bar.Maximum = timeLeft;
+            if (now >= tf)
+            {
+                bar.Value = bar.Maximum;
+                return;
+            }
+
+            var progress = timeDelta - (tf - now);
+
+            bar.Value = progress;
+            bar.Maximum = range;
         }
 
         private async void LoadHeroes()
