@@ -443,6 +443,12 @@ module GameServer =
             | Some garrison -> GetClientGarrisonReply.Success garrison
         (state, GetClientGarrisonReply r)
 
+      | GetClientNotifications clientId ->
+        match state.clientNotifications.TryFind clientId with
+        | None -> Array.empty
+        | Some ls -> ls |> Array.ofList
+        |> fun r -> state, GetClientNotificationsReply r
+
       | GetGameTime ->
         state, state.gameTime |> GetGameTimeReply
 

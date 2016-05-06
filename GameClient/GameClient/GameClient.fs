@@ -133,6 +133,17 @@ type private RestGameClient (endPoint) =
         return reply
       } |> Async.StartAsTask
 
+    member this.GetClientNotifications clientId =
+      async {
+        let! reply = request <| GetClientNotifications clientId
+        let reply = match reply with
+        | GetClientNotificationsReply notifications -> notifications
+        | ExnReply msg -> failwith msg
+        | msg -> failwith <| sprintf "Expected GetClientNotificationsReply but got %A" msg
+
+        return reply
+      } |> Async.StartAsTask
+
     member this.GetGameTime () =
       async {
         let! reply = request <| GetGameTime
