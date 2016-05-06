@@ -51,11 +51,6 @@ namespace GUI.Pages
             this.heroesPage = cell.HeroesPage;
 
             UpdateHeroStatus();
-            //zoneInfoTextBlock.Text = "Garrison Info";
-            //informationTextBlock.Text = "Gold Income: 580 per day\n" +
-            //                            "Soldiers: 250\n" +
-            //                            "Trade Influence: +10%\n" +
-            //                            "Holy Power: 5\n";
         }
 
         //Get client garrison information (owned regions, owned zones)
@@ -118,6 +113,7 @@ namespace GUI.Pages
                     0,
                     0
                 );
+                
                 button.HorizontalAlignment = HorizontalAlignment.Left;
                 button.VerticalAlignment = VerticalAlignment.Top;
                 button.Click += Button_Click;
@@ -204,11 +200,6 @@ namespace GUI.Pages
         {
             Debug.WriteLine("Selection changed");
 
-
-            //Update title text block
-            //titleTextBlock.Text = ?
-
-
             if (listView.SelectedItem == null)
             {
                 this.activeQuest = null;
@@ -229,9 +220,6 @@ namespace GUI.Pages
 
             //Change view to visible
             questPopUp.Visibility = Windows.UI.Xaml.Visibility.Visible;
-
-            //Update body text block
-            //bodyTextBlock.Text = 
         }
 
         private async void BeginPollingHeroQuestState (QuestRecord record, Quest quest)
