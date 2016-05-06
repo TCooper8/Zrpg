@@ -79,13 +79,13 @@ let main argv =
       title = "First quest!"
       body = "The priest needs you to talk to him"
       rewards = 
-        [|  XpReward 100.0
+        [|  XpReward 1000.0
             ItemReward {
               itemId = itemId
               quantity = 5
             }
         |]
-      objective = TimeObjective { timeDelta = 10 }
+      objective = TimeObjective { timeDelta = 2 }
     }
     match reply with
     | AddQuestReply.Success _ -> ()

@@ -51,6 +51,33 @@ module GameServer =
           groundTravelSpeed = 1.0
         }
 
+    let calcXp cl =
+      let mxp cl =
+        match cl with
+        | x when x < 10 -> 50 + (5 * cl)
+        | x when x < 20 -> 100 + (5 * cl)
+        | x when x < 30 -> 200 + (5 * cl)
+        | x -> 500 + (5 * cl)
+
+      let diff cl =
+        match cl with
+        | x when x < 10 -> 0
+        | x when x < 20 -> 10
+        | x when x < 30 -> 20
+        | x -> 50
+
+      ((8 * cl) + diff cl) * mxp cl
+
+    let levelStatMod heroClass heroLevel stats =
+      match heroClass with
+      | Warrior ->
+        { stats with
+            strength = stats.strength + 2.0
+            stamina = stats.stamina + 2.0
+            xp = Math.Max(stats.xp - stats.finalXp, 0.0)
+            finalXp = calcXp heroLevel |> float
+        }
+
     let addGarrison (msg:AddGarrison) (state:GameState): GameState * AddGarrisonReply =
       log.Debug <| sprintf "Adding garrison %s" msg.name
 
@@ -251,45 +278,59 @@ module GameServer =
       // Go through all of the heroes and run them for one cycle.
       let mutable state = state
 
-      let heroes =
-        state.heroes |> Map.map (fun id hero ->
-          log.Debug <| sprintf "Resolving quest for hero %s" hero.id
+      state.heroes |> Map.iter (fun id hero ->
+        log.Debug <| sprintf "Resolving quest for hero %s" hero.id
 
-          state.heroQuestRecords.TryFind id
-          |> Option.map (fun id ->
-            log.Debug <| sprintf "Hero %s has quest record id %s" hero.id id
-            id
-          )
-          |> Option.bind state.questRecords.TryFind
-          |> Option.map (fun record ->
-            log.Debug <| sprintf "Hero %s has quest record %A" hero.id record
-
-            match state.quests.TryFind record.questId with
-            | None -> failwith <| sprintf "Hero quest record %s does not link to an actual quest." record.id
-            | Some quest ->
-              record, quest
-          )
-          |> Option.map (fun (record, quest) ->
-            log.Debug <| sprintf "Hero record %A quest %A" record quest
-            match quest.objective with
-            | TimeObjective objective ->
-              let tf = record.startTime + objective.timeDelta
-              let dt = tf - state.gameTime
-              log.Debug <| sprintf "Hero %s has %i ticks until completing quest %s" hero.id dt quest.id
-
-              if tf <= state.gameTime then
-                // Finish the quest.
-                log.Debug <| sprintf "Hero %s finished quest %A" hero.id quest
-                state <- state.CompleteQuest hero record quest
-                log.Debug <| "Updated "
-              // Quest is not finished
-            ()
-          )
+        state.heroQuestRecords.TryFind id
+        |> Option.map (fun id ->
+          log.Debug <| sprintf "Hero %s has quest record id %s" hero.id id
+          id
         )
+        |> Option.bind state.questRecords.TryFind
+        |> Option.map (fun record ->
+          log.Debug <| sprintf "Hero %s has quest record %A" hero.id record
+
+          match state.quests.TryFind record.questId with
+          | None -> failwith <| sprintf "Hero quest record %s does not link to an actual quest." record.id
+          | Some quest ->
+            record, quest
+        )
+        |> Option.iter (fun (record, quest) ->
+          log.Debug <| sprintf "Hero record %A quest %A" record quest
+          match quest.objective with
+          | TimeObjective objective ->
+            let tf = record.startTime + objective.timeDelta
+            let dt = tf - state.gameTime
+            log.Debug <| sprintf "Hero %s has %i ticks until completing quest %s" hero.id dt quest.id
+
+            if tf <= state.gameTime then
+              // Finish the quest.
+              log.Debug <| sprintf "Hero %s finished quest %A" hero.id quest
+              state <- state.CompleteQuest hero record quest
+              log.Debug <| "Updated "
+            // Quest is not finished
+          ()
+        )
+      )
+
+      // Check and see if we need to level up the heroes.
+      let heroes = state.heroes |> Map.map (fun id hero ->
+        let stats = hero.stats
+        if stats.xp >= stats.finalXp then
+          // Level up the hero.
+          let stats = levelStatMod hero.heroClass hero.level stats
+          // Update the hero with the new stats.
+          { hero with
+              stats = stats
+              level = hero.level + 1
+          }
+        else hero
+      )
 
       state <- {
         state with
           gameTime = state.gameTime + 1
+          heroes = heroes
       }
 
       state, TickReply
