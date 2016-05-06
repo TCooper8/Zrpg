@@ -296,6 +296,17 @@ module GameServer =
 
     let handleMsg msg state =
       match msg with
+      | AddItem info ->
+        let item = {
+          id = uuid()
+          info = info
+        }
+        let state = {
+          state with
+            items = state.items.Add(item.id, item)
+        }
+        state, item.id |> AddItemReply
+
       | AddGarrison msg ->
         addGarrison msg state
         |> fun (s, r) -> (s, AddGarrisonReply r)
@@ -535,9 +546,11 @@ module GameServer =
           log.Debug <| sprintf "Reply with %A" reply
           chan.Reply(reply)
 
+          //do! Async.Sleep(512)
           return! loop state
         with e ->
           log.Error <| sprintf "Agent error: %A" e
+          do! Async.Sleep(5000)
           return! loop state
       }
 
@@ -728,6 +741,14 @@ module GameServer =
       printfn "Reply = %A" res
       let reply = fromChoice res
       return reply
+    }
+
+    member this.AddItem itemInfo = async {
+      let! res = itemInfo |> AddItem |> send
+      return
+        match res with
+        | AddItemReply itemId -> itemId
+        | reply -> sprintf "Expected AddItem reply but got %A" reply |> failwith
     }
 
     member this.AddRegion addRegion = async {

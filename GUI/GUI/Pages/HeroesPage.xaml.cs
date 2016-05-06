@@ -50,42 +50,33 @@ namespace GUI.Pages
             {
                 return;
             }
-            var heroViews = listView.ItemsSource as List<TextBlock>;
-            var xpViews = heroXpList.ItemsSource as List<ProgressBar>;
             //var newHeroViews = new List<TextBlock>();
+            var view = heroViews[heroId];
+            var hero = await state.GetHero(view.Name, true);
 
-            // Find the hero in the controls.
-            var i = -1;
-            foreach (var view in heroViews)
+            Debug.WriteLine("Checking hero {0}:{1}", hero.id, hero.name);
+
+            if (hero.id == heroId)
             {
-                ++i;
-                var hero = await state.GetHero(view.Name, true);
-                Debug.WriteLine("Checking hero {0}:{1}", hero.id, hero.name);
+                // Need to update this hero.
+                var heroF = await state.GetHero(heroId, false);
+                view.Name = heroF.id;
+                view.Text = heroF.ToString();
 
-                if (hero.id == heroId)
+                // Determine the state of the hero and set the progress.
+                if (hero.state.IsQuesting)
                 {
-                    // Need to update this hero.
-                    var heroF = await state.GetHero(heroId, false);
-                    view.Name = heroF.id;
-                    view.Text = heroF.ToString();
-
-                    var xpProgress = xpViews[i];
-
-                    // Determine the state of the hero and set the progress.
-                    if (hero.state.IsQuesting)
-                    {
-                        var questData = await state.GetHeroQuest(hero.id, true);
-                        await this.UpdateHeroQuesting(heroId);
-                        //this.SetHeroQuesting(hero.id, questData.Item2, questData.Item1);
-                    }
-                    else
-                    {
-                        await this.UpdateHeroXp(heroId);
-                    }
-
-                    Debug.WriteLine("Updated hero {0} Status = {1}", hero.name, hero.state.IsQuesting, null);
-                    return;
+                    var questData = await state.GetHeroQuest(hero.id, true);
+                    await this.UpdateHeroQuesting(heroId);
+                    //this.SetHeroQuesting(hero.id, questData.Item2, questData.Item1);
                 }
+                else
+                {
+                    await this.UpdateHeroXp(heroId);
+                }
+
+                Debug.WriteLine("Updated hero {0} Status = {1}", hero.name, hero.state.IsQuesting, null);
+                return;
             }
 
             //listView.ItemsSource = newHeroViews;

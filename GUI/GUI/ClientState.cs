@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -276,20 +277,18 @@ namespace GUI
                         if (option.IsGameSome)
                         {
                             var recordId = ((GameOption<string>.GameSome)option).Item;
+                            Debug.WriteLine("Getting item from record {0}", recordId, null);
                             var data = await gameClient.GetItem(recordId);
+                            Debug.WriteLine("Got item from record");
+
                             var item = data.Item2;
                             var record = data.Item1;
 
-                            if (! items.ContainsKey(item.id))
-                            {
-                                items.Remove(item.id);
-                            }
-                            if (itemRecords.ContainsKey(record.id))
-                            {
-                                itemRecords.Remove(record.id);
-                            }
+                            items.Remove(item.id);
+                            itemRecords.Remove(record.id);
                             items.Add(item.id, item);
                             itemRecords.Add(record.id, record);
+                            Debug.WriteLine("Cached item {0}", item.id, null);
                         }
                     }
                 }

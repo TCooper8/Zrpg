@@ -185,8 +185,6 @@ type QuestCompleted = {
 type ItemRecord = {
   id: string
   itemId: string
-  stackSize: int
-  maxStackSize: int
 }
 
 type Rarity =
@@ -197,8 +195,8 @@ type Rarity =
   | Legendary
 
 type Item = {
-  id:string
-  info:ItemInfo
+  id: string
+  info: ItemInfo
 }
 
 and ItemInfo =

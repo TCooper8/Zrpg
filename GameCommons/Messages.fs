@@ -1,6 +1,7 @@
 ﻿namespace Zrpg.Game
 
 type Msg =
+  | AddItem of ItemInfo
   | AddGarrison of AddGarrison
   | AddHero of AddHero
   | AddRegion of AddRegion
@@ -63,6 +64,7 @@ type AsyncMsg = {
 }
 
 type Reply =
+  | AddItemReply of itemId:string
   | AddGarrisonReply of AddGarrisonReply
   | AddHeroReply of AddHeroReply
   | AddRegionReply of AddRegionReply

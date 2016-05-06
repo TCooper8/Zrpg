@@ -63,11 +63,25 @@ let main argv =
       | AddZoneReply.Success id -> id
       | _ -> failwith <| sprintf "Expected AddZoneReply.Success but got %A" reply
 
+    // Add an item.
+    let item = TradeGood {
+      name = "Cloth"
+      rarity = Common
+    }
+
+    let! itemId = game.AddItem item
+
     let! reply = game.AddQuest {
       zoneId = zoneId
       title = "First quest!"
       body = "The priest needs you to talk to him"
-      rewards = [| XpReward 100.0 |]
+      rewards = 
+        [|  XpReward 100.0
+            ItemReward {
+              itemId = itemId
+              quantity = 5
+            }
+        |]
       objective = TimeObjective { timeDelta = 10 }
     }
     match reply with

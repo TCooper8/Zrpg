@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -12,6 +13,7 @@ using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
 using Zrpg.Game;
 
@@ -27,10 +29,24 @@ namespace GUI.Pages.HeroSubPages
         ClientState state = ClientState.state;
         Hero hero;
         Dictionary<string, ItemSlot> itemSlots;
+        Dictionary<string, Button> slotButtons;
 
         public HeroInventoryTab()
         {
             this.InitializeComponent();
+        }
+
+        private async Task<Brush> LoadItemAssetIcon(ItemSlot slot)
+        {
+            var recordOption = slot.itemRecordId;
+            if (recordOption.IsGameNone)
+            {
+                return new SolidColorBrush(Windows.UI.Colors.Black);
+            }
+
+            var image = new ImageBrush();
+            image.ImageSource = new BitmapImage(new Uri("ms-appx:///Assets/squareGuy.png"));
+            return image;
         }
 
         private async void PopulateInventory()
@@ -38,6 +54,7 @@ namespace GUI.Pages.HeroSubPages
             Debug.WriteLine("Generating inventory.");
             var heroInventory = await state.GetHeroInventory(hero.id);
             itemSlots = new Dictionary<string, ItemSlot>();
+            slotButtons = new Dictionary<string, Button>();
 
             this.InventoryPivot.Items.Clear();
 
@@ -62,7 +79,9 @@ namespace GUI.Pages.HeroSubPages
 
                     var button = new Button();
                     button.Name = String.Format("{0}:{1}", pane.position, slot.position);
-                    button.Background = new SolidColorBrush(Windows.UI.Colors.Black);
+                    //button.Background = new SolidColorBrush(Windows.UI.Colors.Black);
+                    button.Background = await this.LoadItemAssetIcon(slot);
+
                     button.Background.Opacity = 0.4;
                     button.Foreground = new SolidColorBrush(Windows.UI.Colors.White);
                     button.Width = 100;
@@ -73,6 +92,7 @@ namespace GUI.Pages.HeroSubPages
                     buttons.Add(button);
                     Debug.WriteLine("Generated button {0}", button.Name, null);
                     itemSlots.Add(button.Name, slot);
+                    slotButtons.Add(button.Name, button);
                 }
 
                 Debug.WriteLine("Binding sources");
@@ -98,12 +118,15 @@ namespace GUI.Pages.HeroSubPages
                 var data = await state.GetItemRecordData(recordId);
                 var record = data.Item1;
                 var item = data.Item2;
+
+                Debug.WriteLine("Adding item {0} to inventory", item.id, null);
                 var info = item.info;
 
                 // Determine the kind of item.
                 if (info.IsTradeGood)
                 {
                     var tradeGood = (info as ItemInfo.TradeGood).Item;
+                    Debug.WriteLine("Adding trade good {0} to inventory", tradeGood.name, null);
 
                     itemTitle.Text = "TradeGood: " + tradeGood.name;
                     itemTitle.Foreground = new SolidColorBrush(Windows.UI.Colors.Gray);
