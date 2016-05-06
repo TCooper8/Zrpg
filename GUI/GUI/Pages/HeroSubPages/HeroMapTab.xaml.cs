@@ -240,8 +240,10 @@ namespace GUI.Pages
             // Estimate the time to quest completion.
             var ti = record.startTime;
             var ticks = quest.objective.Item.timeDelta;
-            var tf = ti + ticks + 2;
+            var tf = ti + ticks;
             var cur = await state.GetGameTime(false);
+
+            await heroesPage.UpdateHero(hero.id);
 
             // If the current game time is less than the tf, the quest will not be resolved.
             while (cur <= tf)
@@ -250,6 +252,7 @@ namespace GUI.Pages
                 cur = await state.GetGameTime(false);
                 await heroesPage.UpdateHero(hero.id);
             }
+            await heroesPage.UpdateHero(hero.id);
         }
 
         private async void acceptButton_Click(object sender, RoutedEventArgs e)

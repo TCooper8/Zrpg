@@ -140,23 +140,25 @@ type GameState = {
             inventory.panes |> Array.tryPick (fun pane ->
               pane.slots |> Array.tryPick (fun slot ->
                 match slot.itemRecordId with
-                | GameNone -> Some slot
+                | GameNone -> Some (pane.position, slot)
                 | _ -> None
               )
             )
           match slot with
           | None -> failwith "Hero has no empty slots"
-          | Some slot ->
+          | Some (panePos, slot) ->
             let slot = { slot with itemRecordId = GameSome record.id }
             inventory <- {
               inventory with
                 panes = inventory.panes |> Array.map (fun pane ->
-                  { pane with
-                      slots = pane.slots |> Array.map (fun _slot ->
-                        if _slot.position = slot.position then slot
-                        else _slot
-                      )
-                  }
+                  if pane.position = panePos then
+                    { pane with
+                        slots = pane.slots |> Array.map (fun _slot ->
+                          if _slot.position = slot.position then slot
+                          else _slot
+                        )
+                    }
+                  else pane
                 )
             }
             stats

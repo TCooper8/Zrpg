@@ -151,18 +151,18 @@ module GameServer =
 
         // Create the inventory for the hero.
         let inventory =
-          let slots =
-            [
-              for i in 1 .. 10 do
-                let slot = {
-                  position = i
-                  itemRecordId = GameNone
-                }
-                yield slot
-            ] |> Array.ofList
-
           let panes =
-            [ for i in 1 .. 3 do
+            [ for i in 0 .. 2 do
+                let slots =
+                  [
+                    for i in 0 .. 9 do
+                      let slot = {
+                        position = i
+                        itemRecordId = GameNone
+                      }
+                      yield slot
+                  ] |> Array.ofList
+
                 let pane = {
                   position = i
                   slots = slots
