@@ -20,6 +20,8 @@ type GameState = {
   itemRecords: Map<string, ItemRecord>
   items: Map<string, Item>
 
+  artisans: Map<string, Artisan>
+
   // Zone data
   zoneQuests: Map<string, string array>
   zoneAssetPositionInfo: Map<string, AssetPositionInfo>
@@ -29,7 +31,7 @@ type GameState = {
 
   clientGarrisons: Map<string, string>
   clientWorlds: Map<string, string>
-  clientNotifications: Map<string, ClientNotification list>
+  clientNotifications: Map<string, NotifyRecord list>
 
   heroNames: string Set
   regionNames: string Set
@@ -51,6 +53,8 @@ type GameState = {
 
     itemRecords = Map.empty
     items = Map.empty
+
+    artisans = Map.empty
 
     zoneQuests = Map.empty
     zoneAssetPositionInfo = Map.empty
@@ -97,14 +101,19 @@ type GameState = {
 
     let notify = NotifyQuestCompleted {
       questId = quest.id
-      finishTime = this.gameTime
       messageTitle = messageTitle
       messageBody = messageBody
+    }
+    let record = {
+      id = Util.uuid()
+      item = notify
+      timestamp = DateTime.Now
     }
 
     let notifications =
       this.clientNotifications.TryFind hero.clientId
       |> defaultArg <| []
+      |> List.append [ record ]
 
     let mutable state = this
 

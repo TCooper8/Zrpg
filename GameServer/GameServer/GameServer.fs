@@ -560,6 +560,17 @@ module GameServer =
             RemGarrisonReply.Success
         (state, RemGarrisonReply r)
 
+      | RemNotification (clientId, notifyId) ->
+        match state.clientNotifications.TryFind clientId with
+        | None -> state, RemNotificationReply
+        | Some notifies ->
+          let notifies = notifies |> List.filter (fun n -> n.id <> notifyId)
+          let state = {
+            state with
+              clientNotifications = state.clientNotifications.Add(clientId, notifies)
+          }
+          state, RemNotificationReply
+
       | SetStartingZone (race, zoneId) ->
         let raceId = race.ToString()
 

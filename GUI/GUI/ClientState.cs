@@ -185,6 +185,11 @@ namespace GUI
             }
         }
 
+        public Task<NotifyRecord[]> GetNotifications()
+        {
+            return gameClient.GetClientNotifications(ClientId);
+        }
+
         public async Task<List<Region>> GetOwnedRegions()
         {
             var regions = new List<Region>();
@@ -393,6 +398,11 @@ namespace GUI
                 infos.Add(reply);
             }
             return infos;
+        }
+
+        public async Task RemNotification(string notificationId)
+        {
+            await gameClient.RemNotification(ClientId, notificationId);
         }
 
         public string ClientId { get { return EnsureDefined<string>(clientId, "clientId is not defined"); } }

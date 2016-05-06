@@ -18,7 +18,7 @@ type IGameClient =
     abstract member AddZone : AddZone -> AddZoneReply Task
     abstract member AddZoneAssetPositionInfo : AssetPositionInfo -> unit Task
     abstract member GetClientGarrison : clientId:string -> GetClientGarrisonReply Task
-    abstract member GetClientNotifications: clientId:string -> ClientNotification array Task
+    abstract member GetClientNotifications: clientId:string -> NotifyRecord array Task
     abstract member GetGameTime : unit -> int Task
     abstract member GetHero : heroId:string -> GetHeroReply Task
     abstract member GetHeroArray : heroIds:string array -> GetHeroArrayReply Task
@@ -31,4 +31,5 @@ type IGameClient =
     abstract member GetZoneQuests: zoneId:string -> Quest array Task
     abstract member HeroBeginQuest: heroId:string * questId:string -> HeroBeginQuestReply Task
     abstract member RemGarrison : garrisonId:string -> RemGarrisonReply Task
+    abstract member RemNotification: clientId:string * notifyId:string -> Task
     abstract member SetStartingZone: race:Race * zoneId:string -> SetStartingZoneReply Task

@@ -22,6 +22,7 @@ type Msg =
   | GetZoneQuests of zoneId:string
   | HeroBeginQuest of heroId:string * questId:string
   | RemGarrison of string
+  | RemNotification of clientId:string * notifyId:string
   | SetStartingZone of Race * string
   | Tick
 
@@ -80,7 +81,7 @@ type Reply =
   | AddWorldReply of AddWorldReply
   | ExnReply of string
   | GetClientGarrisonReply of GetClientGarrisonReply
-  | GetClientNotificationsReply of ClientNotification array
+  | GetClientNotificationsReply of NotifyRecord array
   | GetGameTimeReply of int
   | GetHeroReply of GetHeroReply
   | GetHeroArrayReply of GetHeroArrayReply
@@ -95,6 +96,7 @@ type Reply =
   | GetZoneQuestsReply of Quest array
   | HeroBeginQuestReply of HeroBeginQuestReply
   | RemGarrisonReply of RemGarrisonReply
+  | RemNotificationReply
   | SetStartingZoneReply of SetStartingZoneReply
   | TickReply
 

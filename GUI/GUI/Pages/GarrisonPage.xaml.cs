@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -39,6 +41,28 @@ namespace GUI.Pages
                                             "Race: {1}\n" +
                                             "Gold Income: {2}",
                                             garrison.faction.ToString(), garrison.race.ToString(), garrison.stats.goldIncome.ToString());
+        }
+
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+            var records = await state.GetNotifications();
+            records = records.OrderBy(record => record.timestamp).ToArray();
+
+            Debug.WriteLine("{0} notifications loaded", records.Length, null);
+            foreach (var record in records)
+            {
+                var notify = record.item;
+                var msg = String.Format(
+                    "Notification: {0}\n\t{1}\n\nTime:{2}",
+                    notify.Item.messageTitle,
+                    notify.Item.messageBody,
+                    record.timestamp
+                );
+                var dialog = new MessageDialog(msg);
+                await dialog.ShowAsync();
+                await state.RemNotification(record.id);
+            }
         }
 
         private void backButton_Click(object sender, RoutedEventArgs e)

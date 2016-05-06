@@ -265,16 +265,27 @@ type private RestGameClient (endPoint) =
         return reply
       } |> Async.StartAsTask
 
-    member this.RemGarrison heroIds =
+    member this.RemGarrison id =
       async {
-        let! reply = request <| RemGarrison heroIds
+        let! reply = request <| RemGarrison id
         let reply = match reply with
         | RemGarrisonReply reply -> reply
         | ExnReply msg -> failwith msg
-        | msg -> failwith <| sprintf "Expected AddGarrisonReply but got %A" msg
+        | msg -> failwith <| sprintf "Expected RemGarrisonReply but got %A" msg
 
         return reply
       } |> Async.StartAsTask
+
+    member this.RemNotification (clientId, notifyId) =
+      async {
+        let! reply = request <| RemNotification (clientId, notifyId)
+        let reply = match reply with
+        | RemNotificationReply -> ()
+        | ExnReply msg -> failwith msg
+        | msg -> failwith <| sprintf "Expected RemNotificationReply but got %A" msg
+
+        return ()
+      } |> fun work -> Task.Factory.StartNew(fun () -> work |> Async.RunSynchronously)
 
     member this.SetStartingZone (race, zoneId) =
       async {

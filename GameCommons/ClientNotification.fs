@@ -1,11 +1,18 @@
 ﻿namespace Zrpg.Game
 
-type ClientNotification =
+open System
+
+type NotifyItem =
   | NotifyQuestCompleted of NotifyQuestCompleted
 
 and NotifyQuestCompleted = {
   questId: string
-  finishTime: int
   messageTitle: string
   messageBody: string
+}
+
+type NotifyRecord = {
+  id: string
+  item: NotifyItem
+  timestamp: DateTime
 }
