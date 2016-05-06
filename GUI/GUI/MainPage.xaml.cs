@@ -179,5 +179,12 @@ namespace GUI
                 loginButton_Click(sender, e);
             }
         }
+
+        private void cancelLoginButton_Click(object sender, RoutedEventArgs e)
+        {
+            relativePanel.Visibility = Visibility.Collapsed;
+
+            //Needs behavior for cancellation token
+        }
     }
 }
