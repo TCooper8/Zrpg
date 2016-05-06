@@ -64,9 +64,12 @@ let main argv =
       | _ -> failwith <| sprintf "Expected AddZoneReply.Success but got %A" reply
 
     // Add an item.
-    let item = TradeGood {
-      name = "Cloth"
-      rarity = Common
+    let item = {
+      assetId = "inv_fabric_linen.jpg"
+      info = TradeGood {
+        name = "Linen Cloth"
+        rarity = Common
+      }
     }
 
     let! itemId = game.AddItem item

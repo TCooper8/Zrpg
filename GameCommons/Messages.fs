@@ -1,7 +1,7 @@
 ﻿namespace Zrpg.Game
 
 type Msg =
-  | AddItem of ItemInfo
+  | AddItem of AddItem
   | AddGarrison of AddGarrison
   | AddHero of AddHero
   | AddRegion of AddRegion
@@ -23,6 +23,11 @@ type Msg =
   | RemGarrison of string
   | SetStartingZone of Race * string
   | Tick
+
+and AddItem = {
+  assetId: string
+  info: ItemInfo
+}
 
 and AddGarrison = {
   clientId: string

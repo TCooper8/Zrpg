@@ -39,9 +39,9 @@ type private RestGameClient (endPoint) =
     )
 
   interface IGameClient with
-    member this.AddItem item =
+    member this.AddItem addItem =
       async {
-        let! reply = request <| AddItem item
+        let! reply = request <| AddItem addItem
         let reply = match reply with
         | AddItemReply itemId -> itemId
         | ExnReply msg -> failwith msg

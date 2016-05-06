@@ -296,10 +296,11 @@ module GameServer =
 
     let handleMsg msg state =
       match msg with
-      | AddItem info ->
+      | AddItem msg ->
         let item = {
           id = uuid()
-          info = info
+          assetId = msg.assetId
+          info = msg.info
         }
         let state = {
           state with
@@ -743,8 +744,8 @@ module GameServer =
       return reply
     }
 
-    member this.AddItem itemInfo = async {
-      let! res = itemInfo |> AddItem |> send
+    member this.AddItem addItem = async {
+      let! res = addItem |> AddItem |> send
       return
         match res with
         | AddItemReply itemId -> itemId

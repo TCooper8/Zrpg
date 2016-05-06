@@ -126,44 +126,72 @@ type GameState = {
             | Some item -> item
           let quantity = reward.quantity
 
-          let record: ItemRecord = {
-            id = Util.uuid()
-            itemId = item.id
-          }
-          state <- {
-            state with
-              itemRecords = state.itemRecords.Add(record.id, record)
+          // Find a pane and slot to fill.
+          //let slot =
+          //  inventory.panes |> Array.tryPick (fun pane ->
+          //    pane.slots |> Array.tryPick (fun slot ->
+          //      match slot.itemRecordId with
+          //      | GameNone -> Some (pane.position, slot)
+          //      | _ -> None
+          //    )
+          //  )
+
+          let mutable added = false
+          inventory <- {
+            inventory with
+              panes = inventory.panes |> Array.map (fun pane ->
+                if added then pane else
+
+                pane.slots |> Array.map (fun slot ->
+                  if added then slot else
+
+                  match slot.itemRecordId with
+                  | GameNone ->
+                    // Empty slot, create a record.
+                    added <- true
+                    let record = {
+                      id = Util.uuid()
+                      itemId = item.id
+                      quantity = quantity
+                    }
+                    state <- { state with itemRecords = state.itemRecords.Add(record.id, record) }
+                    { slot with itemRecordId = GameSome record.id }
+                  | GameSome recordId ->
+                    match state.itemRecords.TryFind recordId with
+                    | None ->
+                      // The record doesn't actually exist.
+                      added <- true
+                      let record = {
+                        id = Util.uuid()
+                        itemId = item.id
+                        quantity = quantity
+                      }
+                      state <- { state with itemRecords = state.itemRecords.Add(record.id, record) }
+                      { slot with itemRecordId = GameSome record.id }
+                    | Some record ->
+                      if record.itemId = item.id then
+                        // We can stack this item.
+                        added <- true
+                        let record = { record with quantity = record.quantity + quantity }
+                        state <- { state with itemRecords = state.itemRecords.Add(record.id, record) }
+                        slot
+                      else
+                        slot
+                )
+                |> fun slots -> { pane with slots = slots }
+              )
           }
 
-          // Find a pane and slot to fill.
-          let slot =
-            inventory.panes |> Array.tryPick (fun pane ->
-              pane.slots |> Array.tryPick (fun slot ->
-                match slot.itemRecordId with
-                | GameNone -> Some (pane.position, slot)
-                | _ -> None
-              )
-            )
-          match slot with
-          | None -> failwith "Hero has no empty slots"
-          | Some (panePos, slot) ->
-            let slot = { slot with itemRecordId = GameSome record.id }
-            inventory <- {
-              inventory with
-                panes = inventory.panes |> Array.map (fun pane ->
-                  if pane.position = panePos then
-                    { pane with
-                        slots = pane.slots |> Array.map (fun _slot ->
-                          if _slot.position = slot.position then slot
-                          else _slot
-                        )
-                    }
-                  else pane
-                )
+          if not added then
+            // Need to mail the item to the player.
+            failwith "Item cannot be added to inventory"
+          else
+            // Add the inventory to the state
+            state <- {
+              state with
+                heroInventories = state.heroInventories.Add(inventory.id, inventory)
             }
             stats
-
-          // Give the hero quantity * items.
       ) hero.stats
 
     let hero = {

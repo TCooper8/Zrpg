@@ -185,6 +185,7 @@ type QuestCompleted = {
 type ItemRecord = {
   id: string
   itemId: string
+  quantity: int
 }
 
 type Rarity =
@@ -196,6 +197,7 @@ type Rarity =
 
 type Item = {
   id: string
+  assetId: string
   info: ItemInfo
 }
 

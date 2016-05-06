@@ -155,6 +155,7 @@
     <Content Include="Assets\background3.jpg" />
     <Content Include="Assets\elwynnForestMap.jpg" />
     <Content Include="Assets\genericBackground.jpg" />
+    <Content Include="Assets\inv_fabric_linen.jpg" />
     <Content Include="Assets\Music\CSC.mp3" />
     <Content Include="Assets\squareGuy.png" />
     <Content Include="Properties\Default.rd.xml" />

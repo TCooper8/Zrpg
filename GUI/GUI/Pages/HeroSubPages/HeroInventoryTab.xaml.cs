@@ -44,8 +44,13 @@ namespace GUI.Pages.HeroSubPages
                 return new SolidColorBrush(Windows.UI.Colors.Black);
             }
 
+            var recordId = (recordOption as GameOption<string>.GameSome).Item;
+            var data = await state.GetItemRecordData(recordId);
+            var item = data.Item2;
+
             var image = new ImageBrush();
-            image.ImageSource = new BitmapImage(new Uri("ms-appx:///Assets/squareGuy.png"));
+            var path = String.Format("ms-appx:///Assets/{0}", item.assetId);
+            image.ImageSource = new BitmapImage(new Uri(path));
             return image;
         }
 
@@ -81,6 +86,16 @@ namespace GUI.Pages.HeroSubPages
                     button.Name = String.Format("{0}:{1}", pane.position, slot.position);
                     //button.Background = new SolidColorBrush(Windows.UI.Colors.Black);
                     button.Background = await this.LoadItemAssetIcon(slot);
+
+                    if (slot.itemRecordId.IsGameSome)
+                    {
+                        var recordId = (slot.itemRecordId as GameOption<string>.GameSome).Item;
+                        var data = await state.GetItemRecordData(recordId);
+                        button.Content = data.Item1.quantity;
+                        button.FontSize = 25.0;
+                        button.HorizontalContentAlignment = HorizontalAlignment.Left;
+                        button.VerticalContentAlignment = VerticalAlignment.Top;
+                    }
 
                     button.Background.Opacity = 0.4;
                     button.Foreground = new SolidColorBrush(Windows.UI.Colors.White);
