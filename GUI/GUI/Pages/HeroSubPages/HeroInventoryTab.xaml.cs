@@ -29,7 +29,7 @@ namespace GUI.Pages.HeroSubPages
         ClientState state = ClientState.state;
         Hero hero;
         Dictionary<string, ItemSlot> itemSlots;
-        Dictionary<string, Button> slotButtons;
+        Dictionary<string, GridViewItem> slotGridViewItems;
 
         public HeroInventoryTab()
         {
@@ -59,7 +59,7 @@ namespace GUI.Pages.HeroSubPages
             Debug.WriteLine("Generating inventory.");
             var heroInventory = await state.GetHeroInventory(hero.id);
             itemSlots = new Dictionary<string, ItemSlot>();
-            slotButtons = new Dictionary<string, Button>();
+            slotGridViewItems = new Dictionary<string, GridViewItem>();
 
             this.InventoryPivot.Items.Clear();
 
@@ -67,64 +67,63 @@ namespace GUI.Pages.HeroSubPages
             {
                 Debug.WriteLine("Generating pane {0}", pane.position);
                 // Add a pane to the view.
-                //this.InventoryPivot
                 var paneControl = new PivotItem();
                 Debug.WriteLine("Created pivot item");
 
                 paneControl.Header = pane.position.ToString();
                 Debug.WriteLine("Creating list view");
                 var view = new GridView();
+                
                 Debug.WriteLine("Creating buttons");
-                var buttons = new List<Button>();
+                var gridViewItems = new List<GridViewItem>();
 
                 // Add all of the slots into the pane.
                 foreach (var slot in pane.slots)
                 {
                     Debug.WriteLine("Generating slot {0}", slot.position);
 
-                    var button = new Button();
-                    button.Name = String.Format("{0}:{1}", pane.position, slot.position);
-                    //button.Background = new SolidColorBrush(Windows.UI.Colors.Black);
-                    button.Background = await this.LoadItemAssetIcon(slot);
-
+                    var gridViewItem = new GridViewItem();
+                    gridViewItem.Name = String.Format("{0}:{1}", pane.position, slot.position);
+                    gridViewItem.Background = await this.LoadItemAssetIcon(slot);
+                    
                     if (slot.itemRecordId.IsGameSome)
                     {
                         var recordId = (slot.itemRecordId as GameOption<string>.GameSome).Item;
                         var data = await state.GetItemRecordData(recordId);
-                        button.Content = data.Item1.quantity;
-                        button.FontSize = 25.0;
-                        button.HorizontalContentAlignment = HorizontalAlignment.Left;
-                        button.VerticalContentAlignment = VerticalAlignment.Top;
+
+                        gridViewItem.Content = data.Item1.quantity;
+                        gridViewItem.FontSize = 25.0;
+                        gridViewItem.HorizontalAlignment = HorizontalAlignment.Left;
+                        gridViewItem.VerticalContentAlignment = VerticalAlignment.Top;
                     }
 
-                    button.Background.Opacity = 0.4;
-                    button.Foreground = new SolidColorBrush(Windows.UI.Colors.White);
-                    button.Width = 100;
-                    button.Height = 100;
+                    gridViewItem.Background.Opacity = 0.4;
+                    gridViewItem.Foreground = new SolidColorBrush(Windows.UI.Colors.White);
+                    gridViewItem.Width = 100;
+                    gridViewItem.Height = 100;
 
-                    button.Click += Button_Click;
+                    gridViewItem.Tapped += GridViewItem_Tapped;
 
-                    buttons.Add(button);
-                    Debug.WriteLine("Generated button {0}", button.Name, null);
-                    itemSlots.Add(button.Name, slot);
-                    slotButtons.Add(button.Name, button);
+                    gridViewItems.Add(gridViewItem);
+                    Debug.WriteLine("Generated button {0}", gridViewItem.Name, null);
+                    itemSlots.Add(gridViewItem.Name, slot);
+                    slotGridViewItems.Add(gridViewItem.Name, gridViewItem);
                 }
 
                 Debug.WriteLine("Binding sources");
 
-                view.ItemsSource = buttons;
+                view.ItemsSource = gridViewItems;
                 Debug.WriteLine("Setting pane content");
                 paneControl.Content = view;
                 Debug.WriteLine("Adding items");
                 this.InventoryPivot.Items.Add(paneControl);
-                this.InventoryPivot.SelectedIndex = 0;
             }
         }
 
-        private async void Button_Click(object sender, RoutedEventArgs e)
+        private async void GridViewItem_Tapped(object sender, RoutedEventArgs e)
         {
-            var button = sender as Button;
-            var slot = itemSlots[button.Name];
+            var gridViewItem = sender as GridViewItem;
+            var slot = itemSlots[gridViewItem.Name];
             var recordOption = slot.itemRecordId;
 
             if (recordOption.IsGameSome)
@@ -147,8 +146,6 @@ namespace GUI.Pages.HeroSubPages
                     itemTitle.Foreground = new SolidColorBrush(Windows.UI.Colors.Gray);
 
                 }
-
-                //itemTitle.Text = 
             }
             else
             {
@@ -178,14 +175,8 @@ namespace GUI.Pages.HeroSubPages
 
         private void Pivot_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //itemTextBlock.Text = "Item Index: ";
-
-            if (e.AddedItems.Count >= 1)
-            {
-                var button = e.AddedItems[0] as Button;
-            }
-            //gridViewTab1.SelectedIndex = -1;
-            //gridViewTab2.SelectedIndex = -1;
+            //TO DO: Clear selected item on pivot tabs
+            //view.SelectedIndex = -1;
         }
     }
 }
