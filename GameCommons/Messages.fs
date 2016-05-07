@@ -5,6 +5,7 @@ type Msg =
   | AddItem of AddItem
   | AddGarrison of AddGarrison
   | AddHero of AddHero
+  | AddRecipe of AddRecipe
   | AddRegion of AddRegion
   | AddZone of AddZone
   | AddZoneAssetPositionInfo of AssetPositionInfo
@@ -55,6 +56,14 @@ and AddHero = {
   heroClass: HeroClass
 }
 
+and AddRecipe = {
+  craftedItemId: string
+  xpReward: float
+  materialCosts: MaterialCost array
+  requirements: RecipeRequirement array
+  tags: string array
+}
+
 and AddRegion = {
   name: string
 }
@@ -83,6 +92,7 @@ type Reply =
   | AddItemReply of itemId:string
   | AddGarrisonReply of AddGarrisonReply
   | AddHeroReply of AddHeroReply
+  | AddRecipeReply of recipeId:string
   | AddRegionReply of AddRegionReply
   | AddZoneReply of AddZoneReply
   | AddZoneAssetPositionInfoReply

@@ -30,6 +30,7 @@ type GameState = {
   quests: Map<string, Quest>
   questRecords: Map<string, QuestRecord>
 
+  clientArtisans: Map<string, string array>
   clientGarrisons: Map<string, string>
   clientWorlds: Map<string, string>
   clientNotifications: Map<string, NotifyRecord list>
@@ -64,6 +65,7 @@ type GameState = {
     quests = Map.empty
     questRecords = Map.empty
 
+    clientArtisans = Map.empty
     clientGarrisons = Map.empty
     clientWorlds = Map.empty
     clientNotifications = Map.empty

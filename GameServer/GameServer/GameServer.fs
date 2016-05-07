@@ -417,9 +417,15 @@ module GameServer =
             finalXp = calcXp 1 |> float
           }
         }
+        let artisans =
+          state.clientArtisans.TryFind msg.clientId
+          |> defaultArg <| Array.empty
+          |> Array.append [| artisan.id |]
+
         let state = {
           state with
             artisans = state.artisans.Add(artisan.id, artisan)
+            clientArtisans = state.clientArtisans.Add(msg.clientId, artisans)
         }
         state, artisan.id |> AddArtisanReply
 
@@ -442,6 +448,21 @@ module GameServer =
       | AddHero msg ->
         addHero msg state
         |> fun (s, r) -> (s, AddHeroReply r)
+
+      | AddRecipe msg ->
+        let recipe:Recipe = {
+          id = uuid()
+          craftedItemId = msg.craftedItemId
+          xpReward = msg.xpReward
+          materialCosts = msg.materialCosts
+          requirements = msg.requirements
+          tags = msg.tags
+        }
+        let state = {
+          state with
+            recipes = state.recipes.Add(recipe.id, recipe)
+        }
+        state, AddRecipeReply recipe.id
 
       | AddRegion msg ->
         match state.regionNames.Contains msg.name with

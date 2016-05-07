@@ -88,6 +88,18 @@ type private RestGameClient (endPoint) =
         return reply
       } |> Async.StartAsTask
 
+    member this.AddRecipe msg =
+      async {
+        let! reply = request <| AddRecipe msg
+
+        let reply = match reply with
+        | AddRecipeReply id -> id
+        | ExnReply msg -> failwith msg
+        | msg -> failwith <| sprintf "Expected AddRecipeReply but got %A" msg
+
+        return reply
+      } |> Async.StartAsTask
+
     member this.AddRegion region =
       async {
         let! reply = region |> AddRegion |> request

@@ -14,6 +14,7 @@ type IGameClient =
       -> AddGarrisonReply Task
 
     abstract member AddHero : AddHero -> AddHeroReply Task
+    abstract member AddRecipe : AddRecipe -> string Task
     abstract member AddRegion : AddRegion -> AddRegionReply Task
     abstract member AddQuest : AddQuest -> AddQuestReply Task
     abstract member AddZone : AddZone -> AddZoneReply Task
