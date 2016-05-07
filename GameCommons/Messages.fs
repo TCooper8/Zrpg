@@ -1,6 +1,7 @@
 ﻿namespace Zrpg.Game
 
 type Msg =
+  | AddArtisan of AddArtisan
   | AddItem of AddItem
   | AddGarrison of AddGarrison
   | AddHero of AddHero
@@ -25,6 +26,11 @@ type Msg =
   | RemNotification of clientId:string * notifyId:string
   | SetStartingZone of Race * string
   | Tick
+
+and AddArtisan = {
+  name: string
+  profession: Profession
+}
 
 and AddItem = {
   assetId: string

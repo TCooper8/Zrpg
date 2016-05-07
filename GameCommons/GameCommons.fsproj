@@ -66,10 +66,10 @@
     <Compile Include="Stats.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="ClientNotification.fs" />
+    <Compile Include="Artisan.fs" />
     <Compile Include="Messages.fs" />
     <Compile Include="IGameClient.fs" />
     <None Include="Script.fsx" />
-    <Compile Include="Artisan.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">
