@@ -22,9 +22,12 @@ namespace GUI.Pages
     /// </summary>
     public sealed partial class ArtisansPage : Page
     {
+        ClientState state = ClientState.state;
+
         public ArtisansPage()
         {
             this.InitializeComponent();
+            LoadArtisans();
         }
 
         private void backButton_Click(object sender, RoutedEventArgs e)
@@ -40,6 +43,16 @@ namespace GUI.Pages
         private void createHeroButton_Click(object sender, RoutedEventArgs e)
         {
             this.Frame.Navigate(typeof(CreateArtisanPage));
+        }
+
+        private async void LoadArtisans()
+        {
+            var reply = await state.GetClientArtisans();
+
+            foreach (var artisans in reply)
+            {
+                listView.Items.Add(artisans.name);
+            }
         }
     }
 }

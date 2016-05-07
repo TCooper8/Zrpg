@@ -20,6 +20,7 @@ namespace GUI
         private string clientId;
         private Garrison garrison;
         private int gameTime = 0;
+        private Dictionary<string, Artisan> artisans;
         private Dictionary<string, Hero> heroes;
         private Dictionary<string, Item> items;
         private Dictionary<string, ItemRecord> itemRecords;
@@ -30,6 +31,7 @@ namespace GUI
         private ClientState()
         {
             this.gameClient = GameClient.RESTClient("http://localhost:8080");
+            this.artisans = new Dictionary<string, Artisan>();
             this.items = new Dictionary<string, Item>();
             this.itemRecords = new Dictionary<string, ItemRecord>();
             this.quests = new Dictionary<string, Quest>();
@@ -76,6 +78,19 @@ namespace GUI
                 gender,
                 heroClass              
             ));
+            return reply;
+        }
+
+        public async Task<Artisan[]> GetClientArtisans()
+        {
+            var reply = await gameClient.GetClientArtisans(clientId);
+
+            foreach(var artisan in reply)
+            {
+                artisans.Add(artisan.id, artisan);
+                artisans.Remove(artisan.id);
+            }
+
             return reply;
         }
 
