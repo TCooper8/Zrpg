@@ -67,8 +67,8 @@ namespace GUI.Pages
 
         private void backButton_Click(object sender, RoutedEventArgs e)
         {
-            //Log user out           
-            this.Frame.Navigate(typeof(MainPage));
+            //Prompt verification          
+            relativePanel.Visibility = Visibility.Visible;
         }
 
         private void Heroes_Tapped(object sender, TappedRoutedEventArgs e)
@@ -87,6 +87,17 @@ namespace GUI.Pages
         {
             //Navigate to artisans page
             this.Frame.Navigate(typeof(ArtisansPage));
+        }
+
+        private void cancelLoginButton_Click(object sender, RoutedEventArgs e)
+        {
+            relativePanel.Visibility = Visibility.Collapsed;
+        }
+
+        private void logoutAcceptButton_Click(object sender, RoutedEventArgs e)
+        {
+            //Log user out
+            this.Frame.Navigate(typeof(MainPage));
         }
     }
 }

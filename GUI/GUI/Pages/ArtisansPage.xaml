@@ -7,32 +7,36 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition/>
-        </Grid.RowDefinitions>
-        <Grid.Background>
-            <ImageBrush Stretch="Fill" ImageSource="ms-appx:///Assets/genericBackground.jpg"/>
-        </Grid.Background>
-        <Button x:Name="backButton" Content="&#xE72B;" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Top" Width="40" Height="40" FontSize="20" FontFamily="Segoe MDL2 Assets" Padding="0" BorderBrush="#FF7A7A7A" Click="backButton_Click">
-            <Button.Background>
-                <SolidColorBrush Color="White" Opacity="0.4"/>
-            </Button.Background>
-        </Button>
-        <TextBlock x:Name="titleTextBlock" HorizontalAlignment="Center" Margin="0" TextWrapping="Wrap" Text="Artisans Page" VerticalAlignment="Center" FontSize="30" Foreground="White"/>
-        <ListView x:Name="listView" HorizontalAlignment="Left" Margin="0,100,0,0" Grid.Row="1" Width="250" Foreground="White" Height="400" VerticalAlignment="Top" Background="#33000000"/>
-        <Frame x:Name="infoFrame" Content="Crafting Info Here" Margin="300,100,50,70" Grid.Row="1" FontSize="20" Foreground="White" Background="#33000000"/>
-        <TextBlock x:Name="listViewTitleTextBlock" HorizontalAlignment="Left" Margin="75,50,0,0" Grid.Row="1" TextWrapping="Wrap" Text="Artisans" VerticalAlignment="Top" FontSize="30" Foreground="White"/>
-        <Button x:Name="createArtisansButton" Content="Create New Artisan" HorizontalAlignment="Left" Margin="25,550,0,0" Grid.Row="1" VerticalAlignment="Top" BorderBrush="#FF7A7A7A" Height="40" Width="200" FontSize="20" Padding="0" Click="createHeroButton_Click">
-            <Button.Background>
-                <SolidColorBrush Color="White" Opacity="0.4"/>
-            </Button.Background>
-        </Button>
-        <Button x:Name="settingsPageButton" Content="&#xE713;" HorizontalAlignment="Right" Margin="0,0,20,20" VerticalAlignment="Bottom" Width="40" Height="40" FontSize="20" FontFamily="Segoe MDL2 Assets" BorderBrush="#FF7A7A7A" Click="settingsPageButton_Click" Grid.Row="1">
-            <Button.Background>
-                <SolidColorBrush Color="White" Opacity="0.4"/>
-            </Button.Background>
-        </Button>
-    </Grid>
+    <ScrollViewer>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.Background>
+                <ImageBrush Stretch="Fill" ImageSource="ms-appx:///Assets/genericBackground.jpg"/>
+            </Grid.Background>
+            <Button x:Name="backButton" Content="&#xE72B;" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Top" Width="40" Height="40" FontSize="20" FontFamily="Segoe MDL2 Assets" Padding="0" BorderBrush="#FF7A7A7A" Click="backButton_Click">
+                <Button.Background>
+                    <SolidColorBrush Color="White" Opacity="0.4"/>
+                </Button.Background>
+            </Button>
+            <TextBlock x:Name="titleTextBlock" HorizontalAlignment="Center" Margin="0" TextWrapping="Wrap" Text="Artisans Page" VerticalAlignment="Center" FontSize="30" Foreground="White"/>
+            <ListView x:Name="listView" HorizontalAlignment="Left" Margin="0,100,0,0" Grid.Row="1" Width="250" Foreground="White" Height="400" VerticalAlignment="Top" Background="#33000000"/>
+            <Frame x:Name="infoFrame" Content="Crafting Info Here" Margin="300,100,50,70" Grid.Row="1" FontSize="20" Foreground="White" Background="#33000000"/>
+            <TextBlock x:Name="listViewTitleTextBlock" HorizontalAlignment="Left" Margin="75,50,0,0" Grid.Row="1" TextWrapping="Wrap" Text="Artisans" VerticalAlignment="Top" FontSize="30" Foreground="White"/>
+            <Button x:Name="createArtisansButton" Content="Create New Artisan" HorizontalAlignment="Left" Margin="25,550,0,0" Grid.Row="1" VerticalAlignment="Top" BorderBrush="#FF7A7A7A" Height="40" Width="200" FontSize="20" Padding="0" Click="createHeroButton_Click">
+                <Button.Background>
+                    <SolidColorBrush Color="White" Opacity="0.4"/>
+                </Button.Background>
+            </Button>
+            <Button x:Name="settingsPageButton" Content="&#xE713;" HorizontalAlignment="Right" Margin="0,0,20,20" VerticalAlignment="Bottom" Width="40" Height="40" FontSize="20" FontFamily="Segoe MDL2 Assets" BorderBrush="#FF7A7A7A" Click="settingsPageButton_Click" Grid.Row="1">
+                <Button.Background>
+                    <SolidColorBrush Color="White" Opacity="0.4"/>
+                </Button.Background>
+            </Button>
+            <TextBlock x:Name="textBlock_Copy" HorizontalAlignment="Left" Margin="50,0,0,0" TextWrapping="Wrap" Text="Back" VerticalAlignment="Top" Height="40" FontSize="20" Foreground="White" Padding="0,5,0,0"/>
+        </Grid>
+    </ScrollViewer>
 </Page>

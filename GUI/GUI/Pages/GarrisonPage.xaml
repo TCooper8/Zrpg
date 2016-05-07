@@ -38,6 +38,19 @@
                     <SolidColorBrush Color="White" Opacity="0.4"/>
                 </Button.Background>
             </Button>
+            <RelativePanel x:Name="relativePanel" HorizontalAlignment="Center" Margin="390,235,390,415" VerticalAlignment="Center" Background="#4C000000" Width="500" Height="199.8" Grid.RowSpan="2" Visibility="Collapsed">
+                <TextBlock x:Name="infoTextBlock" TextWrapping="Wrap" Text="Are you sure you want to logout?" FontSize="20" Foreground="White" Margin="0,50,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" RelativePanel.AlignHorizontalCenterWithPanel="True" RelativePanel.AlignTopWithPanel="True"/>
+                <Button x:Name="cancelLoginButton" Content="No" HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="200" RelativePanel.AlignBottomWithPanel="True" Margin="0,0,20,20" Canvas.ZIndex="1" BorderBrush="#FF7A7A7A" RelativePanel.AlignRightWithPanel="True" Click="cancelLoginButton_Click">
+                    <Button.Background>
+                        <SolidColorBrush Color="White" Opacity="0.9"/>
+                    </Button.Background>
+                </Button>
+                <Button x:Name="logoutAcceptButton" Content="Yes" HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="200" RelativePanel.AlignBottomWithPanel="True" Canvas.ZIndex="1" BorderBrush="#FF7A7A7A" Margin="20,0,0,20" Click="logoutAcceptButton_Click">
+                    <Button.Background>
+                        <SolidColorBrush Color="White" Opacity="0.9"/>
+                    </Button.Background>
+                </Button>
+            </RelativePanel>
         </Grid>
     </ScrollViewer>
 </Page>
