@@ -21,6 +21,7 @@ type GameState = {
   items: Map<string, Item>
 
   artisans: Map<string, Artisan>
+  recipes: Map<string, Recipe>
 
   // Zone data
   zoneQuests: Map<string, string array>
@@ -55,6 +56,7 @@ type GameState = {
     items = Map.empty
 
     artisans = Map.empty
+    recipes = Map.empty
 
     zoneQuests = Map.empty
     zoneAssetPositionInfo = Map.empty

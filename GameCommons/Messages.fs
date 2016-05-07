@@ -9,6 +9,7 @@ type Msg =
   | AddZone of AddZone
   | AddZoneAssetPositionInfo of AssetPositionInfo
   | AddQuest of AddQuest
+  | GetClientArtisans of clientId:string
   | GetClientGarrison of clientId:string
   | GetClientNotifications of clientId:string
   | GetGameTime
@@ -88,6 +89,7 @@ type Reply =
   | AddQuestReply of AddQuestReply
   | AddWorldReply of AddWorldReply
   | ExnReply of string
+  | GetClientArtisansReply of Artisan array
   | GetClientGarrisonReply of GetClientGarrisonReply
   | GetClientNotificationsReply of NotifyRecord array
   | GetGameTimeReply of int

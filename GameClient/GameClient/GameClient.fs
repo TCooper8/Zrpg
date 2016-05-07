@@ -124,12 +124,21 @@ type private RestGameClient (endPoint) =
     member this.AddZone region =
       async {
         let! reply = region |> AddZone |> request
-        let reply = match reply with
-        | AddZoneReply reply -> reply
-        | ExnReply msg -> failwith msg
-        | msg -> failwith <| sprintf "Expected AddZoneReply but got %A" msg
+        return
+          match reply with
+          | AddZoneReply reply -> reply
+          | ExnReply msg -> failwith msg
+          | msg -> failwith <| sprintf "Expected AddZoneReply but got %A" msg
+      } |> Async.StartAsTask
 
-        return reply
+    member this.GetClientArtisans clientId =
+      async {
+        let! reply = clientId |> GetClientArtisans |> request
+        return
+          match reply with
+          | GetClientArtisansReply artisans -> artisans
+          | ExnReply msg -> failwith msg
+          | msg -> failwith <| sprintf "Expected GetClientArtisansReply but got %A" msg
       } |> Async.StartAsTask
 
     member this.GetClientGarrison clientId =

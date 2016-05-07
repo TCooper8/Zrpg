@@ -18,6 +18,7 @@ type IGameClient =
     abstract member AddQuest : AddQuest -> AddQuestReply Task
     abstract member AddZone : AddZone -> AddZoneReply Task
     abstract member AddZoneAssetPositionInfo : AssetPositionInfo -> unit Task
+    abstract member GetClientArtisans : clientId:string -> Artisan array Task
     abstract member GetClientGarrison : clientId:string -> GetClientGarrisonReply Task
     abstract member GetClientNotifications: clientId:string -> NotifyRecord array Task
     abstract member GetGameTime : unit -> int Task

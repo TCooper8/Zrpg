@@ -51,6 +51,14 @@ module GameServer =
           groundTravelSpeed = 1.0
         }
 
+    let professionTierLevelMax tier =
+      match tier with
+      | Novice -> 75
+      | Journeyman -> 150
+      | Expert -> 250
+      | Artisan -> 350
+      | Master -> 450
+
     let calcXp cl =
       let mxp cl =
         match cl with
@@ -327,10 +335,68 @@ module GameServer =
         else hero
       )
 
+      let artisans = state.artisans |> Map.map (fun id artisan ->
+        let mutable artisan = artisan
+
+        let stats = artisan.stats
+        if stats.xp >= stats.finalXp then
+          if artisan.level < artisan.levelMax then
+            let stats = {
+              xp = stats.xp - stats.finalXp
+              finalXp = calcXp (artisan.level + 1) |> float
+            }
+
+            artisan <- {
+              artisan with
+                stats = stats
+                level = artisan.level + 1
+                levelMax = professionTierLevelMax (artisan.tier.Next())
+            }
+
+            let existingRecipes = artisan.recipes |> Array.map (fun r -> r.id) |> Set
+
+            let newRecipes = state.recipes |> Map.toArray |> Array.map snd |> Array.filter (fun recipe ->
+              if existingRecipes.Contains recipe.id then false
+              else
+              let rec loop reqs =
+                match reqs with
+                | [] -> true
+                | req::reqs ->
+                  match req with
+                  | LevelRecipeRequirement level ->
+                    if level <= artisan.level then
+                      true && loop reqs
+                    else false
+                  | ParentRecipeRequirement recipeId ->
+                    if existingRecipes.Contains recipeId then
+                      true && loop reqs
+                    else false
+                  | ProfessionRequirement prof ->
+                    if prof = artisan.profession then
+                      true && loop reqs
+                    else false
+                  | TierRequirement tier ->
+                    if artisan.tier = tier then
+                      true && loop reqs
+                    else false
+
+              recipe.requirements |> Array.toList |> loop
+            )
+
+            if newRecipes.Length <> 0 then
+              artisan <- {
+                artisan with
+                  recipes = newRecipes |> Array.append artisan.recipes
+              }
+
+        artisan
+      )
+
       state <- {
         state with
           gameTime = state.gameTime + 1
           heroes = heroes
+          artisans = artisans
       }
 
       state, TickReply
@@ -343,6 +409,7 @@ module GameServer =
           name = msg.name
           profession = msg.profession
           level = 1
+          levelMax = professionTierLevelMax Novice
           tier = Novice
           recipes = Array.empty
           stats = {

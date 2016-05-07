@@ -14,6 +14,17 @@ type ProfessionTier =
   | Expert
   | Artisan
   | Master
+  with
+    member this.Next () =
+      ProfessionTier.Next this
+
+    static member Next tier =
+      match tier with
+      | Novice -> Journeyman
+      | Journeyman -> Expert
+      | Expert -> Artisan
+      | Artisan -> Master
+      | Master -> Master
 
 type RecipeRequirement =
   | LevelRecipeRequirement of level:int
@@ -39,6 +50,7 @@ type Artisan = {
   name: string
   profession: Profession
   level: int
+  levelMax: int
   tier: ProfessionTier
   recipes: Recipe array
   stats: ArtisanStats
