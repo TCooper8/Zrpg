@@ -105,8 +105,14 @@
     <Compile Include="Pages\AllianceGarrisonCreationPage.xaml.cs">
       <DependentUpon>AllianceGarrisonCreationPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\ArtisansPage.xaml.cs">
+      <DependentUpon>ArtisansPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\ChooseFactionPage.xaml.cs">
       <DependentUpon>ChooseFactionPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\CreateArtisanPage.xaml.cs">
+      <DependentUpon>CreateArtisanPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\GarrisonPage.xaml.cs">
       <DependentUpon>GarrisonPage.xaml</DependentUpon>
@@ -181,7 +187,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Pages\ArtisansPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Pages\ChooseFactionPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\CreateArtisanPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

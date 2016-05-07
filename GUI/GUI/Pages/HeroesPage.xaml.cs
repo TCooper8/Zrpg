@@ -228,28 +228,15 @@ namespace GUI.Pages
         private void statsButton_Click(object sender, RoutedEventArgs e)
         {
             statsButton.IsEnabled = false;
-
-            gearButton.IsEnabled = true;
             inventoryButton.IsEnabled = true;
             mapButton.IsEnabled = true;
 
             GetHeroStats();
         }
 
-        private void gearButton_Click(object sender, RoutedEventArgs e)
-        {
-            gearButton.IsEnabled = false;
-
-            statsButton.IsEnabled = true;
-            inventoryButton.IsEnabled = true;
-            mapButton.IsEnabled = true;
-        }
-
         private void inventoryButton_Click(object sender, RoutedEventArgs e)
         {
             inventoryButton.IsEnabled = false;
-
-            gearButton.IsEnabled = true;
             statsButton.IsEnabled = true;
             mapButton.IsEnabled = true;
 
@@ -259,8 +246,6 @@ namespace GUI.Pages
         private async void mapButton_Click(object sender, RoutedEventArgs e)
         {
             mapButton.IsEnabled = false;
-
-            gearButton.IsEnabled = true;
             inventoryButton.IsEnabled = true;
             statsButton.IsEnabled = true;
 
@@ -290,10 +275,6 @@ namespace GUI.Pages
                 if (statsButton.IsEnabled == false)
                 {
                     statsButton_Click(sender, e);
-                }
-                else if (gearButton.IsEnabled == false)
-                {
-                    gearButton_Click(sender, e);
                 }
                 else if (inventoryButton.IsEnabled == false)
                 {

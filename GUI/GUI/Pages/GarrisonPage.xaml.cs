@@ -82,5 +82,11 @@ namespace GUI.Pages
             //Navigate to settings page
             this.Frame.Navigate(typeof(SettingsPage));
         }
+
+        private void Artisans_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            //Navigate to artisans page
+            this.Frame.Navigate(typeof(ArtisansPage));
+        }
     }
 }
