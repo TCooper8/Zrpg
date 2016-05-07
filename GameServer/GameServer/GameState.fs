@@ -122,7 +122,7 @@ type GameState = {
       | None -> sprintf "Hero %A has no inventory" hero |> failwith
       | Some res -> res
 
-    let stats =
+    let stats: HeroStats =
       quest.rewards |> List.fold (fun stats reward ->
         match reward with
         | XpReward xp ->

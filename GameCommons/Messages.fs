@@ -28,6 +28,7 @@ type Msg =
   | Tick
 
 and AddArtisan = {
+  clientId:string
   name: string
   profession: Profession
 }
@@ -77,6 +78,7 @@ type AsyncMsg = {
 }
 
 type Reply =
+  | AddArtisanReply of artisanId:string
   | AddItemReply of itemId:string
   | AddGarrisonReply of AddGarrisonReply
   | AddHeroReply of AddHeroReply

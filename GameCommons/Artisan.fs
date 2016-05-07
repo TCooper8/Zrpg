@@ -26,6 +26,12 @@ type Recipe = {
   skillReward: int
   materialCosts: MaterialCost array
   requirements: RecipeRequirement array
+  tags: string array
+}
+
+type ArtisanStats = {
+  xp: float
+  finalXp: float
 }
 
 type Artisan = {
@@ -35,4 +41,5 @@ type Artisan = {
   level: int
   tier: ProfessionTier
   recipes: Recipe array
+  stats: ArtisanStats
 }

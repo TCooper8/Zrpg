@@ -337,6 +337,25 @@ module GameServer =
 
     let handleMsg msg state =
       match msg with
+      | AddArtisan msg ->
+        let artisan:Artisan = {
+          id = uuid()
+          name = msg.name
+          profession = msg.profession
+          level = 1
+          tier = Novice
+          recipes = Array.empty
+          stats = {
+            xp = 0.0
+            finalXp = calcXp 1 |> float
+          }
+        }
+        let state = {
+          state with
+            artisans = state.artisans.Add(artisan.id, artisan)
+        }
+        state, artisan.id |> AddArtisanReply
+
       | AddItem msg ->
         let item = {
           id = uuid()

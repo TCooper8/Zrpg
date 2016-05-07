@@ -4,6 +4,7 @@ open System.Threading.Tasks
 
 [<Interface>]
 type IGameClient =
+  abstract member AddArtisan: AddArtisan -> string Task
   abstract member AddItem: AddItem -> string Task
   abstract member AddGarrison :
     clientId:string *

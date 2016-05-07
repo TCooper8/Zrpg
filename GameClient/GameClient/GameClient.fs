@@ -39,6 +39,16 @@ type private RestGameClient (endPoint) =
     )
 
   interface IGameClient with
+    member this.AddArtisan msg =
+      async {
+        let! reply = msg |> AddArtisan |> request
+        return
+          match reply with
+          | AddArtisanReply id -> id
+          | ExnReply msg -> failwith msg
+          | msg -> failwith <| sprintf "Expected AddItemReply but got %A" msg
+      } |> Async.StartAsTask
+
     member this.AddItem addItem =
       async {
         let! reply = request <| AddItem addItem
