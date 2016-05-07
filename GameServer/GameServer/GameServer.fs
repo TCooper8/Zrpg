@@ -540,6 +540,18 @@ module GameServer =
         }
         state, AddQuestReply.Success quest.id |> AddQuestReply
 
+      | GetClientArtisans clientId ->
+        match state.clientArtisans.TryFind clientId with
+        | None ->
+          state, Array.empty |> GetClientArtisansReply
+        | Some artisanIds ->
+          let artisans = artisanIds |> Array.map (fun id ->
+            match state.artisans.TryFind id with
+            | None -> failwith "Artisan does not exist"
+            | Some value -> value
+          )
+          state, artisans |> GetClientArtisansReply
+
       | GetClientGarrison clientId ->
         let r =
           match state.clientGarrisons.TryFind clientId with
