@@ -58,6 +58,7 @@ and AddHero = {
 }
 
 and AddRecipe = {
+  name:string
   craftedItemId: string
   xpReward: float
   materialCosts: MaterialCost array

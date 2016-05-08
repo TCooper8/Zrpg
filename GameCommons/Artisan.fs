@@ -34,6 +34,7 @@ type RecipeRequirement =
 
 type Recipe = {
   id: string
+  name: string
   craftedItemId: string
   xpReward: float
   materialCosts: MaterialCost array

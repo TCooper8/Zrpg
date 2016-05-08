@@ -481,6 +481,7 @@ module GameServer =
       | AddRecipe msg ->
         let recipe:Recipe = {
           id = uuid()
+          name = msg.name
           craftedItemId = msg.craftedItemId
           xpReward = msg.xpReward
           materialCosts = msg.materialCosts

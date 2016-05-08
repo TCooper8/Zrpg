@@ -68,7 +68,8 @@ let quests = [
 ]
 
 let recipes (): AddRecipe list = [
-  { craftedItemId = itemIds.["Copper Bar"]
+  { name = "Copper Bar"
+    craftedItemId = itemIds.["Copper Bar"]
     xpReward = 100.0
     materialCosts =
       [| { itemId = itemIds.Item "Copper Ore"; quantity = 5 }
