@@ -13,6 +13,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Zrpg.Game;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -23,6 +24,8 @@ namespace GUI.Pages
     /// </summary>
     public sealed partial class CreateArtisanPage : Page
     {
+        ClientState state = ClientState.state;
+
         public CreateArtisanPage()
         {
             this.InitializeComponent();
@@ -84,15 +87,23 @@ namespace GUI.Pages
 
         private async void createButton_Click(object sender, RoutedEventArgs e)
         {
-            //Behavior for loading visual. Using a delay for testing purposes
-            relativePanel.Visibility = Visibility.Visible;
-            progressRing.IsActive = true;
-            await Task.Delay(2000);
+            if (artisanNameTextBox.Text == "")
+            {
+                //TO DO: Notify user they cannot have an artisan with an empty name
+            }
+            else
+            {
+                //Behavior for loading visual. Using a delay for testing purposes
+                relativePanel.Visibility = Visibility.Visible;
+                progressRing.IsActive = true;
+                await Task.Delay(2000);
 
-            //Create artisan
+                //Create artisan
+                await state.AddArtisan(state.ClientId, artisanNameTextBox.Text, Profession.Blacksmith);
 
-            //Navigate back to artisan page
-            this.Frame.Navigate(typeof(ArtisansPage));
+                //Navigate back to artisan page
+                this.Frame.Navigate(typeof(ArtisansPage));
+            }
         }
     }
 }

@@ -56,6 +56,15 @@ namespace GUI
             this.clientId = username;
         }
 
+        public async Task AddArtisan(string clientId, string name, Profession profession)
+        {
+            await gameClient.AddArtisan(new AddArtisan(
+                clientId,
+                name,
+                profession
+                ));
+        }
+
         public async Task<AddGarrisonReply> CreateGarrison(Race race, Faction faction)
         {
             var name = String.Format("{0}'s Garrison", Username);

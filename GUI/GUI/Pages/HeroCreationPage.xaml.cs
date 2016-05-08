@@ -88,7 +88,7 @@ namespace GUI.Pages
                 await Task.Delay(2000);
 
                 var create = await state.AddHero(clientId, heroNameTextBox.Text, Race.Human, garrison.faction, gender, HeroClass.Warrior);
-
+                
                 if(create.IsSuccess)
                 {
                     //Navigate back to hero selecion screen
