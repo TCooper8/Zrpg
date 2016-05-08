@@ -422,6 +422,35 @@ module GameServer =
           |> defaultArg <| Array.empty
           |> Array.append [| artisan.id |]
 
+        let newRecipes = state.recipes |> Map.toArray |> Array.map snd |> Array.filter (fun recipe ->
+          let rec loop reqs =
+            match reqs with
+            | [] -> true
+            | req::reqs ->
+              match req with
+              | LevelRecipeRequirement level ->
+                if level <= artisan.level then
+                  true && loop reqs
+                else false
+              | ParentRecipeRequirement recipeId ->
+                false
+              | ProfessionRequirement prof ->
+                if prof = artisan.profession then
+                  true && loop reqs
+                else false
+              | TierRequirement tier ->
+                if artisan.tier = tier then
+                  true && loop reqs
+                else false
+
+          recipe.requirements |> Array.toList |> loop
+        )
+
+        let artisan = {
+          artisan with
+            recipes = newRecipes
+        }
+
         let state = {
           state with
             artisans = state.artisans.Add(artisan.id, artisan)

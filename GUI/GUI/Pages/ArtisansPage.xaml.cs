@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -52,6 +53,11 @@ namespace GUI.Pages
             foreach (var artisans in reply)
             {
                 listView.Items.Add(artisans.name);
+
+                foreach (var recipe in artisans.recipes)
+                {
+                    Debug.WriteLine("Recipe {0} [{1}]", recipe.id, String.Join("; ", recipe.tags));
+                }
             }
         }
     }
