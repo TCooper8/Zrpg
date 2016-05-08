@@ -149,8 +149,8 @@ module GameServer =
           state with
             clientGarrisons = state.clientGarrisons.Add(msg.clientId, garrison.id)
             garrisons = state.garrisons.Add(garrison.id, garrison)
-            worlds = state.worlds.Add(msg.clientId, world)
-            clientWorlds = state.clientWorlds.Add(world.id, world.id)
+            worlds = state.worlds.Add(world.id, world)
+            clientWorlds = state.clientWorlds.Add(msg.clientId, world.id)
         }
 
         (state, AddGarrisonReply.Success)

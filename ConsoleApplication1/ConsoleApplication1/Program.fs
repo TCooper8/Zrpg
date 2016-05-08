@@ -51,6 +51,11 @@ let zones: (unit -> AddZone) list = [
       regionId = regionIds.["Elwynn Forest"]
       terrain = Plains
     }
+  fun () ->
+    { name = "Goldshire"
+      regionId = regionIds.["Elwynn Forest"]
+      terrain = Plains
+    }
 ]
 
 let quests = [
@@ -72,6 +77,7 @@ let quests = [
       body = "Kill 6 Blackrock Worgs."
       rewards =
         [|  XpReward 100.0
+            ZoneUnlockReward zoneIds.["Goldshire"]
         |]
       objective = TimeObjective {
         timeDelta = 5
@@ -174,6 +180,14 @@ async {
     right = 490.0 / 930.0
     top = 175.0 / 510.0
     bottom = 250.0 / 510.0
+  }
+  do! game.AddZoneAssetPositionInfo {
+    id = zoneIds.["Goldshire"]
+    assetId = "elwynnForestMap.jpg"
+    left = 346.0 / 930.0
+    right = 441.0 / 930.0
+    top = 302.0 / 510.0
+    bottom = 344.0 / 510.0
   }
 
   let! reply = game.SetStartingZone (Human, zoneIds.["Northshire"])

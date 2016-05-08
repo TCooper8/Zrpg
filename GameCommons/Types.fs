@@ -162,7 +162,7 @@ and Objective =
 and QuestReward =
   | ItemReward of ItemReward
   | XpReward of float
-  | UnlockQuestReward of questId:string
+  | ZoneUnlockReward of zoneId:string
 
 and TimeObjective = {
   timeDelta: int

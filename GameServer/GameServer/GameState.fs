@@ -88,6 +88,9 @@ type GameState = {
       quest.rewards
       |> List.map (fun reward ->
         match reward with
+        | ZoneUnlockReward zoneId ->
+          let zone = this.zones.[zoneId]
+          sprintf "Discovered %s" zone.name
         | XpReward xp ->
           sprintf "XP : %f" xp
         | ItemReward reward ->
@@ -131,6 +134,19 @@ type GameState = {
     let stats: HeroStats =
       quest.rewards |> List.fold (fun stats reward ->
         match reward with
+        | ZoneUnlockReward zoneId ->
+          let garrisonId = state.clientGarrisons.[hero.clientId]
+          let garrison = state.garrisons.[garrisonId]
+          let zones = garrison.ownedZones |> Array.append [| zoneId |]
+          let garrison = {
+            garrison with
+              ownedZones = zones
+          }
+          state <- {
+            state with
+              garrisons = state.garrisons.Add(garrisonId, garrison)
+          }
+          stats
         | XpReward xp ->
           { stats with xp = stats.xp + xp }
         | ItemReward reward ->
