@@ -17,48 +17,110 @@ let httpHost = "localhost"
 let httpPort = 8080us
 let httpEndPoint = sprintf "http://%s:%i" httpHost httpPort
 
-let itemIds = Map.empty<string, string> |> ref
+let mutable itemIds = Map.empty<string, string>
+let mutable questIds = Map.empty<string, string>
+let mutable regionIds = Map.empty<string, string>
+let mutable zoneIds = Map.empty<string, string>
 
-let items (): (string * AddItem) list = [
-  ("Linen Cloth", {
+let items () = [
+  fun () -> ("Copper Ore", {
     assetId = "inv_fabric_linen.jpg"
     info = TradeGood {
-      name = "Linen Cloth"
+      name = "Copper Ore"
       rarity = Common
     }
   })
-  ("Bolt of Linen Cloth", {
+  fun () -> ("Copper Bar", {
     assetId = "inv_fabric_linen.jpg"
     info = TradeGood {
-      name = "Bolt of Linen Cloth"
+      name = "Copper Bar"
       rarity = Common
     }
   })
 ]
 
+let regions: (unit -> AddRegion) list = [
+  fun () ->
+    { name = "Elwynn Forest"
+    }
+]
+
+let zones: (unit -> AddZone) list = [
+  fun () ->
+    { name = "Northshire" 
+      regionId = regionIds.["Elwynn Forest"]
+      terrain = Plains
+    }
+]
+
+let quests = [
+  fun () -> 
+    { zoneId = zoneIds.["Northshire"]
+      title = "Join the battle!"
+      body = "Report to Sergeant Williams behind Northshire Abbey."
+      rewards =
+        [|  XpReward 100.0
+        |]
+      objective = TimeObjective {
+        timeDelta = 5
+      }
+    }
+]
+
 let recipes (): AddRecipe list = [
-  { craftedItemId = itemIds.Value.["Bolt of Linen Cloth"]
+  { craftedItemId = itemIds.["Copper Bar"]
     xpReward = 100.0
     materialCosts =
-      [| { itemId = itemIds.Value.Item "Linen Cloth"; quantity = 5 }
+      [| { itemId = itemIds.Item "Copper Ore"; quantity = 5 }
       |]
     requirements =
       [|  ProfessionRequirement Blacksmith
       |]
-    tags = [||]
+    tags = [| "Materials" |]
   }
 ]
 
+let addRegions (game:Game.GameServer.GameServerChan) = async { 
+  for f in regions do
+    let region = f()
+    let! reply = game.AddRegion region
+    match reply with
+    | AddRegionReply.RegionExists -> ()
+    | AddRegionReply.Success id ->
+      regionIds <- regionIds.Add(region.name, id)
+}
+
+let addZones (game:Game.GameServer.GameServerChan) = async {
+  for f in zones do
+    let zone = f()
+    let! reply = game.AddZone zone
+    match reply with
+    | AddZoneReply.RegionDoesNotExist -> sprintf "%A" reply |> failwith
+    | AddZoneReply.Success id -> zoneIds <- zoneIds.Add(zone.name, id)
+    | AddZoneReply.ZoneExists -> ()
+}
+
 let addItems (game:Game.GameServer.GameServerChan) = async {
-  for (name, msg) in items() do
+  for f in items() do
+    let name, msg = f()
     let! id = game.AddItem(msg)
-    itemIds := itemIds.Value.Add(name, id)
+    itemIds <- itemIds.Add(name, id)
 }
 
 let addRecipes (game:IGameClient) = async {
   for msg in recipes() do
     let! id = game.AddRecipe msg |> Async.AwaitTask
     ()
+}
+
+let addQuests (game:Game.GameServer.GameServerChan) = async {
+  for f in quests do
+    let quest = f()
+    let! reply = game.AddQuest quest
+    let id =
+      match reply with
+      | AddQuestReply.Success id -> id
+    questIds <- questIds.Add(quest.title, id)
 }
 
 let platform = Platform.create "Main"
@@ -84,25 +146,15 @@ async {
   | Choice1Of2 reply -> printfn "Web reply = %A" reply
   | Choice2Of2 e -> raise e
 
-  let! reply = game.AddRegion ({ name = "Elwyn Forest" })
-  let regionId =
-    match reply with
-    | AddRegionReply.Success id -> id
-    | RegionExists -> failwith "Region exists"
-
-  let! reply = game.AddZone {
-    name = "Northshire"
-    regionId = regionId
-    terrain = Plains
-  }
-  let zoneId =
-    match reply with
-    | AddZoneReply.Success id -> id
-    | _ -> failwith <| sprintf "Expected AddZoneReply.Success but got %A" reply
+  do! addRegions game
+  do! addZones game
+  do! addItems game
+  do! addRecipes client
+  do! addQuests game
 
   // Load the asset info
   do! game.AddZoneAssetPositionInfo {
-    id = zoneId
+    id = zoneIds.["Northshire"]
     assetId = "elwynnForestMap.jpg"
     left = 420.0 / 930.0
     right = 490.0 / 930.0
@@ -110,47 +162,7 @@ async {
     bottom = 250.0 / 510.0
   }
 
-  let! reply = game.AddZone {
-    name = "Goldshire"
-    regionId = regionId
-    terrain = Plains
-  }
-  let zoneId =
-    match reply with
-    | AddZoneReply.Success id -> id
-    | _ -> failwith <| sprintf "Expected AddZoneReply.Success but got %A" reply
-
-  do! addItems game
-  do! addRecipes client
-
-  let! reply = game.AddQuest {
-    zoneId = zoneId
-    title = "First quest!"
-    body = "The priest needs you to talk to him"
-    rewards = 
-      [|  XpReward 1000.0
-          ItemReward {
-            itemId = itemIds.Value.["Linen Cloth"]
-            quantity = 5
-          }
-      |]
-    objective = TimeObjective { timeDelta = 2 }
-  }
-  match reply with
-  | AddQuestReply.Success _ -> ()
-  | reply -> failwith <| sprintf "Expected AddQuestReply.Success but got %A" reply
-
-  // Load the asset info
-  do! game.AddZoneAssetPositionInfo {
-    id = zoneId
-    assetId = "elwynnForestMap.jpg"
-    left = 358.0 / 930.0
-    right = 428.0 / 930.0
-    top = 320.0 / 510.0
-    bottom = 380.0 / 510.0
-  }
-
-  let! reply = game.SetStartingZone (Human, zoneId)
+  let! reply = game.SetStartingZone (Human, zoneIds.["Northshire"])
   match reply with
   | SetStartingZoneReply.Success -> ()
   | _ -> failwith <| sprintf "Expected AddZoneReply.Success but got %A" reply

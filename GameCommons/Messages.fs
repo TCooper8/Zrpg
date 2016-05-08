@@ -20,6 +20,7 @@ type Msg =
   | GetHeroQuest of heroId:string
   | GetItem of recordId:string
   | GetRegion of regionId:string
+  | GetQuestsInZone of clientId:string * zoneId:string
   | GetZone of zoneId:string
   | GetZoneAssetPositionInfo of zoneId:string
   | GetZoneQuests of zoneId:string
@@ -110,6 +111,7 @@ type Reply =
   | GetItemReply of record:ItemRecord * item:Item
   | GetRegionReply of GetRegionReply
   | GetStartingZoneReply of GetStartingZoneReply
+  | GetQuestsInZoneReply of Quest array
   | GetZoneReply of GetZoneReply
   | GetZoneAssetPositionInfoReply of AssetPositionInfo
   | GetZoneConnectionsReply of GetZoneConnectionsReply

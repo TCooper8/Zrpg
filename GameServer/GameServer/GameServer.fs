@@ -620,6 +620,24 @@ module GameServer =
         | Some region ->
           state, GetRegionReply.Success region |> GetRegionReply
 
+      | GetQuestsInZone (clientId, zoneId) ->
+        let closed =
+          state.clientClosedQuests.TryFind clientId
+          |> defaultArg <| Set []
+
+        match state.zoneQuests.TryFind zoneId with
+        | None -> state, Array.empty |> GetQuestsInZoneReply
+        | Some ids ->
+          ids
+          |> Array.filter (closed.Contains >> not)
+          |> Array.map (fun id ->
+            match state.quests.TryFind id with
+            | None -> sprintf "Zone %s contains unmapped quest id %s" zoneId id |> failwith
+            | Some quest -> quest
+          )
+          |> fun r -> state, r |> GetQuestsInZoneReply
+          
+
       | GetZone zoneId ->
         match state.zones.TryFind zoneId with
         | None -> sprintf "Zone %s does not eixst" zoneId |> failwith

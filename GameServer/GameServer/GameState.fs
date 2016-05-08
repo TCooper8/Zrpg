@@ -34,6 +34,7 @@ type GameState = {
   clientGarrisons: Map<string, string>
   clientWorlds: Map<string, string>
   clientNotifications: Map<string, NotifyRecord list>
+  clientClosedQuests: Map<string, string Set>
 
   heroNames: string Set
   regionNames: string Set
@@ -69,6 +70,7 @@ type GameState = {
     clientGarrisons = Map.empty
     clientWorlds = Map.empty
     clientNotifications = Map.empty
+    clientClosedQuests = Map.empty
 
     heroNames = Set.empty
     regionNames = Set.empty
@@ -213,6 +215,11 @@ type GameState = {
         stats = stats
     }
 
+    let closedQuests =
+      state.clientClosedQuests.TryFind hero.clientId
+      |> defaultArg <| Set []
+      |> Set.add quest.id
+
     let state = {
       state with
         heroInventories = state.heroInventories.Add(hero.id, inventory)
@@ -220,6 +227,7 @@ type GameState = {
         heroes = state.heroes.Add(hero.id, hero)
         heroQuestRecords = state.heroQuestRecords.Remove hero.id
         clientNotifications = state.clientNotifications.Add(hero.clientId, notifications)
+        clientClosedQuests = state.clientClosedQuests.Add(hero.clientId, closedQuests)
     }
 
     state
