@@ -9,8 +9,11 @@ using Zrpg.Game;
 
 namespace GUI
 {
+    using Subscription = Tuple<string, Func<object, Task>>;
+
     public class ClientState
     {
+
         // Singleton pattern for the application.
         public static ClientState state = new ClientState();
 
@@ -28,6 +31,8 @@ namespace GUI
         private Dictionary<string, QuestRecord> heroQuestRecords;
         private Dictionary<string, QuestRecord> questRecords;
 
+        private Dictionary<string, List<Subscription>> subscriptions;
+
         private ClientState()
         {
             this.gameClient = GameClient.RESTClient("http://localhost:8080");
@@ -38,6 +43,8 @@ namespace GUI
             this.heroes = new Dictionary<string, Hero>();
             this.heroQuestRecords = new Dictionary<string, QuestRecord>();
             this.questRecords = new Dictionary<string, QuestRecord>();
+
+            this.subscriptions = new Dictionary<string, List<Tuple<string, Func<object, Task>>>>();
         }
 
         private static T EnsureDefined<T>(T val, string msg)
@@ -423,6 +430,52 @@ namespace GUI
                 infos.Add(reply);
             }
             return infos;
+        }
+
+        public void Unsubscribe(string key, string name)
+        {
+            List<Subscription> subs;
+
+            if (this.subscriptions.TryGetValue(key, out subs))
+            {
+                subs = subs.Where(sub => sub.Item1 != name).ToList();
+                this.subscriptions.Remove(key);
+                this.subscriptions.Add(key, subs);
+            }
+        }
+
+        public void Subscribe(string key, string name, Func<object, Task> callback)
+        {
+            Subscription sub = new Subscription(name, callback);
+            this.Unsubscribe(key, name);
+
+            List<Subscription> subs;
+            if (!this.subscriptions.TryGetValue(key, out subs))
+            {
+                subs = new List<Subscription>();
+            }
+
+            subs.Add(sub);
+            this.subscriptions.Remove(key);
+            this.subscriptions.Add(key, subs);
+        }
+
+        public void PublishUpdate(string key, object value)
+        {
+            List<Subscription> subs;
+
+            if (!this.subscriptions.TryGetValue(key, out subs))
+            {
+                return;
+            }
+
+            Task.Run(async () =>
+            {
+                foreach (var sub in subs)
+                {
+                    await sub.Item2(value);
+                }
+            });
         }
 
         public async Task RemNotification(string notificationId)
