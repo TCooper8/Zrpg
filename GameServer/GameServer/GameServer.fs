@@ -556,6 +556,7 @@ module GameServer =
           body = addQuest.body
           rewards = addQuest.rewards |> List.ofArray
           objective = addQuest.objective
+          childQuests = addQuest.childQuests
         }
 
         let zoneQuests =
@@ -664,6 +665,10 @@ module GameServer =
             match state.quests.TryFind id with
             | None -> sprintf "Zone %s contains unmapped quest id %s" zoneId id |> failwith
             | Some quest -> quest
+          )
+          |> Array.filter (fun quest ->
+            // Check and see if the child quests are resolved.
+            quest.childQuests |> Array.exists (closed.Contains >> not) |> not
           )
           |> fun r -> state, r |> GetQuestsInZoneReply
           

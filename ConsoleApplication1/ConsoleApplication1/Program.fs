@@ -64,6 +64,19 @@ let quests = [
       objective = TimeObjective {
         timeDelta = 5
       }
+      childQuests = Array.empty
+    }
+  fun () ->
+    { zoneId = zoneIds.["Northshire"]
+      title = "Beating Them Back!"
+      body = "Kill 6 Blackrock Worgs."
+      rewards =
+        [|  XpReward 100.0
+        |]
+      objective = TimeObjective {
+        timeDelta = 5
+      }
+      childQuests = [| questIds.["Join the battle!"] |]
     }
 ]
 

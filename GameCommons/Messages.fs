@@ -82,6 +82,7 @@ and AddQuest = {
   body: string
   rewards: QuestReward array
   objective: Objective
+  childQuests: string array
 }
 
 type AsyncMsg = {

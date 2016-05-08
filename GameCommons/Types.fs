@@ -153,6 +153,7 @@ type Quest = {
   body: string
   rewards: QuestReward list
   objective: Objective
+  childQuests: string array
 }
 
 and Objective =

@@ -363,7 +363,8 @@ namespace GUI
 
         public async Task<List<Quest>> GetZoneQuests(string zoneId)
         {
-            var quests = await gameClient.GetZoneQuests(zoneId);
+            //var quests = await gameClient.GetZoneQuests(zoneId);
+            var quests = await gameClient.GetQuestsInZone(ClientId, zoneId);
 
             foreach (var quest in quests)
             {
